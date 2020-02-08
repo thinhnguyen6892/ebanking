@@ -29,10 +29,10 @@ public class ConfigurationLogger {
                 .map(ps -> ((EnumerablePropertySource) ps).getPropertyNames()).flatMap(Arrays::stream).distinct()
                 .forEach(prop -> {
                     LOGGER.debug("{}", prop);
-					Object resolved = environment.getProperty(prop, Object.class);
-					if (resolved instanceof String) {
-						LOGGER.info("{}", environment.getProperty(prop));
-					}
+                    Object resolved = environment.getProperty(prop, Object.class);
+                    if (resolved instanceof String) {
+                        LOGGER.info("{}", environment.getProperty(prop));
+                    }
                 });
         LOGGER.debug("===========================================");
     }
