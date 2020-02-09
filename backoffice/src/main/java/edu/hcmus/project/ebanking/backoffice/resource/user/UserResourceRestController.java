@@ -8,7 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.jws.soap.SOAPBinding;
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class UserResourceRestController {
@@ -24,6 +27,9 @@ public class UserResourceRestController {
         return userRepository.findAll();
     }
 
+    @GetMapping("/users/{id}")
+    public User getByid(@PathVariable long id){return userRepository.findById(id);}
+
     @PostMapping("/users/create")
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto dto) {
         User newUser = new User();
@@ -37,4 +43,20 @@ public class UserResourceRestController {
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
+    @PutMapping("/users/update/{id}")
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto, @PathVariable long id){
+        User upUser = userRepository.findById(id);
+        upUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+        upUser.setRole(dto.getRole());
+        upUser.setStatus(dto.getStatus());
+        upUser.setEmail(dto.getEmail());
+        upUser = userRepository.save(upUser);
+        return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> delete(@PathVariable long id) {
+        userRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }
