@@ -1,10 +1,12 @@
 package edu.hcmus.project.ebanking.backoffice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Lists;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -35,6 +37,9 @@ public class User {
     @JoinColumn(name = "role_id", referencedColumnName = "role_id", nullable = false)
     private Role role;
 
+
+    @OneToMany(mappedBy = "owner")
+    private List<Account> accounts = Lists.newArrayList();
 
 
     public Long getId() {

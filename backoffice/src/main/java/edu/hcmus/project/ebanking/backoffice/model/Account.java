@@ -5,7 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -13,8 +13,8 @@ public class Account {
 
     private String accountId;
     private String type;
-    private Integer balance;
-    private Date createDate;
+    private Integer balance = new Integer(0);
+    private Date createDate = new Date();
     private Date expired;
     private Boolean status;
     private User owner;

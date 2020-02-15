@@ -6,6 +6,9 @@ import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.RoleRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
+import edu.hcmus.project.ebanking.backoffice.resource.account.AccountDto;
+import edu.hcmus.project.ebanking.backoffice.resource.exception.EntityNotExistException;
+import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import edu.hcmus.project.ebanking.backoffice.resource.user.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,6 +45,71 @@ public class UserService {
         }).collect(Collectors.toList());
     }
 
+    public AccountDto findAccount(String accountId) {
+        Optional<Account> accountOpt = accountRepository.findById(accountId);
+        if(accountOpt.isPresent()) {
+            Account account = accountOpt.get();
+            AccountDto dto = new AccountDto();
+            dto.setAccountId(account.getAccountId());
+            dto.setBalance(account.getBalance());
+            dto.setCreateDate(account.getCreateDate());
+            dto.setExpired(account.getExpired());
+            dto.setOwnerName(account.getOwner().getUsername());
+            dto.setType(account.getType());
+            return dto;
+        }
+        throw new ResourceNotFoundException("Account not found");
+    }
+
+    public List<AccountDto> findUserAccount(Long userId) {
+        Optional<User> userOp = userRepository.findById(userId);
+        if(userOp.isPresent()) {
+            return accountRepository.findAccountsByOwner(userOp.get()).stream()
+                    .map(account -> {
+                        AccountDto dto = new AccountDto();
+                        dto.setAccountId(account.getAccountId());
+                        dto.setBalance(account.getBalance());
+                        dto.setCreateDate(account.getCreateDate());
+                        dto.setExpired(account.getExpired());
+                        dto.setOwnerName(account.getOwner().getUsername());
+                        dto.setType(account.getType());
+                        return dto;
+                    }).collect(Collectors.toList());
+        }
+        throw new EntityNotExistException("User is not exist");
+    }
+
+    public String createAccount(AccountDto dto) {
+        Optional<User> userOp = userRepository.findById(dto.getOwnerId());
+        if(userOp.isPresent()) {
+            return createAccount(userOp.get(), dto);
+        } else {
+            throw new EntityNotExistException("User not found in the system");
+        }
+    }
+
+    public String updateAccount(AccountDto dto) {
+        Optional<Account> accountOpt = accountRepository.findById(dto.getAccountId());
+        if(accountOpt.isPresent()) {
+            Account account = accountOpt.get();
+            account.setStatus(dto.getStatus());
+            account.setBalance(dto.getBalance());
+            account = accountRepository.save(account);
+            return account.getAccountId();
+        }
+        throw new EntityNotExistException("Account not found in the system");
+    }
+
+    public String createAccount(User owner, AccountDto dto) {
+        Account account = new Account();
+        account.setType(dto.getType());
+        account.setOwner(owner);
+        account.setStatus(dto.getStatus());
+        account.setBalance(dto.getBalance());
+        account = accountRepository.save(account);
+        return account.getAccountId();
+    }
+
     @Transactional
     public boolean createUser(UserDto dto) {
         Optional<Role> roleOp = roleRepository.findById("USER");
@@ -53,13 +121,11 @@ public class UserService {
             newUser.setStatus(dto.getStatus());
             newUser.setEmail(dto.getEmail());
             newUser = userRepository.save(newUser);
-            Account account = new Account();
-            account.setType("Payment");
-            account.setOwner(newUser);
-            account.setStatus(true);
-            account.setBalance(0);
-            account.setOwner(newUser);
-            accountRepository.save(account);
+            AccountDto accountDto = new AccountDto();
+            accountDto.setType("Payment");
+            accountDto.setStatus(true);
+            accountDto.setBalance(0);
+            createAccount(newUser, accountDto);
             return true;
         }
         return false;
