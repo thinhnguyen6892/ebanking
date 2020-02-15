@@ -1,13 +1,24 @@
 package edu.hcmus.project.ebanking.backoffice.resource.user;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 public class UserDto implements Serializable {
 
+    @NotNull
+    @Size(min = 8, message = "Username should have at least 8 characters")
     private String username;
+
+    @NotBlank
     private String password;
+
+    @NotNull
     private String role;
     private Boolean status = Boolean.TRUE;
+
+    @NotBlank
     private String email;
 
     public String getUsername() {

@@ -20,7 +20,7 @@ public class JwtUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException(String.format("USER_NOT_FOUND '%s'.", username));
         } else {
-            return new JwtUserDetails(user.getId(), user.getUsername(), user.getPassword(), user.getRole());
+            return new JwtUserDetails(user.getId(), user.getUsername(), user.getPassword(), user.getRole().getRoleId());
         }
     }
 }

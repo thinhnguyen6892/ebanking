@@ -77,6 +77,12 @@ public class JwtWebSecurityConfig extends WebSecurityConfigurerAdapter {
                         authenticationPath
                 )
                 .antMatchers(HttpMethod.OPTIONS, "/**")
+                .antMatchers("/v2/api-docs",
+                        "/configuration/ui",
+                        "/swagger-resources/**",
+                        "/configuration/security",
+                        "/swagger-ui.html",
+                        "/webjars/**")
                 .and()
                 .ignoring()
                 .antMatchers(

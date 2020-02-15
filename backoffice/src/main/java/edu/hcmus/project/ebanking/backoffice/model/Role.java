@@ -8,16 +8,16 @@ import java.util.Objects;
 
 @Entity
 public class Role {
-    private int roleId;
+    private String roleId;
     private String name;
 
     @Id
     @Column(name = "role_id")
-    public int getRoleId() {
+    public String getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(int roleId) {
+    public void setRoleId(String roleId) {
         this.roleId = roleId;
     }
 
