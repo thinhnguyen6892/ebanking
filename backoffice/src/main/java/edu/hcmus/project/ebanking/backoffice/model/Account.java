@@ -27,10 +27,8 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_seq")
     @GenericGenerator(
             name = "account_seq",
-            strategy = "edu.hcmus.project.ebanking.backoffice.generator.StringPrefixedSequenceIdGenerator",
-            parameters = {
-                    @Parameter(name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER, value = "T2TrC_"),
-                    @Parameter(name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER, value = "%026d") })
+            strategy = "edu.hcmus.project.ebanking.backoffice.generator.TimestampGenerator"
+    )
     @Column(name = "account_id")
     public String getAccountId() {
         return accountId;

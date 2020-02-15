@@ -82,7 +82,8 @@ public class JwtWebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/swagger-resources/**",
                         "/configuration/security",
                         "/swagger-ui.html",
-                        "/webjars/**")
+                        "/webjars/**",
+                        "/actuator")
                 .and()
                 .ignoring()
                 .antMatchers(
