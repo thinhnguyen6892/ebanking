@@ -24,6 +24,9 @@ public class UserResourceRestController {
         return userRepository.findAll();
     }
 
+    @GetMapping("/users/{id}")
+    public User getByid(@PathVariable long id){return userRepository.findById(id);}
+
     @PostMapping("/users/create")
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto dto) {
         User newUser = new User();
@@ -37,4 +40,28 @@ public class UserResourceRestController {
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
+    @PutMapping("/users/update/{id}")
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto, @PathVariable long id){
+        User upUser = userRepository.findById(id);
+        upUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+        upUser.setRole(dto.getRole());
+        upUser.setStatus(dto.getStatus());
+        upUser.setEmail(dto.getEmail());
+        upUser = userRepository.save(upUser);
+        return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> delete(@PathVariable long id) {
+        userRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/users/{username}")
+    public ResponseEntity<UserDto> changePassword(@RequestBody UserDto dto, @PathVariable String username){
+        User cUser = userRepository.findByUsername(username);
+        cUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+        cUser = userRepository.save(cUser);
+        return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
+    }
 }

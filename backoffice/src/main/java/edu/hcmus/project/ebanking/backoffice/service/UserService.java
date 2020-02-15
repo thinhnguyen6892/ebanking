@@ -39,7 +39,7 @@ public class UserService {
             UserDto dto = new UserDto();
             dto.setUsername(user.getUsername());
             dto.setStatus(user.getStatus());
-            dto.setRole(user.getRole().getName());
+            dto.setRole(user.getRole());
             dto.setEmail(user.getEmail());
             return dto;
         }).collect(Collectors.toList());
