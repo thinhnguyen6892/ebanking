@@ -20,9 +20,7 @@ public class UserResourceRestController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping("/users")
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+    public List<User> getAllUsers() { return userRepository.findAll(); }
 
     @GetMapping("/users/{id}")
     public User getByid(@PathVariable long id){return userRepository.findById(id);}
