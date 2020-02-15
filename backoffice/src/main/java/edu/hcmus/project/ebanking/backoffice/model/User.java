@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -26,16 +25,16 @@ public class User {
     @JsonIgnore
     private String password;
 
-    @Column(name = "role", length = 100)
-    @Size(min = 4, max = 100)
-    @NotNull
-    private String role;
-
     @Column(name = "status")
     private Boolean status;
 
     @Column(name = "email")
     private String email;
+
+    @ManyToOne
+    @JoinColumn(name = "role_id", referencedColumnName = "role_id", nullable = false)
+    private Role role;
+
 
 
     public Long getId() {
@@ -62,11 +61,11 @@ public class User {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

@@ -1,6 +1,8 @@
 package edu.hcmus.project.ebanking.backoffice.model;
 
+import edu.hcmus.project.ebanking.backoffice.generator.StringPrefixedSequenceIdGenerator;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 
 import javax.persistence.*;
 import java.sql.Date;
@@ -10,16 +12,25 @@ import java.util.Objects;
 public class Account {
 
     private String accountId;
-    private String ownerId;
     private String type;
     private Integer balance;
     private Date createDate;
     private Date expired;
     private Boolean status;
+    private User owner;
 
+
+
+//    @GeneratedValue(generator = "uuid")
+//    @GenericGenerator(name = "uuid", strategy = "uuid")
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_seq")
+    @GenericGenerator(
+            name = "account_seq",
+            strategy = "edu.hcmus.project.ebanking.backoffice.generator.StringPrefixedSequenceIdGenerator",
+            parameters = {
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER, value = "T2TrC_"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER, value = "%026d") })
     @Column(name = "account_id")
     public String getAccountId() {
         return accountId;
@@ -29,14 +40,15 @@ public class Account {
         this.accountId = accountId;
     }
 
-    @Basic
-    @Column(name = "owner_id")
-    public String getOwnerId() {
-        return ownerId;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
+    public User getOwner() {
+        return owner;
     }
 
-    public void setOwnerId(String ownerId) {
-        this.ownerId = ownerId;
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 
     @Basic
@@ -95,7 +107,6 @@ public class Account {
         if (o == null || getClass() != o.getClass()) return false;
         Account account = (Account) o;
         return Objects.equals(accountId, account.accountId) &&
-                Objects.equals(ownerId, account.ownerId) &&
                 Objects.equals(type, account.type) &&
                 Objects.equals(balance, account.balance) &&
                 Objects.equals(createDate, account.createDate) &&
@@ -105,6 +116,6 @@ public class Account {
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountId, ownerId, type, balance, createDate, expired, status);
+        return Objects.hash(accountId, type, balance, createDate, expired, status);
     }
 }

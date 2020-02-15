@@ -2,6 +2,7 @@ package edu.hcmus.project.ebanking.backoffice.resource.user;
 
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
+import edu.hcmus.project.ebanking.backoffice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,27 +15,12 @@ import java.util.List;
 public class UserResourceRestController {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @GetMapping("/users")
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+    private UserService userService;
 
     @PostMapping("/users/create")
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto dto) {
-        User newUser = new User();
-        newUser.setUsername(dto.getUsername());
-        newUser.setPassword(passwordEncoder.encode(dto.getPassword()));
-        newUser.setRole(dto.getRole());
-        newUser.setStatus(dto.getStatus());
-        newUser.setEmail(dto.getEmail());
-        newUser = userRepository.save(newUser);
-        dto.setPassword("");
-        return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
+        boolean result = userService.createUser(dto);
+        return new ResponseEntity<UserDto>(dto, result ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
 
 }
