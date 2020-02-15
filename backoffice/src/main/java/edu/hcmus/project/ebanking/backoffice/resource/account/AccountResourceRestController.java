@@ -23,6 +23,7 @@ public class AccountResourceRestController {
         return userService.findUserAccount(userId);
     }
 
+    //Todo Hidden account id
     @GetMapping("/accounts/{accountId}")
     public AccountDto retrieveUserAccount(@PathVariable String accountId) {
         return userService.findAccount(accountId);

@@ -9,7 +9,7 @@ public class AccountDto implements Serializable {
 
     private String accountId;
     private String type;
-    private Integer balance;
+    private Double balance;
     private Date createDate;
     private Date expired;
     private Boolean status;
@@ -35,11 +35,11 @@ public class AccountDto implements Serializable {
         this.type = type;
     }
 
-    public Integer getBalance() {
+    public Double getBalance() {
         return balance;
     }
 
-    public void setBalance(Integer balance) {
+    public void setBalance(Double balance) {
         this.balance = balance;
     }
 

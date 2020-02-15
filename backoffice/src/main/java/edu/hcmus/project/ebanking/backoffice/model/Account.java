@@ -13,7 +13,7 @@ public class Account {
 
     private String accountId;
     private String type;
-    private Integer balance = new Integer(0);
+    private Double balance = new Double(0);
     private Date createDate = new Date();
     private Date expired;
     private Boolean status;
@@ -63,11 +63,11 @@ public class Account {
 
     @Basic
     @Column(name = "balance")
-    public Integer getBalance() {
+    public Double getBalance() {
         return balance;
     }
 
-    public void setBalance(Integer balance) {
+    public void setBalance(Double balance) {
         this.balance = balance;
     }
 
