@@ -124,7 +124,7 @@ public class UserService {
             AccountDto accountDto = new AccountDto();
             accountDto.setType("Payment");
             accountDto.setStatus(true);
-            accountDto.setBalance(0);
+            accountDto.setBalance(0.0);
             createAccount(newUser, accountDto);
             return true;
         }
