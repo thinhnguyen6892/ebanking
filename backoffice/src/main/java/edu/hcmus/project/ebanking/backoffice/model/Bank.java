@@ -1,12 +1,10 @@
 package edu.hcmus.project.ebanking.backoffice.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
+@Table(name = "bank")
 public class Bank {
     private String id;
     private String bankName;
@@ -77,7 +75,7 @@ public class Bank {
     }
 
     @Basic
-    @Column(name = "key")
+    @Column(name = "api_key")
     public String getKey() {
         return key;
     }
