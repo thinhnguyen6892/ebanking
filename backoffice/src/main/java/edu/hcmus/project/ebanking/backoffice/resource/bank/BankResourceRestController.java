@@ -1,11 +1,8 @@
 package edu.hcmus.project.ebanking.backoffice.resource.bank;
 
 import edu.hcmus.project.ebanking.backoffice.model.Bank;
-import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.repository.BankRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
-import edu.hcmus.project.ebanking.backoffice.resource.user.UserDto;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
