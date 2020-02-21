@@ -1,9 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt;
 
-import edu.hcmus.project.ebanking.backoffice.model.Bank;
 import edu.hcmus.project.ebanking.backoffice.model.Debt;
 import edu.hcmus.project.ebanking.backoffice.repository.DebtRepository;
-import edu.hcmus.project.ebanking.backoffice.resource.bank.BankDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.HttpStatus;
@@ -54,5 +52,31 @@ public class DebtResourceRestController {
             return new ResponseEntity<DebtDto>(dto, HttpStatus.OK);
         }
         throw new ResourceNotFoundException("Debt have existed");
+    }
+
+    @PutMapping("/debt/update/{id}")
+    public ResponseEntity<DebtDto> updateBank(@RequestBody DebtDto dto, @PathVariable int id){
+        Optional<Debt> BankOp = DebtRepository.findById(id);
+        if(BankOp.isPresent()) {
+            Debt upDebt = BankOp.get();
+            upDebt.setType(dto.getType());
+            upDebt.setCreateDate(dto.getCreateDate());
+            upDebt.setEndDate(dto.getEndDate());
+            upDebt.setStatus(dto.getStatus());
+            upDebt = DebtRepository.save(upDebt);
+            return new ResponseEntity<DebtDto>(dto, HttpStatus.OK);
+        }
+        throw new ResourceNotFoundException("Debt not found");
+    }
+
+    @DeleteMapping("/debt/delete/{id}")
+    public ResponseEntity<Void> delete(@PathVariable int id) {
+        Optional<Debt> deBank = DebtRepository.findById(id);
+        if(deBank.isPresent())
+        {
+            DebtRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        throw new ResourceNotFoundException("Debt not found");
     }
 }
