@@ -1,10 +1,13 @@
 package edu.hcmus.project.ebanking.backoffice.resource.user;
 
 import edu.hcmus.project.ebanking.backoffice.service.UserService;
+import edu.hcmus.project.ebanking.backoffice.model.User;
+import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -18,6 +21,11 @@ import java.util.List;
 public class UserResourceRestController {
 
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
     private UserService userService;
 
     @GetMapping("/users")
@@ -29,7 +37,18 @@ public class UserResourceRestController {
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto dto) {
         boolean result = userService.createUser(dto);
         dto.setPassword("");
-        return new ResponseEntity<UserDto>(dto, result ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
+    }
+
+    @PutMapping("/users/update/{id}")
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto, @PathVariable long id){
+        User upUser = userRepository.findById(id);
+        upUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+        upUser.setRole(dto.getRole());
+        upUser.setStatus(dto.getStatus());
+        upUser.setEmail(dto.getEmail());
+        upUser = userRepository.save(upUser);
+        return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/users/recover/{email:.+}",
@@ -46,4 +65,17 @@ public class UserResourceRestController {
         }
     }
 
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> delete(@PathVariable long id) {
+        userRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/users/{username}")
+    public ResponseEntity<UserDto> changePassword(@RequestBody UserDto dto, @PathVariable String username){
+        User cUser = userRepository.findByUsername(username);
+        cUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+        cUser = userRepository.save(cUser);
+        return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
+    }
 }

@@ -1,11 +1,8 @@
-package edu.hcmus.project.ebanking.backoffice.model;
+package edu.hcmus.project.ebanking.backoffice.resource.bank;
 
-import javax.persistence.*;
-import java.util.Objects;
+import java.io.Serializable;
 
-@Entity
-@Table(name = "bank")
-public class Bank {
+public class BankDto implements Serializable {
     private String id;
     private String bankName;
     private String address;
@@ -14,8 +11,6 @@ public class Bank {
     private Boolean status;
     private String key;
 
-    @Id
-    @Column(name = "id")
     public String getId() {
         return id;
     }
@@ -24,8 +19,6 @@ public class Bank {
         this.id = id;
     }
 
-    @Basic
-    @Column(name = "bank_name")
     public String getBankName() {
         return bankName;
     }
@@ -34,8 +27,6 @@ public class Bank {
         this.bankName = bankName;
     }
 
-    @Basic
-    @Column(name = "address")
     public String getAddress() {
         return address;
     }
@@ -44,8 +35,6 @@ public class Bank {
         this.address = address;
     }
 
-    @Basic
-    @Column(name = "email")
     public String getEmail() {
         return email;
     }
@@ -54,8 +43,6 @@ public class Bank {
         this.email = email;
     }
 
-    @Basic
-    @Column(name = "phone")
     public String getPhone() {
         return phone;
     }
@@ -64,8 +51,6 @@ public class Bank {
         this.phone = phone;
     }
 
-    @Basic
-    @Column(name = "status")
     public Boolean getStatus() {
         return status;
     }
@@ -74,32 +59,11 @@ public class Bank {
         this.status = status;
     }
 
-    @Basic
-    @Column(name = "api_key")
     public String getKey() {
         return key;
     }
 
     public void setKey(String key) {
         this.key = key;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Bank bank = (Bank) o;
-        return Objects.equals(id, bank.id) &&
-                Objects.equals(bankName, bank.bankName) &&
-                Objects.equals(address, bank.address) &&
-                Objects.equals(email, bank.email) &&
-                Objects.equals(phone, bank.phone) &&
-                Objects.equals(status, bank.status) &&
-                Objects.equals(key, bank.key);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, bankName, address, email, phone, status, key);
     }
 }

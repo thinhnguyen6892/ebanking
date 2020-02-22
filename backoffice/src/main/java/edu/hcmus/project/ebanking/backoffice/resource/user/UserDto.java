@@ -1,5 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.resource.user;
 
+import edu.hcmus.project.ebanking.backoffice.model.Role;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -15,7 +17,7 @@ public class UserDto implements Serializable {
     private String password;
 
     @NotNull
-    private String role;
+    private Role role;
     private Boolean status = Boolean.TRUE;
 
     @NotBlank
@@ -37,11 +39,11 @@ public class UserDto implements Serializable {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

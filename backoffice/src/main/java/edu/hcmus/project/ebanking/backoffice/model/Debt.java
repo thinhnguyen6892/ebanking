@@ -1,9 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
 
@@ -14,6 +11,9 @@ public class Debt {
     private Timestamp createDate;
     private Timestamp endDate;
     private Boolean status;
+    private Account holder;
+    private Account debtor;
+    private Account debtor_acc;
 
     @Id
     @Column(name = "id")
@@ -65,6 +65,36 @@ public class Debt {
         this.status = status;
     }
 
+    @ManyToOne
+    @JoinColumn (name = "holder", referencedColumnName = "owner_id", nullable = false)
+    public Account getHolder() {
+        return holder;
+    }
+
+    public void setHolder(Account holder) {
+        this.holder = holder;
+    }
+
+    @ManyToOne
+    @JoinColumn (name = "debtor", referencedColumnName = "owner_id", nullable = false)
+    public Account getDebtor() {
+        return debtor;
+    }
+
+    public void setDebtor(Account debtor) {
+        this.debtor = debtor;
+    }
+
+    @ManyToOne
+    @JoinColumn (name = "debtor_acc", referencedColumnName = "account_id", nullable = false)
+    public Account getDebtor_acc() {
+        return debtor_acc;
+    }
+
+    public void setDebtor_acc(Account debtor_acc) {
+        this.debtor_acc = debtor_acc;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -74,11 +104,16 @@ public class Debt {
                 Objects.equals(type, debt.type) &&
                 Objects.equals(createDate, debt.createDate) &&
                 Objects.equals(endDate, debt.endDate) &&
-                Objects.equals(status, debt.status);
+                Objects.equals(status, debt.status) &&
+                Objects.equals(holder, debt.holder) &&
+                Objects.equals(debtor, debt.debtor) &&
+                Objects.equals(debtor_acc, debt.debtor_acc);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, type, createDate, endDate, status);
+        return Objects.hash(id, type, createDate, endDate, status, holder, debtor, debtor_acc);
     }
+
+
 }

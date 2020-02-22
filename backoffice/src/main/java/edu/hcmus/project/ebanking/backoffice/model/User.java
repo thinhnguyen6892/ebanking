@@ -20,7 +20,7 @@ public class User implements UserDetails {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "username ", length = 50, unique = true)
+    @Column(name = "username", length = 50, unique = true)
     @NotNull
     @Size(min = 4, max = 50)
     private String username;
