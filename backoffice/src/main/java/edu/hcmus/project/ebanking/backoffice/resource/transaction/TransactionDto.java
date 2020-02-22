@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.transaction;
 
+import edu.hcmus.project.ebanking.backoffice.model.TransactionFeeType;
 import edu.hcmus.project.ebanking.backoffice.model.TransactionType;
 
 import java.io.Serializable;
@@ -14,6 +15,7 @@ public class TransactionDto implements Serializable {
     private String content;
     private Double amount;
     private TransactionType type;
+    private TransactionFeeType feeType;
     private String otpCode;
 
     public String getSource() {
@@ -78,5 +80,13 @@ public class TransactionDto implements Serializable {
 
     public void setOtpCode(String otpCode) {
         this.otpCode = otpCode;
+    }
+
+    public TransactionFeeType getFeeType() {
+        return feeType;
+    }
+
+    public void setFeeType(TransactionFeeType feeType) {
+        this.feeType = feeType;
     }
 }

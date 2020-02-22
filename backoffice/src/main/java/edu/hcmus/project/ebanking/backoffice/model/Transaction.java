@@ -20,6 +20,8 @@ public class Transaction {
     private String otpCode;
     private Long validity;
 
+    private TransactionFeeType feeType;
+
 
     @Id
     @Column(name = "id")
@@ -124,6 +126,17 @@ public class Transaction {
 
     public void setValidity(Long validity) {
         this.validity = validity;
+    }
+
+    @Basic
+    @Enumerated(EnumType.STRING)
+    @Column(name = "fee_type")
+    public TransactionFeeType getFeeType() {
+        return feeType;
+    }
+
+    public void setFeeType(TransactionFeeType feeType) {
+        this.feeType = feeType;
     }
 
     @Override

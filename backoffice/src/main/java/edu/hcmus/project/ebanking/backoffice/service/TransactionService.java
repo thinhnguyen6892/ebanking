@@ -44,7 +44,7 @@ public class TransactionService {
     public List<TransactionDto> findAllAccountTransaction(String accountId) {
 
         Optional<Account> accountOpt = accountRepository.findById(accountId);
-        if(accountOpt.isPresent()) {
+        if(!accountOpt.isPresent()) {
             throw new EntityNotExistException("Account not found in the system");
         }
         Account account = accountOpt.get();
@@ -85,6 +85,7 @@ public class TransactionService {
         transaction.setTarget(target.getAccountId());
         transaction.setStatus(TransactionStatus.NEW);
         transaction.setType(dto.getType());
+        transaction.setFeeType(dto.getFeeType());
 
         long expires = currentTime + 1000L * (30 * 60);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
@@ -146,6 +147,7 @@ public class TransactionService {
         transactionRepository.save(transaction);
 
         Transaction receive = new Transaction();
+        receive.setFeeType(transaction.getFeeType());
         receive.setAmount(transaction.getAmount());
         receive.setContent(transaction.getContent());
         receive.setDate(new Date());
