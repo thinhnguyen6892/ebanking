@@ -1,15 +1,20 @@
-package edu.hcmus.project.ebanking.backoffice.resource.transfer;
+package edu.hcmus.project.ebanking.backoffice.resource.transaction;
+
+import edu.hcmus.project.ebanking.backoffice.model.TransactionType;
 
 import java.io.Serializable;
 import java.util.Date;
 
 public class TransactionDto implements Serializable {
+
+    private String id;
     private String source;
     private String target;
     private Date created;
     private String content;
     private Double amount;
-    private String type;
+    private TransactionType type;
+    private String otpCode;
 
     public String getSource() {
         return source;
@@ -51,11 +56,27 @@ public class TransactionDto implements Serializable {
         this.created = created;
     }
 
-    public String getType() {
+    public TransactionType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(TransactionType type) {
         this.type = type;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getOtpCode() {
+        return otpCode;
+    }
+
+    public void setOtpCode(String otpCode) {
+        this.otpCode = otpCode;
     }
 }

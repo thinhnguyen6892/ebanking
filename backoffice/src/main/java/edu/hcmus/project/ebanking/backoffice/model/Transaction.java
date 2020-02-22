@@ -3,19 +3,23 @@ package edu.hcmus.project.ebanking.backoffice.model;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
 public class Transaction {
     private String id;
-    private Timestamp date;
+    private Date date;
     private TransactionType type;
     private String source;
     private String target;
     private String content;
     private double amount;
-    private boolean status;
+    private TransactionStatus status;
+
+    private String otpCode;
+    private Long validity;
+
 
     @Id
     @Column(name = "id")
@@ -31,17 +35,18 @@ public class Transaction {
 
     @Basic
     @Column(name = "date")
-    public Timestamp getDate() {
+    @Temporal(TemporalType.TIMESTAMP)
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(Timestamp date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
     @Basic
-    @Enumerated(EnumType.STRING)
     @Column(name = "type")
+    @Enumerated(EnumType.STRING)
     public TransactionType getType() {
         return type;
     }
@@ -92,12 +97,33 @@ public class Transaction {
 
     @Basic
     @Column(name = "status")
-    public boolean isStatus() {
+    @Enumerated(EnumType.ORDINAL)
+    public TransactionStatus getStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(TransactionStatus status) {
         this.status = status;
+    }
+
+    @Basic
+    @Column(name = "otp_code")
+    public String getOtpCode() {
+        return otpCode;
+    }
+
+    public void setOtpCode(String otpCode) {
+        this.otpCode = otpCode;
+    }
+
+    @Basic
+    @Column(name = "validity")
+    public Long getValidity() {
+        return validity;
+    }
+
+    public void setValidity(Long validity) {
+        this.validity = validity;
     }
 
     @Override
@@ -106,7 +132,7 @@ public class Transaction {
         if (o == null || getClass() != o.getClass()) return false;
         Transaction that = (Transaction) o;
         return Double.compare(that.amount, amount) == 0 &&
-                status == that.status &&
+                Objects.equals(status,that.status) &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(date, that.date) &&
                 Objects.equals(type, that.type) &&
@@ -119,4 +145,5 @@ public class Transaction {
     public int hashCode() {
         return Objects.hash(id, date, type, source, target, content, amount, status);
     }
+
 }

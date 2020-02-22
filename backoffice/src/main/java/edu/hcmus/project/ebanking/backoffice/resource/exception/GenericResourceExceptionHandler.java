@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.exception;
 
+import edu.hcmus.project.ebanking.backoffice.resource.authentication.JwtAuthenticationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,16 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
                 request.getDescription(false));
         return new ResponseEntity(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
+
+
+
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public final ResponseEntity<Object> handleJwtAuthenticationException(JwtAuthenticationException ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity(exceptionResponse, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(EntityNotExistException.class)
