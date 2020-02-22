@@ -2,6 +2,7 @@ package edu.hcmus.project.ebanking.backoffice.service;
 
 import edu.hcmus.project.ebanking.backoffice.model.Account;
 import edu.hcmus.project.ebanking.backoffice.model.Role;
+import edu.hcmus.project.ebanking.backoffice.model.Token;
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.RoleRepository;
@@ -9,18 +10,28 @@ import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.account.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.EntityNotExistException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
+import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
 import edu.hcmus.project.ebanking.backoffice.resource.user.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+
+    @Autowired
+    private TokenProvider tokenProvider;
 
     @Autowired
     private UserRepository userRepository;
@@ -33,6 +44,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private MailService mailService;
 
     public List<UserDto> findAllUsers() {
         return userRepository.findAll().stream().map(user -> {
@@ -130,4 +144,27 @@ public class UserService {
         }
         return false;
     }
+    public String recoverPassword(String email, String token, String password, HttpServletRequest request) throws URISyntaxException {
+        Optional<User> userOpt = userRepository.findOneByEmail(email);
+        if (!userOpt.isPresent()) {
+            throw new EntityNotExistException("User not found in the system");
+        }
+        User user = userOpt.get();
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>(user.getAuthorities());
+        if (!StringUtils.isEmpty(token)) {
+            if(!tokenProvider.validateToken(token, user)) {
+                throw new TokenException("Invalid token!");
+            }
+            String encryptedPassword = passwordEncoder.encode(password);
+            user.setPassword(encryptedPassword);
+            userRepository.save(user);
+            return "Password changed";
+        } else {
+            Token emailToken = tokenProvider.createToken(user);
+//                mailService.sendRecoverPasswordEmail(user, emailToken.getToken(), buildBaseUrl(request));
+            return emailToken.getToken();
+        }
+    }
+
+
 }

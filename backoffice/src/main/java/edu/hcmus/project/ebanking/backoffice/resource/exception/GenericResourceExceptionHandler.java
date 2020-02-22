@@ -38,7 +38,12 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
         return new ResponseEntity(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 
-
+    @ExceptionHandler(TokenException.class)
+    public final ResponseEntity<Object> handleTokenException(ResourceNotFoundException ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
 
 
     @ExceptionHandler(JwtAuthenticationException.class)

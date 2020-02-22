@@ -1,13 +1,19 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
+import edu.hcmus.project.ebanking.backoffice.model.Token;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.codec.Hex;
 import org.springframework.stereotype.Service;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 @Service
 public class TokenProvider {
 //    String series  = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    Random random = new Random();
+    private Random random = new Random();
+    private String secretKey = "mySecretKey";
 
     public String generateRandomSeries(String series, int len){
         char[] token = new char[len];
@@ -15,6 +21,44 @@ public class TokenProvider {
             token[i] = series.charAt(random.nextInt(series.length()));
         }
         return new String(token);
+    }
+
+    public Token createToken(UserDetails userDetails) {
+        long expires = System.currentTimeMillis() + 1000L * (60*60*24); // 24h
+        String token = userDetails.getUsername() + ":" + expires + ":" + computeSignature(userDetails, expires);
+        return new Token(token, expires);
+    }
+
+    public String computeSignature(UserDetails userDetails, long expires) {
+        StringBuilder signatureBuilder = new StringBuilder();
+        signatureBuilder.append(userDetails.getUsername()).append(":");
+        signatureBuilder.append(expires).append(":");
+        signatureBuilder.append(userDetails.getPassword()).append(":");
+        signatureBuilder.append(secretKey);
+
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("No MD5 algorithm available!");
+        }
+        return new String(Hex.encode(digest.digest(signatureBuilder.toString().getBytes())));
+    }
+
+    public String getUserNameFromToken(String authToken) {
+        if (null == authToken) {
+            return null;
+        }
+        String[] parts = authToken.split(":");
+        return parts[0];
+    }
+
+    public boolean validateToken(String authToken, UserDetails userDetails) {
+        String[] parts = authToken.split(":");
+        long expires = Long.parseLong(parts[1]);
+        String signature = parts[2];
+        String signatureToMatch = computeSignature(userDetails, expires);
+        return expires >= System.currentTimeMillis() && signature.equals(signatureToMatch);
     }
 
 

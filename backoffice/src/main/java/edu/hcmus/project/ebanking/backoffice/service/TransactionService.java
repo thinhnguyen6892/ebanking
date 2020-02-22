@@ -109,10 +109,11 @@ public class TransactionService {
         if(TransactionStatus.COMPLETED == transaction.getStatus() || TransactionStatus.CANCEL == transaction.getStatus()) {
             throw new EntityNotExistException("Transaction is not exist!");
         }
-        if(!dto.getOtpCode().equals(transaction.getOtpCode())) {
+        long currentTime = System.currentTimeMillis();
+        if(!dto.getOtpCode().equals(transaction.getOtpCode()) || transaction.getValidity() < currentTime) {
             transaction.setStatus(TransactionStatus.CANCEL);
             transactionRepository.save(transaction);
-            throw new InvalidTransactionException("Invalid OTP!");
+            throw new InvalidTransactionException("Invalid OTP or expired!");
         }
         performTransaction(transaction);
     }
