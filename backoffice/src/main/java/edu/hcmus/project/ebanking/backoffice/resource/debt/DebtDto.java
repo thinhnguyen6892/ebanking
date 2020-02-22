@@ -9,6 +9,9 @@ public class DebtDto implements Serializable {
     private Timestamp createDate;
     private Timestamp endDate;
     private Boolean status;
+    private int holder;
+    private int debtor;
+    private String debtor_acc;
 
     public int getId() {
         return id;
@@ -48,5 +51,29 @@ public class DebtDto implements Serializable {
 
     public void setStatus(Boolean status) {
         this.status = status;
+    }
+
+    public int getHolder() {
+        return holder;
+    }
+
+    public void setHolder(int holder) {
+        this.holder = holder;
+    }
+
+    public int getDebtor() {
+        return debtor;
+    }
+
+    public void setDebtor(int debtor) {
+        this.debtor = debtor;
+    }
+
+    public String getDebtor_acc() {
+        return debtor_acc;
+    }
+
+    public void setDebtor_acc(String debtor_acc) {
+        this.debtor_acc = debtor_acc;
     }
 }
