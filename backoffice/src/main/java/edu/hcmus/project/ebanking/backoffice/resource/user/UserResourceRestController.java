@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.user;
 
+import edu.hcmus.project.ebanking.backoffice.resource.exception.EntityNotExistException;
 import edu.hcmus.project.ebanking.backoffice.service.UserService;
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
@@ -16,12 +17,14 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class UserResourceRestController {
 
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -42,12 +45,16 @@ public class UserResourceRestController {
 
     @PutMapping("/users/update/{id}")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto, @PathVariable long id){
-        User upUser = userRepository.findById(id);
-        upUser.setPassword(passwordEncoder.encode(dto.getPassword()));
-        upUser.setRole(dto.getRole());
-        upUser.setStatus(dto.getStatus());
-        upUser.setEmail(dto.getEmail());
-        upUser = userRepository.save(upUser);
+        Optional<User> upUser = userRepository.findById(id);
+        if(!upUser.isPresent()) {
+            throw new EntityNotExistException("User not found exception");
+        }
+        User user = upUser.get();
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRole(dto.getRole());
+        user.setStatus(dto.getStatus());
+        user.setEmail(dto.getEmail());
+        userRepository.save(user);
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
