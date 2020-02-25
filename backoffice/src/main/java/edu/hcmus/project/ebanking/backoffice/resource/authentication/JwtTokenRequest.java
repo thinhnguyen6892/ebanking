@@ -5,6 +5,8 @@ public class JwtTokenRequest {
     private String username;
     private String password;
 
+    private String reCAPTCHA;
+
     public JwtTokenRequest() {
         super();
     }
@@ -30,4 +32,11 @@ public class JwtTokenRequest {
         this.password = password;
     }
 
+    public String getReCAPTCHA() {
+        return reCAPTCHA;
+    }
+
+    public void setReCAPTCHA(String reCAPTCHA) {
+        this.reCAPTCHA = reCAPTCHA;
+    }
 }

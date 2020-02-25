@@ -41,14 +41,16 @@ public class TransactionService {
         }).collect(Collectors.toList());
     }
 
-    public List<TransactionDto> findAllAccountTransaction(String accountId) {
+    public List<TransactionDto> findAllAccountTransaction(String accountId, TransactionType type) {
 
         Optional<Account> accountOpt = accountRepository.findById(accountId);
         if(!accountOpt.isPresent()) {
             throw new EntityNotExistException("Account not found in the system");
         }
         Account account = accountOpt.get();
-        return transactionRepository.findTransactionsBySource(account.getAccountId()).stream().map(transaction -> {
+        return (type != null ? transactionRepository.findTransactionsBySourceAndTypeOrderByDateDesc(account.getAccountId(), type) :
+                transactionRepository.findTransactionsBySourceOrderByDateDesc(account.getAccountId()))
+                .stream().map(transaction -> {
             TransactionDto dto = new TransactionDto();
             dto.setAmount(transaction.getAmount());
             dto.setContent(transaction.getContent());

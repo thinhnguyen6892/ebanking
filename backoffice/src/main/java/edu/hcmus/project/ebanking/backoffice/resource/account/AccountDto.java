@@ -1,12 +1,17 @@
 package edu.hcmus.project.ebanking.backoffice.resource.account;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
+@ApiModel(description = "All details about the Account. ")
 public class AccountDto implements Serializable {
 
+    @ApiModelProperty(notes = "The Account id")
     private String accountId;
     private String type;
     private Double balance;

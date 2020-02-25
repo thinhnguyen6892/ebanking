@@ -21,9 +21,9 @@ public class TransferResourceRestController {
         return tranferService.findAllTransaction();
     }
 
-    @GetMapping("/transactions/account/{id}")
-    public List<TransactionDto> retrieveAllTransaction(@PathVariable String id) {
-        return tranferService.findAllAccountTransaction(id);
+    @PostMapping("/transactions/account")
+    public List<TransactionDto> retrieveAllTransaction(@Valid @RequestBody TransactionRequestDto dto) {
+        return tranferService.findAllAccountTransaction(dto.getAccountId(), dto.getType());
     }
 
     @PostMapping("/transactions/request")
