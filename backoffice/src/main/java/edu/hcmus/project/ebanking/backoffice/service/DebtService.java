@@ -6,7 +6,7 @@ import edu.hcmus.project.ebanking.backoffice.model.DebtStatus;
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.DebtRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.UserBankRepository;
+import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.DebtDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class DebtService {
     private DebtRepository debtRepository;
 
     @Autowired
-    private UserBankRepository userBankRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -73,8 +73,8 @@ public class DebtService {
 
     @Transactional
     public boolean createDebt(DebtDto dto){
-        Optional<User> Debtorop = userBankRepository.findById(dto.getDebtor());
-        Optional<User> Holderop = userBankRepository.findById(dto.getHolder());
+        Optional<User> Debtorop = userRepository.findById(dto.getDebtor());
+        Optional<User> Holderop = userRepository.findById(dto.getHolder());
         if (Debtorop.isPresent()) {
             Optional<Account> accop = accountRepository.findById(dto.getDebtor_acc());
             if (accop.isPresent()) {
@@ -93,8 +93,8 @@ public class DebtService {
 
     public boolean updateDebt(DebtDto dto, int id){
         Optional<Debt> DebtOp = debtRepository.findById(id);
-        Optional<User> Debtorop = userBankRepository.findById(dto.getDebtor());
-        Optional<User> Holderop = userBankRepository.findById(dto.getHolder());
+        Optional<User> Debtorop = userRepository.findById(dto.getDebtor());
+        Optional<User> Holderop = userRepository.findById(dto.getHolder());
         Optional<Account> accop = accountRepository.findById(dto.getDebtor_acc());
         if(DebtOp.isPresent()) {
             if(Debtorop.isPresent()){
