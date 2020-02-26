@@ -7,6 +7,7 @@ import edu.hcmus.project.ebanking.backoffice.resource.exception.EntityNotExistEx
 import edu.hcmus.project.ebanking.backoffice.resource.exception.InvalidTransactionException;
 import edu.hcmus.project.ebanking.backoffice.resource.transaction.TransactionDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,9 @@ public class TransactionService {
 
     @Autowired
     private TokenProvider tokenProvider;
+
+    @Autowired
+    private MailService mailService;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -98,6 +102,9 @@ public class TransactionService {
         transaction = transactionRepository.save(transaction);
         dto.setId(transaction.getId());
         dto.setOtpCode(opt);
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        mailService.sendTransactionConfirmationEmail(userDetails, opt);
         return dto;
     }
 

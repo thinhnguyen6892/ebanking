@@ -7,9 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.core.env.Environment;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import javax.mail.internet.MimeMessage;
 import java.net.URISyntaxException;
@@ -23,14 +26,14 @@ public class MailService {
     @Autowired
     private Environment env;
 
-//    @Autowired
-//    private JavaMailSender javaMailSender;
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     @Autowired
     private MessageSource messageSource;
 
-//    @Autowired
-//    private SpringTemplateEngine templateEngine;
+    @Autowired
+    private SpringTemplateEngine templateEngine;
 
     @Value("${mail.from}")
     private String from;
@@ -39,42 +42,29 @@ public class MailService {
     public void sendEmail(String to, String subject, String content, boolean isMultipart, boolean isHtml) {
         log.debug("Send e-mail[multipart '{}' and html '{}'] to '{}' with subject '{}' and content={}",
                 isMultipart, isHtml, to, subject, content);
-
-        // Prepare message using a Spring helper
-//        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-//        try {
-//            MimeMessageHelper message = new MimeMessageHelper(mimeMessage, isMultipart, "UTF-8");
-//            message.setTo(to);
-//            message.setFrom(from);
-//            message.setSubject(subject);
-//            message.setText(content, isHtml);
-//            javaMailSender.send(mimeMessage);
-//            log.debug("Sent e-mail from {} to User '{}'", from, to);
-//        } catch (Exception e) {
-//            log.warn("E-mail could not be sent from {} to user '{}', exception is: {}", from, to, e.getMessage());
-//        }
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper message = new MimeMessageHelper(mimeMessage, isMultipart, "UTF-8");
+            message.setTo(to);
+            message.setFrom(from);
+            message.setSubject(subject);
+            message.setText(content, isHtml);
+            javaMailSender.send(mimeMessage);
+            log.debug("Sent e-mail from {} to User '{}'", from, to);
+        } catch (Exception e) {
+            log.warn("E-mail could not be sent from {} to user '{}', exception is: {}", from, to, e.getMessage());
+        }
     }
 
-    public void sendActivationEmail(User user, String baseUrl) {
-        log.debug("Sending activation e-mail to '{}'", user.getEmail());
-//        Context context = new Context(Locale.ENGLISH);
-//        context.setVariable("user", user);
-//        context.setVariable("baseUrl", baseUrl);
-//        String content = templateEngine.process("activationEmail", context);
-//        String subject = messageSource.getMessage("email.activation.title", null, Locale.ENGLISH);
-//        sendEmail(user.getEmail(), subject, content, false, true);
+    public void sendTransactionConfirmationEmail(User user, String otp) {
+        log.debug("Sending transaction confirmation e-mail to '{}'", user.getEmail());
+        Context context = new Context(Locale.ENGLISH);
+        context.setVariable("otp_code", otp);
+        String content = templateEngine.process("transaction_confimation", context);
+        String subject = "Transaction Confirmation";
+        sendEmail(user.getEmail(), subject, content, false, true);
     }
 
-    public void sendNotfiyEmail(User user, String baseUrl, String rawPassword) {
-        log.debug("Sending notify email to '{}'", user.getEmail());
-//        Context context = new Context(Locale.ENGLISH);
-//        context.setVariable("user", user);
-//        context.setVariable("baseUrl", baseUrl);
-//        context.setVariable("password", rawPassword);
-//        String content = templateEngine.process("newUser", context);
-//        String subject = messageSource.getMessage("email.creation.title", null, Locale.ENGLISH);
-//        sendEmail(user.getEmail(), subject, content, false, true);
-    }
 
     public void sendRecoverPasswordEmail(User user, String token, String baseUrl) throws URISyntaxException {
 //        Context context = new Context(Locale.ENGLISH);
