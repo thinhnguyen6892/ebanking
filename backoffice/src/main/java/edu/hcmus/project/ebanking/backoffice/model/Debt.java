@@ -1,21 +1,21 @@
 package edu.hcmus.project.ebanking.backoffice.model;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
 public class Debt {
     private int id;
-    private String type;
-    private Timestamp createDate;
-    private Timestamp endDate;
-    private Boolean status;
-    private Account holder;
-    private Account debtor;
+    private Date createDate;
+    private DebtStatus status;
+    private User holder;
+    private User debtor;
     private Account debtor_acc;
 
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public int getId() {
         return id;
@@ -26,62 +26,43 @@ public class Debt {
     }
 
     @Basic
-    @Column(name = "type")
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    @Basic
     @Column(name = "create_date")
-    public Timestamp getCreateDate() {
+    public Date getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(Timestamp createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
     @Basic
-    @Column(name = "end_date")
-    public Timestamp getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Timestamp endDate) {
-        this.endDate = endDate;
-    }
-
-    @Basic
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    public Boolean getStatus() {
+    public DebtStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Boolean status) {
+    public void setStatus(DebtStatus status) {
         this.status = status;
     }
 
     @ManyToOne
-    @JoinColumn (name = "holder", referencedColumnName = "owner_id", nullable = false)
-    public Account getHolder() {
+    @JoinColumn (name = "holder", referencedColumnName = "id", nullable = false)
+    public User getHolder() {
         return holder;
     }
 
-    public void setHolder(Account holder) {
+    public void setHolder(User holder) {
         this.holder = holder;
     }
 
     @ManyToOne
-    @JoinColumn (name = "debtor", referencedColumnName = "owner_id", nullable = false)
-    public Account getDebtor() {
+    @JoinColumn (name = "debtor", referencedColumnName = "id", nullable = false)
+    public User getDebtor() {
         return debtor;
     }
 
-    public void setDebtor(Account debtor) {
+    public void setDebtor(User debtor) {
         this.debtor = debtor;
     }
 
@@ -101,9 +82,7 @@ public class Debt {
         if (o == null || getClass() != o.getClass()) return false;
         Debt debt = (Debt) o;
         return id == debt.id &&
-                Objects.equals(type, debt.type) &&
                 Objects.equals(createDate, debt.createDate) &&
-                Objects.equals(endDate, debt.endDate) &&
                 Objects.equals(status, debt.status) &&
                 Objects.equals(holder, debt.holder) &&
                 Objects.equals(debtor, debt.debtor) &&
@@ -112,7 +91,7 @@ public class Debt {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, type, createDate, endDate, status, holder, debtor, debtor_acc);
+        return Objects.hash(id, createDate, status, holder, debtor, debtor_acc);
     }
 
 

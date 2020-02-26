@@ -3,7 +3,7 @@ package edu.hcmus.project.ebanking.backoffice.resource.user;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.EntityNotExistException;
 import edu.hcmus.project.ebanking.backoffice.service.UserService;
 import edu.hcmus.project.ebanking.backoffice.model.User;
-import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
+import edu.hcmus.project.ebanking.backoffice.repository.UserBankRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,7 +23,7 @@ import java.util.Optional;
 public class UserResourceRestController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserBankRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;

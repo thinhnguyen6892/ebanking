@@ -6,7 +6,7 @@ import edu.hcmus.project.ebanking.backoffice.model.Token;
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.RoleRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
+import edu.hcmus.project.ebanking.backoffice.repository.UserBankRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.account.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.EntityNotExistException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
@@ -33,7 +33,7 @@ public class UserService {
     private TokenProvider tokenProvider;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserBankRepository userRepository;
 
     @Autowired
     private AccountRepository accountRepository;

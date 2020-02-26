@@ -1,16 +1,20 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt;
 
+import edu.hcmus.project.ebanking.backoffice.model.Account;
+import edu.hcmus.project.ebanking.backoffice.model.Debt;
+import edu.hcmus.project.ebanking.backoffice.model.DebtStatus;
+import edu.hcmus.project.ebanking.backoffice.model.User;
+
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.util.Date;
+
 
 public class DebtDto implements Serializable {
     private int id;
-    private String type;
-    private Timestamp createDate;
-    private Timestamp endDate;
-    private Boolean status;
-    private int holder;
-    private int debtor;
+    private Date createDate;
+    private DebtStatus status;
+    private Long holder;
+    private Long debtor;
     private String debtor_acc;
 
     public int getId() {
@@ -21,51 +25,35 @@ public class DebtDto implements Serializable {
         this.id = id;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Timestamp getCreateDate() {
+    public Date getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(Timestamp createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
-    public Timestamp getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Timestamp endDate) {
-        this.endDate = endDate;
-    }
-
-    public Boolean getStatus() {
+    public DebtStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Boolean status) {
+    public void setStatus(DebtStatus status) {
         this.status = status;
     }
 
-    public int getHolder() {
+    public Long getHolder() {
         return holder;
     }
 
-    public void setHolder(int holder) {
+    public void setHolder(Long holder) {
         this.holder = holder;
     }
 
-    public int getDebtor() {
+    public Long getDebtor() {
         return debtor;
     }
 
-    public void setDebtor(int debtor) {
+    public void setDebtor(Long debtor) {
         this.debtor = debtor;
     }
 
