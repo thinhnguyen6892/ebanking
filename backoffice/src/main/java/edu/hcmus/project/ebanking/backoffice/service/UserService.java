@@ -13,6 +13,8 @@ import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFound
 import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
 import edu.hcmus.project.ebanking.backoffice.resource.user.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -47,12 +49,24 @@ public class UserService {
     @Autowired
     private MailService mailService;
 
+    public List<UserDto> findAllStaffs() {
+        Role role = roleRepository.findById("STAFF").get();
+        return userRepository.findByRole(role).stream().map(user -> {
+            UserDto dto = new UserDto();
+            dto.setUsername(user.getUsername());
+            dto.setStatus(user.getStatus());
+            dto.setRole(user.getRole().getName());
+            dto.setEmail(user.getEmail());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
     public List<UserDto> findAllUsers() {
         return userRepository.findAll().stream().map(user -> {
             UserDto dto = new UserDto();
             dto.setUsername(user.getUsername());
             dto.setStatus(user.getStatus());
-            dto.setRole(user.getRole());
+            dto.setRole(user.getRole().getName());
             dto.setEmail(user.getEmail());
             return dto;
         }).collect(Collectors.toList());
@@ -113,6 +127,24 @@ public class UserService {
         throw new EntityNotExistException("Account not found in the system");
     }
 
+    public UserDto updateUser(Long id, UserDto dto) {
+        Optional<User> upUser = userRepository.findById(id);
+        if(!upUser.isPresent()) {
+            throw new EntityNotExistException("User not found exception");
+        }
+        Optional<Role> roleOp = roleRepository.findById(dto.getRole());
+        if(!roleOp.isPresent()) {
+            throw new EntityNotExistException("Role not found exception");
+        }
+        User user = upUser.get();
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRole(roleOp.get());
+        user.setStatus(dto.getStatus());
+        user.setEmail(dto.getEmail());
+        userRepository.save(user);
+        return dto;
+    }
+
     public String createAccount(User owner, AccountDto dto) {
         Account account = new Account();
         account.setType(dto.getType());
@@ -125,7 +157,7 @@ public class UserService {
 
     @Transactional
     public boolean createUser(UserDto dto) {
-        Optional<Role> roleOp = roleRepository.findById("USER");
+        Optional<Role> roleOp = roleRepository.findById(dto.getRole());
         if(roleOp.isPresent()) {
             User newUser = new User();
             newUser.setUsername(dto.getUsername());

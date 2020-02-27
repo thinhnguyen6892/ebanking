@@ -1,5 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.model;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -16,6 +18,8 @@ public class Bank {
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid")
     public String getId() {
         return id;
     }

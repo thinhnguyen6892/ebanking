@@ -2,17 +2,19 @@ package edu.hcmus.project.ebanking.backoffice.service;
 
 import edu.hcmus.project.ebanking.backoffice.model.*;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
+import edu.hcmus.project.ebanking.backoffice.repository.BankRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.TransactionRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.EntityNotExistException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.InvalidTransactionException;
 import edu.hcmus.project.ebanking.backoffice.resource.transaction.TransactionDto;
+import edu.hcmus.project.ebanking.backoffice.resource.transaction.TransactionRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,15 +32,28 @@ public class TransactionService {
     private AccountRepository accountRepository;
 
     @Autowired
+    private BankRepository bankRepository;
+
+    @Autowired
     private TransactionRepository transactionRepository;
 
 
-    public List<TransactionDto> findAllTransaction() {
-        return transactionRepository.findAll().stream().map(transaction -> {
+    public List<TransactionDto> findAllTransaction(TransactionRequestDto request) {
+        List<Transaction> transactions;
+        if(request.getBankId() != null && request.getBankId() != "") {
+            Optional<Bank> bankOpt = bankRepository.findById(request.getBankId());
+            if(!bankOpt.isPresent()) {
+                throw new EntityNotExistException("Bank not found in the system");
+            }
+            transactions = transactionRepository.findTransactionsByDateBetweenAndReferenceAndStatusNotOrderByDateDesc(request.getStartDate(), request.getEndDate(), bankOpt.get(), TransactionStatus.NEW);
+        } else {
+            transactions = transactionRepository.findTransactionsByDateBetweenAndStatusNotOrderByDateDesc(request.getStartDate(), request.getEndDate(), TransactionStatus.NEW);
+        }
+        return transactions.stream().map(transaction -> {
             TransactionDto dto = new TransactionDto();
             dto.setAmount(transaction.getAmount());
             dto.setContent(transaction.getContent());
-            dto.setCreated(transaction.getDate());
+            dto.setCreatedDate(transaction.getDate());
             dto.setSource(transaction.getSource());
             dto.setType(transaction.getType());
             return dto;
@@ -52,13 +67,13 @@ public class TransactionService {
             throw new EntityNotExistException("Account not found in the system");
         }
         Account account = accountOpt.get();
-        return (type != null ? transactionRepository.findTransactionsBySourceAndTypeOrderByDateDesc(account.getAccountId(), type) :
-                transactionRepository.findTransactionsBySourceOrderByDateDesc(account.getAccountId()))
+        return (type != null ? transactionRepository.findTransactionsBySourceAndTypeAndStatusNotOrderByDateDesc(account.getAccountId(), type, TransactionStatus.NEW) :
+                transactionRepository.findTransactionsBySourceAndStatusNotOrderByDateDesc(account.getAccountId(), TransactionStatus.NEW))
                 .stream().map(transaction -> {
             TransactionDto dto = new TransactionDto();
             dto.setAmount(transaction.getAmount());
             dto.setContent(transaction.getContent());
-            dto.setCreated(transaction.getDate());
+            dto.setCreatedDate(transaction.getDate());
             dto.setSource(transaction.getSource());
             dto.setType(transaction.getType());
             return dto;
@@ -82,11 +97,12 @@ public class TransactionService {
         if(sourceBalance < transactionAmount) {
             throw new InvalidTransactionException("Insufficient balance. Cannot execute this transaction!");
         }
-        long currentTime = System.currentTimeMillis();
+        ZonedDateTime now = ZonedDateTime.now();
+        long currentTime =  now.toInstant().toEpochMilli();
         Transaction transaction = new Transaction();
         transaction.setAmount(dto.getAmount());
         transaction.setContent(dto.getContent());
-        transaction.setDate(new Date(currentTime));
+        transaction.setDate(now);
         transaction.setSource(source.getAccountId());
         transaction.setTarget(target.getAccountId());
         transaction.setStatus(TransactionStatus.NEW);
@@ -102,6 +118,7 @@ public class TransactionService {
         transaction = transactionRepository.save(transaction);
         dto.setId(transaction.getId());
         dto.setOtpCode(opt);
+        dto.setCreatedDate(now);
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
         mailService.sendTransactionConfirmationEmail(userDetails, opt);
@@ -160,7 +177,7 @@ public class TransactionService {
         receive.setFeeType(transaction.getFeeType());
         receive.setAmount(transaction.getAmount());
         receive.setContent(transaction.getContent());
-        receive.setDate(new Date());
+        receive.setDate(ZonedDateTime.now());
         receive.setSource(target.getAccountId());
         receive.setTarget(source.getAccountId());
         receive.setStatus(TransactionStatus.COMPLETED);

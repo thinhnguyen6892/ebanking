@@ -1,9 +1,11 @@
 package edu.hcmus.project.ebanking.backoffice.resource.transaction;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import edu.hcmus.project.ebanking.backoffice.model.TransactionFeeType;
 import edu.hcmus.project.ebanking.backoffice.model.TransactionType;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 public class TransactionDto implements Serializable {
@@ -11,7 +13,8 @@ public class TransactionDto implements Serializable {
     private String id;
     private String source;
     private String target;
-    private Date created;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    private ZonedDateTime createdDate;
     private String content;
     private Double amount;
     private TransactionType type;
@@ -50,12 +53,12 @@ public class TransactionDto implements Serializable {
         this.amount = amount;
     }
 
-    public Date getCreated() {
-        return created;
+    public ZonedDateTime getCreatedDate() {
+        return createdDate;
     }
 
-    public void setCreated(Date created) {
-        this.created = created;
+    public void setCreatedDate(ZonedDateTime createdDate) {
+        this.createdDate = createdDate;
     }
 
     public TransactionType getType() {

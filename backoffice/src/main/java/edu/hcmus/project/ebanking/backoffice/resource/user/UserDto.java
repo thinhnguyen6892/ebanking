@@ -10,14 +10,14 @@ import java.io.Serializable;
 public class UserDto implements Serializable {
 
     @NotNull
-    @Size(min = 8, message = "Username should have at least 8 characters")
+//    @Size(min = 8, message = "Username should have at least 8 characters")
     private String username;
 
     @NotBlank
     private String password;
 
     @NotNull
-    private Role role;
+    private String role;
     private Boolean status = Boolean.TRUE;
 
     @NotBlank
@@ -39,13 +39,6 @@ public class UserDto implements Serializable {
         this.password = password;
     }
 
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
 
     public Boolean getStatus() {
         return status;
@@ -61,5 +54,13 @@ public class UserDto implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

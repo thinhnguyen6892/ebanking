@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,9 +31,16 @@ public class UserResourceRestController {
     @Autowired
     private UserService userService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
     public List<UserDto> retrieveAllUsers() {
         return userService.findAllUsers();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @GetMapping("/users/staff")
+    public List<UserDto> retrieveAllStaff() {
+        return userService.findAllStaffs();
     }
 
     @PostMapping("/users/create")
@@ -44,16 +52,7 @@ public class UserResourceRestController {
 
     @PutMapping("/users/update/{id}")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto, @PathVariable long id){
-        Optional<User> upUser = userRepository.findById(id);
-        if(!upUser.isPresent()) {
-            throw new EntityNotExistException("User not found exception");
-        }
-        User user = upUser.get();
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRole(dto.getRole());
-        user.setStatus(dto.getStatus());
-        user.setEmail(dto.getEmail());
-        userRepository.save(user);
+        userService.updateUser(id, dto);
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 

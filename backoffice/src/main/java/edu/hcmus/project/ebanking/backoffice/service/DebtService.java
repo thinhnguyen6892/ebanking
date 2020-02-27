@@ -8,8 +8,10 @@ import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.DebtRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.DebtDto;
+import edu.hcmus.project.ebanking.backoffice.resource.exception.EntityNotExistException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -58,8 +60,10 @@ public class DebtService {
         throw new ResourceNotFoundException("Debt not found");
     }
 
-    public List<DebtDto> findDebtbyHolder(int holder){
-        return debtRepository.findByHolder(holder).stream().map(debt -> {
+    public List<DebtDto> findDebtByHolder() {
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        return debtRepository.findByHolder(userDetails).stream().map(debt -> {
             DebtDto dto = new DebtDto();
             dto.setId(debt.getId());
             dto.setCreateDate(debt.getCreateDate());
@@ -74,14 +78,15 @@ public class DebtService {
     @Transactional
     public boolean createDebt(DebtDto dto){
         Optional<User> Debtorop = userRepository.findById(dto.getDebtor());
-        Optional<User> Holderop = userRepository.findById(dto.getHolder());
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         if (Debtorop.isPresent()) {
             Optional<Account> accop = accountRepository.findById(dto.getDebtor_acc());
             if (accop.isPresent()) {
                 Debt newDebt = new Debt();
                 newDebt.setCreateDate(new Date());
                 newDebt.setStatus(DebtStatus.NEW);
-                newDebt.setHolder(Holderop.get());
+                newDebt.setHolder(userDetails);
                 newDebt.setDebtor(Debtorop.get());
                 newDebt.setDebtor_acc(accop.get());
                 debtRepository.save(newDebt);

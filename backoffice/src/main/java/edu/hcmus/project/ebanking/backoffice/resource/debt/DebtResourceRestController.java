@@ -4,9 +4,13 @@ import edu.hcmus.project.ebanking.backoffice.model.Debt;
 import edu.hcmus.project.ebanking.backoffice.repository.DebtRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import edu.hcmus.project.ebanking.backoffice.service.DebtService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -29,9 +33,17 @@ public class DebtResourceRestController {
         return debtService.findDebt(id);
     }
 
-    @GetMapping("/debt/{holder}")
-    public List<DebtDto> findDebtByHolder(@Valid @PathVariable int holder){
-        return debtService.findDebtbyHolder(holder);
+    @ApiOperation(value = "View a list of available debt of current log-on user", response = List.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully retrieved list"),
+            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    })
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/debt/holder")
+    public List<DebtDto> findDebtByHolder(){
+        return debtService.findDebtByHolder();
     }
 
     @PostMapping("/debt/create")
