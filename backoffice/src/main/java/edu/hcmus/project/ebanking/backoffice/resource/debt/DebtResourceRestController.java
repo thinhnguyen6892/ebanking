@@ -1,8 +1,5 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt;
 
-import edu.hcmus.project.ebanking.backoffice.model.Debt;
-import edu.hcmus.project.ebanking.backoffice.repository.DebtRepository;
-import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import edu.hcmus.project.ebanking.backoffice.service.DebtService;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.HttpStatus;
@@ -11,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class DebtResourceRestController {
@@ -29,9 +25,9 @@ public class DebtResourceRestController {
         return debtService.findDebt(id);
     }
 
-    @GetMapping("/debt/{holder}")
-    public List<DebtDto> findDebtByHolder(@Valid @PathVariable int holder){
-        return debtService.findDebtbyHolder(holder);
+    @GetMapping("/debt/had/{user}")
+    public List<DebtDto> findDebtByHolderOrDebtor(@Valid @PathVariable int user){
+        return debtService.findDebtbyHolderOrDebtor(user);
     }
 
     @PostMapping("/debt/create")

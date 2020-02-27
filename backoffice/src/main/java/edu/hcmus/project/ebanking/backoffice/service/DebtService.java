@@ -58,17 +58,21 @@ public class DebtService {
         throw new ResourceNotFoundException("Debt not found");
     }
 
-    public List<DebtDto> findDebtbyHolder(int holder){
-        return debtRepository.findByHolder(holder).stream().map(debt -> {
-            DebtDto dto = new DebtDto();
-            dto.setId(debt.getId());
-            dto.setCreateDate(debt.getCreateDate());
-            dto.setStatus(debt.getStatus());
-            dto.setHolder(debt.getHolder().getId());
-            dto.setDebtor(debt.getDebtor().getId());
-            dto.setDebtor_acc(debt.getDebtor_acc().getAccountId());
-            return dto;
-        }).collect(Collectors.toList());
+    public List<DebtDto> findDebtbyHolderOrDebtor(long userid) {
+        Optional<User> userOp = userRepository.findById(userid);
+        if (userOp.isPresent()) {
+            return debtRepository.findDebtByHolderOrDebtor(userOp.get(), userOp.get()).stream().map(debt -> {
+                DebtDto dto = new DebtDto();
+                dto.setId(debt.getId());
+                dto.setCreateDate(debt.getCreateDate());
+                dto.setStatus(debt.getStatus());
+                dto.setHolder(debt.getHolder().getId());
+                dto.setDebtor(debt.getDebtor().getId());
+                dto.setDebtor_acc(debt.getDebtor_acc().getAccountId());
+                return dto;
+            }).collect(Collectors.toList());
+        }
+        return null;
     }
 
     @Transactional
@@ -114,8 +118,8 @@ public class DebtService {
     }
 
     public boolean deleteDebt(int id){
-        Optional<Debt> deBank = debtRepository.findById(id);
-        if(deBank.isPresent()) {
+        Optional<Debt> deDebt = debtRepository.findById(id);
+        if(deDebt.isPresent()) {
             debtRepository.deleteById(id);
             return true;
         }
