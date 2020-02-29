@@ -56,7 +56,7 @@ public class UserService {
             UserDto dto = new UserDto();
             dto.setUsername(user.getUsername());
             dto.setStatus(user.getStatus());
-            dto.setRole(user.getRole().getName());
+            dto.setRole(user.getRole().getRoleId());
             dto.setEmail(user.getEmail());
             return dto;
         }).collect(Collectors.toList());
@@ -67,7 +67,7 @@ public class UserService {
             UserDto dto = new UserDto();
             dto.setUsername(user.getUsername());
             dto.setStatus(user.getStatus());
-            dto.setRole(user.getRole().getName());
+            dto.setRole(user.getRole().getRoleId());
             dto.setEmail(user.getEmail());
             return dto;
         }).collect(Collectors.toList());
@@ -187,7 +187,7 @@ public class UserService {
             }
             User user = upUser.get();
             user.setPassword(passwordEncoder.encode(dto.getPassword()));
-            user.setRole(dto.getRole());
+//            user.setRole(dto.getRole());
             user.setStatus(dto.getStatus());
             user.setEmail(dto.getEmail());
             userRepository.save(user);
@@ -225,7 +225,7 @@ public class UserService {
                 UserDto dto = new UserDto();
                 dto.setUsername(user.getUsername());
                 dto.setStatus(user.getStatus());
-                dto.setRole(user.getRole());
+                dto.setRole(user.getRole().getRoleId());
                 dto.setEmail(user.getEmail());
                 return dto;
             }).collect(Collectors.toList());
@@ -243,7 +243,7 @@ public class UserService {
                 if(user.getRole().getRoleId() == "EMPLOYEE"){
                     dto.setUsername(user.getUsername());
                     dto.setStatus(user.getStatus());
-                    dto.setRole(user.getRole());
+                    dto.setRole(user.getRole().getRoleId());
                     dto.setEmail(user.getEmail());
                     return dto;
                 }
@@ -274,10 +274,10 @@ public class UserService {
         if(roleOp.isPresent()) {
             Optional<User> upUser = userRepository.findById(id);
             if(upUser.isPresent()){
-                if(dto.getRole().getRoleId() == "EMPLOYEE"){
+                if(dto.getRole() == "EMPLOYEE"){
                     User user = upUser.get();
                     user.setPassword(passwordEncoder.encode(dto.getPassword()));
-                    user.setRole(dto.getRole());
+//                    user.setRole(dto.getRole());
                     user.setStatus(dto.getStatus());
                     user.setEmail(dto.getEmail());
                     userRepository.save(user);
