@@ -11,7 +11,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-public class TransferResourceRestController {
+public class TransactionResourceRestController {
 
     @Autowired
     private TransactionService tranferService;
