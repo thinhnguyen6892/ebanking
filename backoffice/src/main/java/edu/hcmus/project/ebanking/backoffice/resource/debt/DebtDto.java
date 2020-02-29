@@ -10,20 +10,11 @@ import java.util.Date;
 
 
 public class DebtDto implements Serializable {
-    private int id;
     private Date createDate;
     private DebtStatus status;
     private Long holder;
     private Long debtor;
     private String debtor_acc;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public Date getCreateDate() {
         return createDate;

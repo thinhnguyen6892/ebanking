@@ -94,5 +94,4 @@ public class Debt {
         return Objects.hash(id, createDate, status, holder, debtor, debtor_acc);
     }
 
-
 }

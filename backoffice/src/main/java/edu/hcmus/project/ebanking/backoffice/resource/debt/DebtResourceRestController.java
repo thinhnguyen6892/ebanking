@@ -30,6 +30,11 @@ public class DebtResourceRestController {
         return debtService.findDebtbyHolderOrDebtor(user);
     }
 
+    @GetMapping("/debt/debtor/{user}")
+    public List<DebtDto> findNewDebtByDebtor(@Valid @PathVariable int user){
+        return debtService.findNewDebtByDebtor(user);
+    }
+
     @PostMapping("/debt/create")
     public ResponseEntity<DebtDto> createDebt(@RequestBody DebtDto dto) {
         boolean result = debtService.createDebt(dto);
@@ -46,5 +51,11 @@ public class DebtResourceRestController {
     public ResponseEntity<Void> deleteDebt(@PathVariable int id) {
         boolean result = debtService.deleteDebt(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("debt/updatestatus/{id}")
+    public ResponseEntity<DebtDto> updateStatus(@RequestBody DebtDto dto, @PathVariable int id){
+        boolean result = debtService.changeStatus(dto, id);
+        return new ResponseEntity<DebtDto>(dto, HttpStatus.OK);
     }
 }
