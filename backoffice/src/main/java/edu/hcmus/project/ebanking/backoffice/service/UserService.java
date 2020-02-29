@@ -6,13 +6,15 @@ import edu.hcmus.project.ebanking.backoffice.model.Token;
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.RoleRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.UserBankRepository;
+import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.account.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.EntityNotExistException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
 import edu.hcmus.project.ebanking.backoffice.resource.user.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,7 +36,7 @@ public class UserService {
     private TokenProvider tokenProvider;
 
     @Autowired
-    private UserBankRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -185,7 +187,7 @@ public class UserService {
             }
             User user = upUser.get();
             user.setPassword(passwordEncoder.encode(dto.getPassword()));
-            user.setRole(roleOp.get());
+            user.setRole(dto.getRole());
             user.setStatus(dto.getStatus());
             user.setEmail(dto.getEmail());
             userRepository.save(user);
@@ -223,7 +225,7 @@ public class UserService {
                 UserDto dto = new UserDto();
                 dto.setUsername(user.getUsername());
                 dto.setStatus(user.getStatus());
-                dto.setRole(user.getRole().getRoleId());
+                dto.setRole(user.getRole());
                 dto.setEmail(user.getEmail());
                 return dto;
             }).collect(Collectors.toList());
@@ -241,7 +243,7 @@ public class UserService {
                 if(user.getRole().getRoleId() == "EMPLOYEE"){
                     dto.setUsername(user.getUsername());
                     dto.setStatus(user.getStatus());
-                    dto.setRole(user.getRole().getRoleId());
+                    dto.setRole(user.getRole());
                     dto.setEmail(user.getEmail());
                     return dto;
                 }
@@ -272,10 +274,10 @@ public class UserService {
         if(roleOp.isPresent()) {
             Optional<User> upUser = userRepository.findById(id);
             if(upUser.isPresent()){
-                if(dto.getRole() == "EMPLOYEE"){
+                if(dto.getRole().getRoleId() == "EMPLOYEE"){
                     User user = upUser.get();
                     user.setPassword(passwordEncoder.encode(dto.getPassword()));
-                    user.setRole(roleOp.get());
+                    user.setRole(dto.getRole());
                     user.setStatus(dto.getStatus());
                     user.setEmail(dto.getEmail());
                     userRepository.save(user);
