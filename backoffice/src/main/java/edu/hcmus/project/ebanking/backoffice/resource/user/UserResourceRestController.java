@@ -52,7 +52,8 @@ public class UserResourceRestController {
 
     @PutMapping("/users/update/{id}")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto, @PathVariable long id){
-        userService.updateUser(id, dto);
+        boolean result = userService.updateUser(dto, id);
+        dto.setPassword("");
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
@@ -82,5 +83,35 @@ public class UserResourceRestController {
         cUser.setPassword(passwordEncoder.encode(dto.getPassword()));
         cUser = userRepository.save(cUser);
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
+    }
+
+    @GetMapping("/employee")
+    public List<UserDto> GetAllEmployee(){
+        return userService.findAllEmployeeRole();
+    }
+
+    @GetMapping("/employee/{id}")
+    public UserDto GetEmployeeById(@PathVariable long id){
+        return userService.findEmployeeById(id);
+    }
+
+    @PostMapping("/employee/create")
+    public ResponseEntity<UserDto> createEmployee(@Valid @RequestBody UserDto dto){
+        boolean result = userService.createEmployee(dto);
+        dto.setPassword("");
+        return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
+    }
+
+    @PutMapping("/employee/update/{id}")
+    public ResponseEntity<UserDto> updateEmployee(@RequestBody UserDto dto, @PathVariable long id){
+        boolean result = userService.updateEmployee(dto, id);
+        dto.setPassword("");
+        return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/employee/delete/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable long id) {
+        boolean result = userService.deleteEmployee(id);
+        return ResponseEntity.noContent().build();
     }
 }

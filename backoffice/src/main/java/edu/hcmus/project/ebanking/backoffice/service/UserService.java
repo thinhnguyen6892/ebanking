@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import javax.validation.constraints.Null;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -175,6 +176,26 @@ public class UserService {
         }
         return false;
     }
+
+    @Transactional
+    public boolean updateUser(UserDto dto, long id){
+        Optional<Role> roleOp = roleRepository.findById("USER");
+        if(roleOp.isPresent()){
+            Optional<User> upUser = userRepository.findById(id);
+            if(!upUser.isPresent()) {
+                throw new EntityNotExistException("User not found exception");
+            }
+            User user = upUser.get();
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+            user.setRole(dto.getRole());
+            user.setStatus(dto.getStatus());
+            user.setEmail(dto.getEmail());
+            userRepository.save(user);
+            return true;
+        }
+        return false;
+    }
+
     public String recoverPassword(String email, String token, String password, HttpServletRequest request) throws URISyntaxException {
         Optional<User> userOpt = userRepository.findOneByEmail(email);
         if (!userOpt.isPresent()) {
@@ -197,5 +218,85 @@ public class UserService {
         }
     }
 
+    public List<UserDto> findAllEmployeeRole(){
+        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
+        if(roleOp.isPresent()){
+            return userRepository.findByRole(roleOp.get()).stream().map(user -> {
+                UserDto dto = new UserDto();
+                dto.setUsername(user.getUsername());
+                dto.setStatus(user.getStatus());
+                dto.setRole(user.getRole());
+                dto.setEmail(user.getEmail());
+                return dto;
+            }).collect(Collectors.toList());
+        }
+        throw new EntityNotExistException("Employee not found in the system");
+    }
 
+    public UserDto findEmployeeById(long id){
+        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
+        if(roleOp.isPresent()){
+            Optional<User> userOp = userRepository.findById(id);
+            if(userOp.isPresent()){
+                User user = userOp.get();
+                UserDto dto = new UserDto();
+                if(user.getRole().getRoleId() == "EMPLOYEE"){
+                    dto.setUsername(user.getUsername());
+                    dto.setStatus(user.getStatus());
+                    dto.setRole(user.getRole());
+                    dto.setEmail(user.getEmail());
+                    return dto;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Transactional
+    public boolean createEmployee(UserDto dto) {
+        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
+        if(roleOp.isPresent()) {
+            User newUser = new User();
+            newUser.setUsername(dto.getUsername());
+            newUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+            newUser.setRole(roleOp.get());
+            newUser.setStatus(dto.getStatus());
+            newUser.setEmail(dto.getEmail());
+            userRepository.save(newUser);
+            return true;
+        }
+        return false;
+    }
+
+    @Transactional
+    public boolean updateEmployee(UserDto dto, long id){
+        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
+        if(roleOp.isPresent()) {
+            Optional<User> upUser = userRepository.findById(id);
+            if(upUser.isPresent()){
+                if(dto.getRole().getRoleId() == "EMPLOYEE"){
+                    User user = upUser.get();
+                    user.setPassword(passwordEncoder.encode(dto.getPassword()));
+                    user.setRole(dto.getRole());
+                    user.setStatus(dto.getStatus());
+                    user.setEmail(dto.getEmail());
+                    userRepository.save(user);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean deleteEmployee(long id){
+        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
+        if(roleOp.isPresent()) {
+            Optional<User> deUser = userRepository.findById(id);
+            if(deUser.isPresent()){
+                userRepository.deleteById(id);
+                return true;
+            }
+        }
+        return false;
+    }
 }

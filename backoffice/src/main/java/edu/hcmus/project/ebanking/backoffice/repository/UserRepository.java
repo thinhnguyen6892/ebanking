@@ -2,7 +2,7 @@ package edu.hcmus.project.ebanking.backoffice.repository;
 
 import edu.hcmus.project.ebanking.backoffice.model.Role;
 import edu.hcmus.project.ebanking.backoffice.model.User;
-import org.springframework.data.domain.Example;
+import edu.hcmus.project.ebanking.backoffice.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

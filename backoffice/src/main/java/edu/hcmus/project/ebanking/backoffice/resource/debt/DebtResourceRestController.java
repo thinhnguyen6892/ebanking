@@ -1,8 +1,5 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt;
 
-import edu.hcmus.project.ebanking.backoffice.model.Debt;
-import edu.hcmus.project.ebanking.backoffice.repository.DebtRepository;
-import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import edu.hcmus.project.ebanking.backoffice.service.DebtService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -15,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class DebtResourceRestController {
@@ -41,9 +37,14 @@ public class DebtResourceRestController {
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
     })
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/debt/holder")
-    public List<DebtDto> findDebtByHolder(){
-        return debtService.findDebtByHolder();
+    @GetMapping("/debt/had/{user}")
+    public List<DebtDto> findDebtByHolderOrDebtor(@Valid @PathVariable int user){
+        return debtService.findDebtbyHolderOrDebtor(user);
+    }
+
+    @GetMapping("/debt/debtor/{user}")
+    public List<DebtDto> findNewDebtByDebtor(@Valid @PathVariable int user){
+        return debtService.findNewDebtByDebtor(user);
     }
 
     @PostMapping("/debt/create")
@@ -62,5 +63,11 @@ public class DebtResourceRestController {
     public ResponseEntity<Void> deleteDebt(@PathVariable int id) {
         boolean result = debtService.deleteDebt(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("debt/updatestatus/{id}")
+    public ResponseEntity<DebtDto> updateStatus(@RequestBody DebtDto dto, @PathVariable int id){
+        boolean result = debtService.changeStatus(dto, id);
+        return new ResponseEntity<DebtDto>(dto, HttpStatus.OK);
     }
 }
