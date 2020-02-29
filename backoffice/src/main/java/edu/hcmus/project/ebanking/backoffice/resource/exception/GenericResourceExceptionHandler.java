@@ -26,7 +26,7 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
     }
 
     @ExceptionHandler(InvalidTransactionException.class)
-    public final ResponseEntity<Object> handleInvalidTransactionException(ResourceNotFoundException ex, WebRequest request) {
+    public final ResponseEntity<Object> handleInvalidTransactionException(InvalidTransactionException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
                 request.getDescription(false));
         return new ResponseEntity(exceptionResponse, HttpStatus.NOT_ACCEPTABLE);
@@ -40,7 +40,7 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public final ResponseEntity<Object> handleTokenException(ResourceNotFoundException ex, WebRequest request) {
+    public final ResponseEntity<Object> handleAccessDeniedExceptionException(AccessDeniedException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
                 request.getDescription(false));
         return new ResponseEntity(exceptionResponse, HttpStatus.FORBIDDEN);
@@ -55,7 +55,7 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
     }
 
     @ExceptionHandler({EntityNotExistException.class, TokenException.class})
-    public final ResponseEntity<Object> handleEntityNotExistException(ResourceNotFoundException ex, WebRequest request) {
+    public final ResponseEntity<Object> handleEntityNotExistException(TokenException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
                 request.getDescription(false));
         return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
