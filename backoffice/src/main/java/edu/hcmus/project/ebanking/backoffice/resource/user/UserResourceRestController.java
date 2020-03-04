@@ -4,10 +4,12 @@ import edu.hcmus.project.ebanking.backoffice.resource.exception.EntityNotExistEx
 import edu.hcmus.project.ebanking.backoffice.service.UserService;
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,13 +18,13 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
+@RequestMapping("/users")
 public class UserResourceRestController {
 
     @Autowired
-    private UserRepository  userRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -30,63 +32,55 @@ public class UserResourceRestController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/users")
+    @ApiOperation(value = "[Administrator] View a list of available users on the system. ", response = List.class)
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping
     public List<UserDto> retrieveAllUsers() {
-        return userService.findAllUsers();
+        return userService.findAllUsers(null, true);
     }
 
-    @PostMapping("/users/create")
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto dto) {
-        boolean result = userService.createUser(dto);
+    @ApiOperation(value = "[Administrator] View a list of available employee on the system. ", response = List.class)
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/employee")
+    public List<UserDto> retrieveAllStaff() {
+        return userService.findAllStaffs();
+    }
+
+    @ApiOperation(value = "[Administrator - Employee] Create new customer. ", response = UserDto.class)
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PostMapping("/create")
+    public ResponseEntity<UserDto> createCustomer(@Valid @RequestBody UserDto dto) {
+        boolean result = userService.createCustomer(dto);
         dto.setPassword("");
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
-    @PutMapping("/users/update/{id}")
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto dto, @PathVariable long id){
-        boolean result = userService.updateUser(dto, id);
+    @ApiOperation(value = "[Administrator - Employee] Update customer information. ", response = UserDto.class)
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PutMapping("/update/{id}")
+    public ResponseEntity<UserDto> updateCustomer(@RequestBody UserDto dto, @PathVariable long id){
+        boolean result = userService.updateCustomer(dto, id);
         dto.setPassword("");
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/users/recover/{email:.+}",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> recoverPassword(@NotNull @PathVariable String email,
-                                          @RequestParam(value = "token", required = false) String token,
-                                          @RequestParam(value = "password", required = false) String password,
-                                          HttpServletRequest request) {
-        try {
-            return new ResponseEntity(userService.recoverPassword(email, token, password, request), HttpStatus.OK);
-        } catch (URISyntaxException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @DeleteMapping("/users/{id}")
+    @ApiOperation(value = "[Administrator] Delete an user. ")
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable long id) {
         userRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/users/{username}")
-    public ResponseEntity<UserDto> changePassword(@RequestBody UserDto dto, @PathVariable String username){
-        User cUser = userRepository.findByUsername(username);
-        cUser.setPassword(passwordEncoder.encode(dto.getPassword()));
-        cUser = userRepository.save(cUser);
-        return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
+    @ApiOperation(value = "[Employee] View a list of available user on the system. ", response = List.class)
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @GetMapping("/customers")
+    public List<UserDto> retrieveAllCustomer() {
+        return userService.findAllCustomer();
     }
 
-    @GetMapping("/employee")
-    public List<UserDto> GetAllEmployee(){
-        return userService.findAllEmployeeRole();
-    }
-
-    @GetMapping("/employee/{id}")
-    public UserDto GetEmployeeById(@PathVariable long id){
-        return userService.findEmployeeById(id);
-    }
-
+    @ApiOperation(value = "[Administrator] Create new employee on the system. ", response = UserDto.class)
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/employee/create")
     public ResponseEntity<UserDto> createEmployee(@Valid @RequestBody UserDto dto){
         boolean result = userService.createEmployee(dto);
@@ -94,16 +88,27 @@ public class UserResourceRestController {
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
-    @PutMapping("/employee/update/{id}")
+    @ApiOperation(value = "[Administrator] Update an employee on the system. ", response = UserDto.class)
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/employee/{id}")
     public ResponseEntity<UserDto> updateEmployee(@RequestBody UserDto dto, @PathVariable long id){
         boolean result = userService.updateEmployee(dto, id);
         dto.setPassword("");
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
-    @DeleteMapping("/employee/delete/{id}")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable long id) {
-        boolean result = userService.deleteEmployee(id);
-        return ResponseEntity.noContent().build();
+    @ApiOperation(value = "Recover password via email", response = String.class)
+    @RequestMapping(value = "/recover/{email:.+}",
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> recoverPassword(@NotNull @PathVariable String email,
+                                                  @RequestParam(value = "token", required = false) String token,
+                                                  @RequestParam(value = "password", required = false) String password,
+                                                  HttpServletRequest request) {
+        try {
+            return new ResponseEntity(userService.recoverPassword(email, token, password, request), HttpStatus.OK);
+        } catch (URISyntaxException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

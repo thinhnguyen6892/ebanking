@@ -4,11 +4,12 @@ import edu.hcmus.project.ebanking.backoffice.model.Role;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 public class UserDto implements Serializable {
 
+    private Long id;
+    
     @NotNull
 //    @Size(min = 8, message = "Username should have at least 8 characters")
     private String username;
@@ -62,5 +63,13 @@ public class UserDto implements Serializable {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

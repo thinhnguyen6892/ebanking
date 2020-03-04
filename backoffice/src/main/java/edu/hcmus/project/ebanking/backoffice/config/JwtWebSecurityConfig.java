@@ -82,6 +82,7 @@ public class JwtWebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/swagger-resources/**",
                         "/configuration/security",
                         "/swagger-ui.html",
+                        "/csrf**",
                         "/webjars/**",
                         "/actuator")
                 .and()

@@ -3,17 +3,22 @@ package edu.hcmus.project.ebanking.backoffice.resource.transaction;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import edu.hcmus.project.ebanking.backoffice.model.TransactionType;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
 public class TransactionRequestDto implements Serializable {
     private String accountId;
+
+    @ApiModelProperty(notes = "Transaction Type. [ DEPOSIT, WITHDRAW, TRANSFER, PAYMENT ]")
     private TransactionType type;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private ZonedDateTime startDate;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private ZonedDateTime endDate;
+
+    @ApiModelProperty(notes = "Filter by bank (Only apply for administrator).")
     private String bankId;
 
     public String getAccountId() {
