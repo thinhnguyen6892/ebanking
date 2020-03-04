@@ -1,7 +1,10 @@
 package edu.hcmus.project.ebanking.backoffice.resource.account;
 
 import edu.hcmus.project.ebanking.backoffice.model.User;
-import edu.hcmus.project.ebanking.backoffice.resource.user.UserDto;
+import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
+import edu.hcmus.project.ebanking.backoffice.resource.account.dto.CreateAccount;
+import edu.hcmus.project.ebanking.backoffice.resource.account.dto.DepositAccount;
+import edu.hcmus.project.ebanking.backoffice.service.AccountService;
 import edu.hcmus.project.ebanking.backoffice.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,8 +13,8 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -21,45 +24,50 @@ import java.util.List;
 
 @Api(value="Account Management Resource")
 @RestController
+@RequestMapping("/accounts")
 public class AccountResourceRestController {
 
     @Autowired
     private UserService userService;
 
-    @ApiOperation(value = "View a list of available account of current log-on user", response = List.class)
+    @Autowired
+    private AccountService accountService;
+
+    @ApiOperation(value = "[USER] View a list of available account of current log-on user", response = List.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved list"),
             @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
             @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
     })
-    @GetMapping("/accounts/user")
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/user")
     public List<AccountDto> retrieveAllUserAccounts() {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        return userService.findUserAccount(userDetails.getId());
+        return accountService.findUserAccount(userDetails.getId());
     }
 
-    //Todo Hidden account id
-    @GetMapping("/accounts/{accountId}")
-    public AccountDto retrieveUserAccount(@PathVariable String accountId) {
-        return userService.findAccount(accountId);
+    @ApiOperation(value = "[Employee] View a list of available user account on the system by user id. ", response = List.class)
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @GetMapping("/user/{id}")
+    public List<AccountDto> retrieveAllUserAccounts(@PathVariable long id) {
+        return accountService.findUserAccount(id);
     }
 
-    @PutMapping("/accounts")
-    public ResponseEntity<AccountDto> updateAccount(@Valid @RequestBody AccountDto dto) {
-        String accountId = userService.updateAccount(dto);
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(accountId).toUri();
-        return ResponseEntity.status(HttpStatus.ACCEPTED).location(location).build();
+    @ApiOperation(value = "[Employee] Deposit into account")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PutMapping("/deposit")
+    public ResponseEntity<Void> depositAccount(@Valid @RequestBody DepositAccount dto) {
+        accountService.depositAccount(dto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
 
-    @PostMapping("/accounts")
-    public ResponseEntity<AccountDto> createAccount(@Valid @RequestBody AccountDto dto) {
-        String accountId = userService.createAccount(dto);
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PostMapping
+    public ResponseEntity<AccountDto> createAccount(@Valid @RequestBody CreateAccount dto) {
+        String accountId = accountService.createAccount(dto);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

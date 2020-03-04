@@ -12,7 +12,7 @@ import java.util.Objects;
 public class Account {
 
     private String accountId;
-    private String type;
+    private AccountType type;
     private Double balance = new Double(0);
     private Date createDate = new Date();
     private Date expired;
@@ -51,11 +51,12 @@ public class Account {
 
     @Basic
     @Column(name = "type")
-    public String getType() {
+    @Enumerated(EnumType.STRING)
+    public AccountType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(AccountType type) {
         this.type = type;
     }
 

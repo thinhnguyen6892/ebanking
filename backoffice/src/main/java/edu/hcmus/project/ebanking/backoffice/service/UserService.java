@@ -1,20 +1,15 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
-import edu.hcmus.project.ebanking.backoffice.model.Account;
-import edu.hcmus.project.ebanking.backoffice.model.Role;
-import edu.hcmus.project.ebanking.backoffice.model.Token;
-import edu.hcmus.project.ebanking.backoffice.model.User;
+import edu.hcmus.project.ebanking.backoffice.model.*;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.RoleRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
-import edu.hcmus.project.ebanking.backoffice.resource.account.AccountDto;
-import edu.hcmus.project.ebanking.backoffice.resource.exception.EntityNotExistException;
-import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
+import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
+import edu.hcmus.project.ebanking.backoffice.resource.account.dto.CreateAccount;
+import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
 import edu.hcmus.project.ebanking.backoffice.resource.user.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,7 +17,6 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import javax.validation.constraints.Null;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +25,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+
+    @Autowired
+    private AccountService accountService;
 
     @Autowired
     private TokenProvider tokenProvider;
@@ -51,69 +48,32 @@ public class UserService {
     private MailService mailService;
 
     public List<UserDto> findAllStaffs() {
-        Role role = roleRepository.findById("STAFF").get();
-        return userRepository.findByRole(role).stream().map(user -> {
-            UserDto dto = new UserDto();
-            dto.setUsername(user.getUsername());
-            dto.setStatus(user.getStatus());
-            dto.setRole(user.getRole().getRoleId());
-            dto.setEmail(user.getEmail());
-            return dto;
-        }).collect(Collectors.toList());
+        return findAllUsers("STAFF", false);
     }
 
-    public List<UserDto> findAllUsers() {
-        return userRepository.findAll().stream().map(user -> {
-            UserDto dto = new UserDto();
-            dto.setUsername(user.getUsername());
-            dto.setStatus(user.getStatus());
-            dto.setRole(user.getRole().getRoleId());
-            dto.setEmail(user.getEmail());
-            return dto;
-        }).collect(Collectors.toList());
+    public List<UserDto> findAllCustomer() {
+        return findAllUsers("USER", false);
     }
 
-    public AccountDto findAccount(String accountId) {
-        Optional<Account> accountOpt = accountRepository.findById(accountId);
-        if(accountOpt.isPresent()) {
-            Account account = accountOpt.get();
-            AccountDto dto = new AccountDto();
-            dto.setAccountId(account.getAccountId());
-            dto.setBalance(account.getBalance());
-            dto.setCreateDate(account.getCreateDate());
-            dto.setExpired(account.getExpired());
-            dto.setOwnerName(account.getOwner().getUsername());
-            dto.setType(account.getType());
-            return dto;
-        }
-        throw new ResourceNotFoundException("Account not found");
-    }
-
-    public List<AccountDto> findUserAccount(Long userId) {
-        Optional<User> userOp = userRepository.findById(userId);
-        if(userOp.isPresent()) {
-            return accountRepository.findAccountsByOwner(userOp.get()).stream()
-                    .map(account -> {
-                        AccountDto dto = new AccountDto();
-                        dto.setAccountId(account.getAccountId());
-                        dto.setBalance(account.getBalance());
-                        dto.setCreateDate(account.getCreateDate());
-                        dto.setExpired(account.getExpired());
-                        dto.setOwnerName(account.getOwner().getUsername());
-                        dto.setType(account.getType());
-                        return dto;
-                    }).collect(Collectors.toList());
-        }
-        throw new EntityNotExistException("User is not exist");
-    }
-
-    public String createAccount(AccountDto dto) {
-        Optional<User> userOp = userRepository.findById(dto.getOwnerId());
-        if(userOp.isPresent()) {
-            return createAccount(userOp.get(), dto);
+    public List<UserDto> findAllUsers(String roleStr, boolean showRole) {
+        List<User> users;
+        if(!StringUtils.isEmpty(roleStr)) {
+            Role role = roleRepository.findById(roleStr).get();
+            users =  userRepository.findByRole(role);
         } else {
-            throw new EntityNotExistException("User not found in the system");
+            users= userRepository.findAll();
         }
+        return users.stream().map(user -> {
+            UserDto dto = new UserDto();
+            dto.setId(user.getId());
+            dto.setUsername(user.getUsername());
+            dto.setStatus(user.getStatus());
+            if(showRole) {
+                dto.setRole(user.getRole().getRoleId());
+            }
+            dto.setEmail(user.getEmail());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     public String updateAccount(AccountDto dto) {
@@ -125,81 +85,82 @@ public class UserService {
             account = accountRepository.save(account);
             return account.getAccountId();
         }
-        throw new EntityNotExistException("Account not found in the system");
+        throw new BadRequestException("Account not found in the system");
     }
 
-    public UserDto updateUser(Long id, UserDto dto) {
-        Optional<User> upUser = userRepository.findById(id);
-        if(!upUser.isPresent()) {
-            throw new EntityNotExistException("User not found exception");
-        }
-        Optional<Role> roleOp = roleRepository.findById(dto.getRole());
-        if(!roleOp.isPresent()) {
-            throw new EntityNotExistException("Role not found exception");
-        }
-        User user = upUser.get();
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRole(roleOp.get());
-        user.setStatus(dto.getStatus());
-        user.setEmail(dto.getEmail());
-        userRepository.save(user);
-        return dto;
+
+    public boolean createEmployee(UserDto dto) {
+        return createUser(dto, "EMPLOYEE", true);
     }
 
-    public String createAccount(User owner, AccountDto dto) {
-        Account account = new Account();
-        account.setType(dto.getType());
-        account.setOwner(owner);
-        account.setStatus(dto.getStatus());
-        account.setBalance(dto.getBalance());
-        account = accountRepository.save(account);
-        return account.getAccountId();
+    public boolean createCustomer(UserDto dto) {
+        return createUser(dto, "USER", false);
     }
 
     @Transactional
-    public boolean createUser(UserDto dto) {
-        Optional<Role> roleOp = roleRepository.findById(dto.getRole());
+    public boolean createUser(UserDto dto, String roleStr, boolean isEmployee) {
+        Optional<Role> roleOp = roleRepository.findById(roleStr);
         if(roleOp.isPresent()) {
-            User newUser = new User();
-            newUser.setUsername(dto.getUsername());
-            newUser.setPassword(passwordEncoder.encode(dto.getPassword()));
-            newUser.setRole(roleOp.get());
-            newUser.setStatus(dto.getStatus());
-            newUser.setEmail(dto.getEmail());
-            newUser = userRepository.save(newUser);
-            AccountDto accountDto = new AccountDto();
-            accountDto.setType("Payment");
-            accountDto.setStatus(true);
-            accountDto.setBalance(0.0);
-            createAccount(newUser, accountDto);
+            User checkUser = userRepository.findByUsername(dto.getUsername());
+            if(checkUser != null) {
+                User newUser = new User();
+                newUser.setUsername(dto.getUsername());
+                newUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+                newUser.setRole(roleOp.get());
+                newUser.setStatus(dto.getStatus());
+                newUser.setEmail(dto.getEmail());
+                newUser = userRepository.save(newUser);
+
+                CreateAccount accountDto = new CreateAccount();
+                accountDto.setStatus(true);
+                accountDto.setBalance(0.0);
+                if(!isEmployee) {
+                    accountService.createAccount(newUser, accountDto, AccountType.SYSTEM);
+                } else {
+                    accountService.createAccount(newUser, accountDto, AccountType.PAYMENT);
+                }
+            }
             return true;
         }
-        return false;
+        throw new BadRequestException("Invalid user information!");
+    }
+
+    public boolean updateCustomer(UserDto dto, long id) {
+        return updateUser(dto, id, "USER");
+    }
+
+    public boolean updateEmployee(UserDto dto, long id){
+        return updateUser(dto, id, "EMPLOYEE");
     }
 
     @Transactional
-    public boolean updateUser(UserDto dto, long id){
-        Optional<Role> roleOp = roleRepository.findById("USER");
+    public boolean updateUser(UserDto dto, long id, String roleStr){
+        Optional<Role> roleOp = roleRepository.findById(roleStr);
         if(roleOp.isPresent()){
             Optional<User> upUser = userRepository.findById(id);
-            if(!upUser.isPresent()) {
-                throw new EntityNotExistException("User not found exception");
+            if(upUser.isPresent()) {
+                User user = upUser.get();
+                if(!StringUtils.isEmpty(dto.getPassword())) {
+                    user.setPassword(passwordEncoder.encode(dto.getPassword()));
+                }
+                if(!StringUtils.isEmpty(dto.getEmail())) {
+                    user.setEmail(dto.getEmail());
+                }
+
+                if(dto.getStatus() != null) {
+                    user.setStatus(dto.getStatus());
+                }
+                userRepository.save(user);
+                return true;
             }
-            User user = upUser.get();
-            user.setPassword(passwordEncoder.encode(dto.getPassword()));
-//            user.setRole(dto.getRole());
-            user.setStatus(dto.getStatus());
-            user.setEmail(dto.getEmail());
-            userRepository.save(user);
-            return true;
         }
-        return false;
+        throw new BadRequestException("User not found exception");
     }
 
     public String recoverPassword(String email, String token, String password, HttpServletRequest request) throws URISyntaxException {
         Optional<User> userOpt = userRepository.findOneByEmail(email);
         if (!userOpt.isPresent()) {
-            throw new EntityNotExistException("User not found in the system");
+            throw new BadRequestException("User not found in the system");
         }
         User user = userOpt.get();
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>(user.getAuthorities());
@@ -218,85 +179,4 @@ public class UserService {
         }
     }
 
-    public List<UserDto> findAllEmployeeRole(){
-        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
-        if(roleOp.isPresent()){
-            return userRepository.findByRole(roleOp.get()).stream().map(user -> {
-                UserDto dto = new UserDto();
-                dto.setUsername(user.getUsername());
-                dto.setStatus(user.getStatus());
-                dto.setRole(user.getRole().getRoleId());
-                dto.setEmail(user.getEmail());
-                return dto;
-            }).collect(Collectors.toList());
-        }
-        throw new EntityNotExistException("Employee not found in the system");
-    }
-
-    public UserDto findEmployeeById(long id){
-        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
-        if(roleOp.isPresent()){
-            Optional<User> userOp = userRepository.findById(id);
-            if(userOp.isPresent()){
-                User user = userOp.get();
-                UserDto dto = new UserDto();
-                if(user.getRole().getRoleId() == "EMPLOYEE"){
-                    dto.setUsername(user.getUsername());
-                    dto.setStatus(user.getStatus());
-                    dto.setRole(user.getRole().getRoleId());
-                    dto.setEmail(user.getEmail());
-                    return dto;
-                }
-            }
-        }
-        return null;
-    }
-
-    @Transactional
-    public boolean createEmployee(UserDto dto) {
-        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
-        if(roleOp.isPresent()) {
-            User newUser = new User();
-            newUser.setUsername(dto.getUsername());
-            newUser.setPassword(passwordEncoder.encode(dto.getPassword()));
-            newUser.setRole(roleOp.get());
-            newUser.setStatus(dto.getStatus());
-            newUser.setEmail(dto.getEmail());
-            userRepository.save(newUser);
-            return true;
-        }
-        return false;
-    }
-
-    @Transactional
-    public boolean updateEmployee(UserDto dto, long id){
-        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
-        if(roleOp.isPresent()) {
-            Optional<User> upUser = userRepository.findById(id);
-            if(upUser.isPresent()){
-                if(dto.getRole() == "EMPLOYEE"){
-                    User user = upUser.get();
-                    user.setPassword(passwordEncoder.encode(dto.getPassword()));
-//                    user.setRole(dto.getRole());
-                    user.setStatus(dto.getStatus());
-                    user.setEmail(dto.getEmail());
-                    userRepository.save(user);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean deleteEmployee(long id){
-        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
-        if(roleOp.isPresent()) {
-            Optional<User> deUser = userRepository.findById(id);
-            if(deUser.isPresent()){
-                userRepository.deleteById(id);
-                return true;
-            }
-        }
-        return false;
-    }
 }

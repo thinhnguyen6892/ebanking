@@ -54,7 +54,7 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
         return new ResponseEntity(exceptionResponse, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler({EntityNotExistException.class, TokenException.class})
+    @ExceptionHandler({BadRequestException.class, TokenException.class})
     public final ResponseEntity<Object> handleEntityNotExistException(TokenException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
                 request.getDescription(false));
