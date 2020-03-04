@@ -1,4 +1,4 @@
-package edu.hcmus.project.ebanking.backoffice.resource.transaction.dto;
+package edu.hcmus.project.ebanking.backoffice.resource.transaction;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;

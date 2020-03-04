@@ -283,4 +283,47 @@ public class TransactionService {
 
     }
 
+
+    @Transactional
+    public void depositTransaction(User employee, DepositAccount transactionDto) {
+        Account senderAccount, receiverAccount;
+        List<Account> systemAccounts = accountRepository.findAccountsByOwner(employee);
+        if(systemAccounts.isEmpty()) {
+            throw new BadRequestException("Current user don't have permission to perform this deposit transaction.");
+        }
+        senderAccount = systemAccounts.get(0);
+
+        if(StringUtils.isEmpty(transactionDto.getAccountId())) {
+            User receiver = userRepository.findByUsername(transactionDto.getUsername());
+            List<Account> receiverAccounts = accountRepository.findAccountsByOwnerAndType(receiver, "PAYMENT");
+            if(receiverAccounts.isEmpty()) {
+                throw new BadRequestException("Receiver user doesn't have PAYMENT account.");
+            }
+            receiverAccount = receiverAccounts.get(0);
+        } else {
+            Optional<Account> receiverAccountOpt = accountRepository.findById(transactionDto.getAccountId());
+            if(!receiverAccountOpt.isPresent()) {
+                throw new BadRequestException("Receiver's account doesn't exist.");
+            }
+            receiverAccount = receiverAccountOpt.get();
+        }
+
+        Double targetBalance = receiverAccount.getBalance();
+        receiverAccount.setBalance(targetBalance + transactionDto.getAmount());
+        accountRepository.save(receiverAccount);
+
+        ZonedDateTime now = ZonedDateTime.now();
+        Transaction transaction = new Transaction();
+        transaction.setAmount(transactionDto.getAmount());
+        transaction.setContent(transactionDto.getContent());
+        transaction.setDate(now);
+        transaction.setSource(senderAccount.getAccountId());
+        transaction.setTarget(receiverAccount.getAccountId());
+        transaction.setType(TransactionType.DEPOSIT);
+        transaction.setFeeType(transactionDto.getFeeType());
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transactionRepository.save(transaction);
+
+    }
+
 }
