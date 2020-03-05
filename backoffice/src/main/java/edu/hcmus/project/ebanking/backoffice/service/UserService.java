@@ -65,9 +65,12 @@ public class UserService {
         }
         return users.stream().map(user -> {
             UserDto dto = new UserDto();
+            dto.setId(user.getId().toString());
             dto.setUsername(user.getUsername());
             dto.setStatus(user.getStatus());
-            dto.setRole(user.getRole().getRoleId());
+            if(showRole) {
+                dto.setRole(user.getRole().getRoleId());
+            }
             dto.setEmail(user.getEmail());
             return dto;
         }).collect(Collectors.toList());
@@ -129,20 +132,20 @@ public class UserService {
     }
 
 
-    public boolean createEmployee(UserDto dto) {
+    public UserDto createEmployee(UserDto dto) {
         return createUser(dto, "EMPLOYEE", true);
     }
 
-    public boolean createCustomer(UserDto dto) {
+    public UserDto createCustomer(UserDto dto) {
         return createUser(dto, "USER", false);
     }
 
     @Transactional
-    public boolean createUser(UserDto dto, String roleStr, boolean isEmployee) {
+    public UserDto createUser(UserDto dto, String roleStr, boolean isEmployee) {
         Optional<Role> roleOp = roleRepository.findById(roleStr);
         if(roleOp.isPresent()) {
             User checkUser = userRepository.findByUsername(dto.getUsername());
-            if(checkUser != null) {
+            if(checkUser == null) {
                 User newUser = new User();
                 newUser.setUsername(dto.getUsername());
                 newUser.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -159,30 +162,32 @@ public class UserService {
                 } else {
                     accountService.createAccount(newUser, accountDto, AccountType.PAYMENT);
                 }
+                dto.setId(newUser.getId().toString());
+                return dto;
             }
             return true;
         }
         throw new BadRequestException("Invalid user information!");
     }
 
-    public boolean updateCustomer(UserDto dto, long id) {
+    public UserDto updateCustomer(UserDto dto, long id) {
         return updateUser(dto, id, "USER");
     }
 
-    public boolean updateEmployee(UserDto dto, long id){
+    public UserDto updateEmployee(UserDto dto, long id){
         return updateUser(dto, id, "EMPLOYEE");
     }
 
     @Transactional
-    public boolean updateUser(UserDto dto, long id, String roleStr){
+    public UserDto updateUser(UserDto dto, long id, String roleStr){
         Optional<Role> roleOp = roleRepository.findById(roleStr);
         if(roleOp.isPresent()){
             Optional<User> upUser = userRepository.findById(id);
             if(upUser.isPresent()) {
                 User user = upUser.get();
-                if(!StringUtils.isEmpty(dto.getPassword())) {
-                    user.setPassword(passwordEncoder.encode(dto.getPassword()));
-                }
+//                if(!StringUtils.isEmpty(dto.getPassword())) {
+//                    user.setPassword(passwordEncoder.encode(dto.getPassword()));
+//                }
                 if(!StringUtils.isEmpty(dto.getEmail())) {
                     user.setEmail(dto.getEmail());
                 }
@@ -191,7 +196,7 @@ public class UserService {
                     user.setStatus(dto.getStatus());
                 }
                 userRepository.save(user);
-                return true;
+                return dto;
             }
         }
         throw new BadRequestException("User not found exception");
