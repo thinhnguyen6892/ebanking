@@ -46,9 +46,9 @@ public class JwtAuthenticationRestController {
     public ResponseEntity<?> createAuthenticationToken(JwtTokenRequest authenticationRequest)
             throws JwtAuthenticationException {
 
-//        if(!captchaValidator.validateCaptcha(authenticationRequest.getReCAPTCHA())){
-//            throw new TokenException("Captcha is not valid");
-//        }
+        if(!captchaValidator.validateCaptcha(authenticationRequest.getReCAPTCHA())){
+            throw new TokenException("Captcha is not valid");
+        }
 
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 
