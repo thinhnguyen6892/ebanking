@@ -1,8 +1,10 @@
 package edu.hcmus.project.ebanking.backoffice.resource.authentication;
 
+import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
 import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
 import edu.hcmus.project.ebanking.backoffice.service.CaptchaValidator;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -37,21 +41,22 @@ public class JwtAuthenticationRestController {
     @Autowired
     private CaptchaValidator captchaValidator;
 
+    @ApiOperation(value = "Request an access token.", response = JwtTokenResponse.class)
     @RequestMapping(value = "${jwt.get.token.uri}", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(JwtTokenRequest authenticationRequest)
             throws JwtAuthenticationException {
 
-        if(!captchaValidator.validateCaptcha(authenticationRequest.getReCAPTCHA())){
-            throw new TokenException("Captcha is not valid");
-        }
+//        if(!captchaValidator.validateCaptcha(authenticationRequest.getReCAPTCHA())){
+//            throw new TokenException("Captcha is not valid");
+//        }
 
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 
-        final UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+        final User userDetails = (User) jwtUserDetailsService.loadUserByUsername(authenticationRequest.getUsername());
 
         final String token = jwtTokenUtil.generateToken(userDetails);
-
-        return ResponseEntity.ok(new JwtTokenResponse(token));
+        final String role = Base64.getEncoder().encodeToString(userDetails.getRole().getRoleId().getBytes());
+        return ResponseEntity.ok(new JwtTokenResponse(token, role));
     }
 
     @RequestMapping(value = "${jwt.refresh.token.uri}", method = RequestMethod.GET)
@@ -60,11 +65,12 @@ public class JwtAuthenticationRestController {
         final String token = authToken.substring(7);
         String username = jwtTokenUtil.getUsernameFromToken(token);
 
-        jwtUserDetailsService.loadUserByUsername(username);
+        final User userDetails = (User)jwtUserDetailsService.loadUserByUsername(username);
 
         if (jwtTokenUtil.canTokenBeRefreshed(token)) {
             String refreshedToken = jwtTokenUtil.refreshToken(token);
-            return ResponseEntity.ok(new JwtTokenResponse(refreshedToken));
+            final String role = Base64.getEncoder().encodeToString(userDetails.getRole().getRoleId().getBytes());
+            return ResponseEntity.ok(new JwtTokenResponse(refreshedToken, role));
         } else {
             return ResponseEntity.badRequest().body(null);
         }
@@ -78,7 +84,6 @@ public class JwtAuthenticationRestController {
     private void authenticate(String username, String password) {
         Objects.requireNonNull(username);
         Objects.requireNonNull(password);
-
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         } catch (DisabledException e) {

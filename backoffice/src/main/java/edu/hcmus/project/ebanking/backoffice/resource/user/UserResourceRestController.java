@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,17 +44,16 @@ public class UserResourceRestController {
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @PostMapping("/create")
     public ResponseEntity<UserDto> createCustomer(@Valid @RequestBody UserDto dto) {
-        boolean result = userService.createCustomer(dto);
-        dto.setPassword("");
-        return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
+        UserDto newDto = userService.createCustomer(dto);
+        newDto.setPassword("");
+        return new ResponseEntity<UserDto>(newDto, HttpStatus.OK);
     }
 
     @ApiOperation(value = "[Administrator - Employee] Update customer information. ", response = UserDto.class)
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @PutMapping("/update/{id}")
     public ResponseEntity<UserDto> updateCustomer(@RequestBody UserDto dto, @PathVariable long id){
-        boolean result = userService.updateCustomer(dto, id);
-        dto.setPassword("");
+        dto = userService.updateCustomer(dto, id);
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
@@ -78,17 +76,16 @@ public class UserResourceRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/employee/create")
     public ResponseEntity<UserDto> createEmployee(@Valid @RequestBody UserDto dto){
-        boolean result = userService.createEmployee(dto);
-        dto.setPassword("");
-        return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
+        UserDto newDto = userService.createEmployee(dto);
+        newDto.setPassword("");
+        return new ResponseEntity<UserDto>(newDto, HttpStatus.OK);
     }
 
     @ApiOperation(value = "[Administrator] Update an employee on the system. ", response = UserDto.class)
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/employee/{id}")
     public ResponseEntity<UserDto> updateEmployee(@RequestBody UserDto dto, @PathVariable long id){
-        boolean result = userService.updateEmployee(dto, id);
-        dto.setPassword("");
+        dto = userService.updateEmployee(dto, id);
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
