@@ -8,19 +8,16 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Base64;
-import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -28,6 +25,9 @@ public class JwtAuthenticationRestController {
 
     @Value("${jwt.http.request.header}")
     private String tokenHeader;
+
+    @Value("${app.dev.mode}")
+    private Boolean devMode;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -45,8 +45,7 @@ public class JwtAuthenticationRestController {
     @RequestMapping(value = "${jwt.get.token.uri}", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(JwtTokenRequest authenticationRequest)
             throws JwtAuthenticationException {
-
-        if(!captchaValidator.validateCaptcha(authenticationRequest.getReCAPTCHA())){
+        if(!captchaValidator.validateCaptcha(authenticationRequest.getReCAPTCHA()) && !devMode){
             throw new TokenException("Captcha is not valid");
         }
 
