@@ -22,7 +22,7 @@ import java.util.Optional;
 public class UserResourceRestController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserRepository  userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
