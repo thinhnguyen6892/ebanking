@@ -15,6 +15,8 @@ public class DebtDto implements Serializable {
     private Long holder;
     private Long debtor;
     private String debtor_acc;
+    private String content;
+    private Double amount;
 
     public Date getCreateDate() {
         return createDate;
@@ -54,5 +56,21 @@ public class DebtDto implements Serializable {
 
     public void setDebtor_acc(String debtor_acc) {
         this.debtor_acc = debtor_acc;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
     }
 }

@@ -12,6 +12,8 @@ public class Debt {
     private User holder;
     private User debtor;
     private Account debtor_acc;
+    private String content;
+    private Double amount;
 
 
     @Id
@@ -76,6 +78,26 @@ public class Debt {
         this.debtor_acc = debtor_acc;
     }
 
+    @Basic
+    @Column(name = "content")
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    @Basic
+    @Column(name = "amount")
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -86,12 +108,14 @@ public class Debt {
                 Objects.equals(status, debt.status) &&
                 Objects.equals(holder, debt.holder) &&
                 Objects.equals(debtor, debt.debtor) &&
-                Objects.equals(debtor_acc, debt.debtor_acc);
+                Objects.equals(debtor_acc, debt.debtor_acc) &&
+                Objects.equals(content, debt.content) &&
+                Objects.equals(amount, debt.amount);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createDate, status, holder, debtor, debtor_acc);
+        return Objects.hash(id, createDate, status, holder, debtor, debtor_acc, content, amount);
     }
 
 }
