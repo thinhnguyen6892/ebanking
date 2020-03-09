@@ -187,4 +187,16 @@ public class UserService {
         }
     }
 
+    public UserDto findUserByUserName(String userName){
+        UserDto user = new UserDto();
+        if(userName != null && !userName.trim().isEmpty())
+            return user;
+        User findUser = userRepository.findByUsername(userName);
+        user.setEmail(findUser.getEmail());
+        user.setId(findUser.getId().toString());
+        // user.setFullName();
+        // user.setPhone();
+        return user;
+    }
+
 }

@@ -75,4 +75,11 @@ public class AccountResourceRestController {
         return ResponseEntity.created(location).build();
     }
 
+    @ApiOperation(value = "[Employee] Find account by acountId")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @GetMapping("/account/{accountId}")
+    public AccountDto findAccountByAccountId(@PathVariable String accountId) {
+        return accountService.findAccountByAccountId(accountId);
+    }
+
 }
