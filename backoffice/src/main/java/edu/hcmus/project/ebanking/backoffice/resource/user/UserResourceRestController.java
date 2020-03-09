@@ -107,4 +107,12 @@ public class UserResourceRestController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @ApiOperation(value = "[Employee] Get user by userName")
+    @PreAuthorize("hasRole('ADMIN','STAFF')")
+    @GetMapping("/user/{id}")
+    public ResponseEntity<UserDto> findUserByUserName(@PathVariable String id){
+        UserDto user = userService.findUserByUserName(id);
+        return new ResponseEntity<UserDto>(user, HttpStatus.OK);
+    }
 }
