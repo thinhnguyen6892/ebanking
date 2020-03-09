@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>edu.hcmus.project.ebanking</groupId>
 	<artifactId>backoffice</artifactId>
-	<version>0.0.6</version>
+	<version>0.0.7</version>
 	<name>backoffice</name>
 	<description>E-banking with Spring Boot</description>
 

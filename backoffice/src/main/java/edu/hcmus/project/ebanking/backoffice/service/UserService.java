@@ -1,6 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
 import edu.hcmus.project.ebanking.backoffice.model.*;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.AccountType;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.RoleRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
@@ -8,7 +9,8 @@ import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.CreateAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
-import edu.hcmus.project.ebanking.backoffice.resource.user.UserDto;
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static edu.hcmus.project.ebanking.backoffice.service.TokenProvider.*;
 
 @Service
 public class UserService {
@@ -69,7 +73,7 @@ public class UserService {
             dto.setUsername(user.getUsername());
             dto.setStatus(user.getStatus());
             if(showRole) {
-                dto.setRole(user.getRole().getRoleId());
+                dto.setUserType(user.getRole().getRoleId());
             }
             dto.setEmail(user.getEmail());
             return dto;
@@ -88,26 +92,29 @@ public class UserService {
         throw new BadRequestException("Account not found in the system");
     }
 
-
-    public UserDto createEmployee(UserDto dto) {
-        return createUser(dto, "EMPLOYEE", true);
+    public String generatePassword(int length) {
+        return tokenProvider.generateRandomSeries(LOWER+UPPER+DIGITS+PUNCTUATION, length);
     }
 
-    public UserDto createCustomer(UserDto dto) {
-        return createUser(dto, "USER", false);
+    public UserDto createEmployee(CreateUserDto dto) {
+        return createUser(dto, "EMPLOYEE", generatePassword(16), true);
+    }
+
+    public UserDto createCustomer(CreateUserDto dto) {
+        return createUser(dto, "USER", generatePassword(16),false);
     }
 
     @Transactional
-    public UserDto createUser(UserDto dto, String roleStr, boolean isEmployee) {
+    public UserDto createUser(CreateUserDto dto, String roleStr, String rawPassword, boolean isEmployee) {
         Optional<Role> roleOp = roleRepository.findById(roleStr);
         if(roleOp.isPresent()) {
             User checkUser = userRepository.findByUsername(dto.getUsername());
             if(checkUser == null) {
                 User newUser = new User();
                 newUser.setUsername(dto.getUsername());
-                newUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+                newUser.setPassword(passwordEncoder.encode(rawPassword));
                 newUser.setRole(roleOp.get());
-                newUser.setStatus(dto.getStatus());
+                newUser.setStatus(Boolean.TRUE);
                 newUser.setEmail(dto.getEmail());
                 newUser = userRepository.save(newUser);
 
@@ -119,8 +126,8 @@ public class UserService {
                 } else {
                     accountService.createAccount(newUser, accountDto, AccountType.PAYMENT);
                 }
-                dto.setId(newUser.getId().toString());
-                return dto;
+                mailService.sendUserPasswordEmail(newUser, rawPassword);
+                return new UserDto(newUser);
             }
         }
         throw new BadRequestException("Invalid user information!");

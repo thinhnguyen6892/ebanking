@@ -1,5 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.model;
 
+import edu.hcmus.project.ebanking.backoffice.model.contranst.DebtStatus;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;

@@ -1,10 +1,12 @@
 package edu.hcmus.project.ebanking.backoffice.model;
 
+import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionStatus;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.Objects;
 
 @Entity

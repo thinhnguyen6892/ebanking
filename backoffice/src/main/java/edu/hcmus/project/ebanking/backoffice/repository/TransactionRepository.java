@@ -2,8 +2,8 @@ package edu.hcmus.project.ebanking.backoffice.repository;
 
 import edu.hcmus.project.ebanking.backoffice.model.Bank;
 import edu.hcmus.project.ebanking.backoffice.model.Transaction;
-import edu.hcmus.project.ebanking.backoffice.model.TransactionStatus;
-import edu.hcmus.project.ebanking.backoffice.model.TransactionType;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionStatus;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.ZonedDateTime;
