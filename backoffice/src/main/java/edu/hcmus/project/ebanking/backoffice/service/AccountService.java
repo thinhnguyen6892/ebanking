@@ -73,9 +73,12 @@ public class AccountService {
 
     public AccountDto findAccountByAccountId(String accountId){
         AccountDto result = new AccountDto();
-        Account account = accountRepository.findAccountByAccountId(accountId);
-        result.setAccountId(account.getAccountId());
-        result.setOwnerName(account.getOwner().getUsername());
+        Optional<Account> accountOpt = accountRepository.findById(accountId);
+        if(accountOpt.isPresent()) {
+            Account account = accountOpt.get();
+            result.setAccountId(account.getAccountId());
+            result.setOwnerName(account.getOwner().getUsername());
+        }
         return result;
     }
 }
