@@ -70,4 +70,12 @@ public class AccountService {
             throw new BadRequestException("User not found in the system");
         }
     }
+
+    public AccountDto findAccountByAccountId(String accountId){
+        AccountDto result = new AccountDto();
+        Account account = accountRepository.findAccountByAccountId(accountId);
+        result.setAccountId(account.getAccountId());
+        result.setOwnerName(account.getOwner().getUsername());
+        return result;
+    }
 }
