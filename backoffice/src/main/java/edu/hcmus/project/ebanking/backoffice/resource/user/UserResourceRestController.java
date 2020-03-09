@@ -1,6 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.resource.user;
 
-import edu.hcmus.project.ebanking.backoffice.resource.exception.EntityNotExistException;
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 import edu.hcmus.project.ebanking.backoffice.service.UserService;
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
@@ -48,9 +49,8 @@ public class UserResourceRestController {
     @ApiOperation(value = "[Administrator - Employee] Create new customer. ", response = UserDto.class)
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @PostMapping("/create")
-    public ResponseEntity<UserDto> createCustomer(@Valid @RequestBody UserDto dto) {
+    public ResponseEntity<UserDto> createCustomer(@Valid @RequestBody CreateUserDto dto) {
         UserDto newDto = userService.createCustomer(dto);
-        newDto.setPassword("");
         return new ResponseEntity<UserDto>(newDto, HttpStatus.OK);
     }
 
@@ -80,9 +80,8 @@ public class UserResourceRestController {
     @ApiOperation(value = "[Administrator] Create new employee on the system. ", response = UserDto.class)
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/employee/create")
-    public ResponseEntity<UserDto> createEmployee(@Valid @RequestBody UserDto dto){
+    public ResponseEntity<UserDto> createEmployee(@Valid @RequestBody CreateUserDto dto){
         UserDto newDto = userService.createEmployee(dto);
-        newDto.setPassword("");
         return new ResponseEntity<UserDto>(newDto, HttpStatus.OK);
     }
 

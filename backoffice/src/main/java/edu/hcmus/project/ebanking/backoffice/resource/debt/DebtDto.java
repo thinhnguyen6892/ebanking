@@ -1,9 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt;
 
-import edu.hcmus.project.ebanking.backoffice.model.Account;
-import edu.hcmus.project.ebanking.backoffice.model.Debt;
-import edu.hcmus.project.ebanking.backoffice.model.DebtStatus;
-import edu.hcmus.project.ebanking.backoffice.model.User;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.DebtStatus;
 
 import java.io.Serializable;
 import java.util.Date;

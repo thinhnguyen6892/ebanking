@@ -2,6 +2,7 @@ package edu.hcmus.project.ebanking.backoffice.resource.authentication;
 
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
 import edu.hcmus.project.ebanking.backoffice.service.CaptchaValidator;
 import io.swagger.annotations.ApiOperation;
@@ -55,7 +56,7 @@ public class JwtAuthenticationRestController {
 
         final String token = jwtTokenUtil.generateToken(userDetails);
         final String role = Base64.getEncoder().encodeToString(userDetails.getRole().getRoleId().getBytes());
-        return ResponseEntity.ok(new JwtTokenResponse(token, role));
+        return ResponseEntity.ok(new JwtTokenResponse(token, role, new UserDto(userDetails)));
     }
 
     @RequestMapping(value = "${jwt.refresh.token.uri}", method = RequestMethod.GET)
@@ -69,7 +70,7 @@ public class JwtAuthenticationRestController {
         if (jwtTokenUtil.canTokenBeRefreshed(token)) {
             String refreshedToken = jwtTokenUtil.refreshToken(token);
             final String role = Base64.getEncoder().encodeToString(userDetails.getRole().getRoleId().getBytes());
-            return ResponseEntity.ok(new JwtTokenResponse(refreshedToken, role));
+            return ResponseEntity.ok(new JwtTokenResponse(refreshedToken, role, new UserDto(userDetails)));
         } else {
             return ResponseEntity.badRequest().body(null);
         }

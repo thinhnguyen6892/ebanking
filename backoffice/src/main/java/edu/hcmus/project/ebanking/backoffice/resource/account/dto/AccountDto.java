@@ -1,6 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.account.dto;
 
-import edu.hcmus.project.ebanking.backoffice.model.AccountType;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.AccountType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 

@@ -1,6 +1,8 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
 import edu.hcmus.project.ebanking.backoffice.model.*;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionStatus;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.BankRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.TransactionRepository;
@@ -202,7 +204,10 @@ public class TransactionService {
         senderAccount = systemAccounts.get(0);
 
         if(StringUtils.isEmpty(transactionDto.getAccountId())) {
-            User receiver = userRepository.findByUsername(transactionDto.getUsername());
+            User receiver = userRepository.findByUsernameAndStatusIsTrue(transactionDto.getUsername());
+            if(receiver == null) {
+                throw new BadRequestException("User is not exist");
+            }
             List<Account> receiverAccounts = accountRepository.findAccountsByOwnerAndType(receiver, "PAYMENT");
             if(receiverAccounts.isEmpty()) {
                 throw new BadRequestException("Receiver user doesn't have PAYMENT account.");

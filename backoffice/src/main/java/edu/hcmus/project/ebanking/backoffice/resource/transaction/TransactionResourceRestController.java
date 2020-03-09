@@ -1,7 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.transaction;
 
 import edu.hcmus.project.ebanking.backoffice.resource.exception.InvalidTransactionException;
-import edu.hcmus.project.ebanking.backoffice.resource.user.UserDto;
 import edu.hcmus.project.ebanking.backoffice.service.TransactionService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;

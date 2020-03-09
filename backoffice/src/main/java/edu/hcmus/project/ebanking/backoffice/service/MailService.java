@@ -38,6 +38,9 @@ public class MailService {
     @Value("${mail.from}")
     private String from;
 
+    @Value("${app.dev.mode}")
+    private Boolean devMode;
+
     @Async
     public void sendEmail(String to, String subject, String content, boolean isMultipart, boolean isHtml) {
         log.debug("Send e-mail[multipart '{}' and html '{}'] to '{}' with subject '{}' and content={}",
@@ -49,11 +52,23 @@ public class MailService {
             message.setFrom(from);
             message.setSubject(subject);
             message.setText(content, isHtml);
-            javaMailSender.send(mimeMessage);
+            if(!devMode) {
+                javaMailSender.send(mimeMessage);
+            }
             log.debug("Sent e-mail from {} to User '{}'", from, to);
         } catch (Exception e) {
             log.warn("E-mail could not be sent from {} to user '{}', exception is: {}", from, to, e.getMessage());
         }
+    }
+
+    public void sendUserPasswordEmail(User user, String password) {
+        log.debug("Sending transaction confirmation e-mail to '{}'", user.getEmail());
+        Context context = new Context(Locale.ENGLISH);
+        context.setVariable("user_name", user.getUsername());
+        context.setVariable("password", password);
+        String content = templateEngine.process("user_creation", context);
+        String subject = "Your account information";
+        sendEmail(user.getEmail(), subject, content, false, true);
     }
 
     public void sendTransactionConfirmationEmail(User user, String otp) {

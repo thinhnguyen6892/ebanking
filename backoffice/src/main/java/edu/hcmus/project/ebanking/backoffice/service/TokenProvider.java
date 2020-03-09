@@ -11,9 +11,12 @@ import java.util.Random;
 
 @Service
 public class TokenProvider {
-//    String series  = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private Random random = new Random();
     private String secretKey = "mySecretKey";
+    public static final String LOWER = "abcdefghijklmnopqrstuvwxyz";
+    public static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    public static final String DIGITS = "0123456789";
+    public static final String PUNCTUATION = "!@#$%&*()_+-=[]|,./?><";
 
     public String generateRandomSeries(String series, int len){
         char[] token = new char[len];

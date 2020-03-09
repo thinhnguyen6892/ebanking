@@ -1,8 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.model;
 
-import edu.hcmus.project.ebanking.backoffice.generator.StringPrefixedSequenceIdGenerator;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.AccountType;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 
 import javax.persistence.*;
 import java.util.Date;
