@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,7 +32,7 @@ public class AccountService {
 
     public List<AccountDto> findUserAccounts(Long userId, boolean details) {
         Optional<User> userOp = userRepository.findById(userId);
-        if(userOp.isPresent()) {
+        if (userOp.isPresent()) {
             return accountRepository.findAccountsByOwner(userOp.get()).stream()
                     .map(account -> {
                         AccountDto dto = new AccountDto();
@@ -66,21 +67,34 @@ public class AccountService {
 
     public String createAccount(CreateAccount dto) {
         Optional<User> userOp = userRepository.findById(dto.getOwnerId());
-        if(userOp.isPresent()) {
+        if (userOp.isPresent()) {
             return createAccount(userOp.get(), dto, AccountType.SAVING);
         } else {
             throw new BadRequestException("User not found in the system");
         }
     }
 
-    public AccountDto findAccountByAccountId(String accountId){
+    public AccountDto findAccountByAccountId(String accountId) {
         AccountDto result = new AccountDto();
         Optional<Account> accountOpt = accountRepository.findById(accountId);
-        if(accountOpt.isPresent()) {
+        if (accountOpt.isPresent()) {
             Account account = accountOpt.get();
             result.setAccountId(account.getAccountId());
             result.setOwnerName(account.getOwner().getUsername());
         }
         return result;
+    }
+
+    public List<AccountDto> findAccountByUserName(String userName) {
+        Optional<User> user = Optional.ofNullable(userRepository.findByUsername(userName));
+        if (user.isPresent()) {
+            return  accountRepository.findAccountsByOwner(user.get()).stream()
+                    .map(account -> {
+                        AccountDto accountDto = new AccountDto();
+                        accountDto.setOwnerName(account.getOwner().getUsername());
+                        accountDto.setAccountId(account.getAccountId());
+                        return accountDto;
+                    }).collect(Collectors.toList());
+        }
     }
 }

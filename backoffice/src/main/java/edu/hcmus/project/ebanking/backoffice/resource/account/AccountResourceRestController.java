@@ -82,4 +82,11 @@ public class AccountResourceRestController {
         return accountService.findAccountByAccountId(accountId);
     }
 
+    @ApiOperation(value = "[Employee] Find accounts by userName")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @GetMapping("/accounts/{userName}")
+    public List<AccountDto> findAccountsByUserName(@PathVariable String userName) {
+        return accountService.findAccountByUserName(userName);
+    }
+
 }
