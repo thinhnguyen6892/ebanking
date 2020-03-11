@@ -39,7 +39,7 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
     @ExceptionHandler(ResourceNotFoundException.class)
     public final ResponseEntity<Object> handleUserNotFoundException(ResourceNotFoundException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
-                request.getDescription(false), devMode);
+                request.getDescription(false));
         return new ResponseEntity(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 
