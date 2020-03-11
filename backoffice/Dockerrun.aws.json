@@ -3,7 +3,7 @@
   "containerDefinitions": [
     {
       "name": "T2TrC-Bank",
-      "image": "aktv4pro/backoffice:0.0.7",
+      "image": "aktv4pro/backoffice:0.0.8",
       "essential": true,
       "memory": 256,
       "portMappings": [

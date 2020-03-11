@@ -10,6 +10,9 @@ public class SavedAccount {
     private String nameSuggestion;
     private String bankId;
     private String accountId;
+    private String firstName;
+    private String lastName;
+    private User owner;
 
     @Id
     @Column(name = "id")
@@ -65,5 +68,33 @@ public class SavedAccount {
     @Override
     public int hashCode() {
         return Objects.hash(id, nameSuggestion, bankId, accountId);
+    }
+
+    @Column(name = "first_name")
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    @Column(name = "last_name")
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "owner", referencedColumnName = "id", nullable = false)
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 }

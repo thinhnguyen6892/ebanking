@@ -33,7 +33,7 @@ public class AccountResourceRestController {
     @Autowired
     private AccountService accountService;
 
-    @ApiOperation(value = "[USER] View a list of available account of current log-on user", response = List.class)
+    @ApiOperation(value = "1.2 [USER] View a list of available account of current log-on user", response = List.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved list"),
             @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
@@ -45,14 +45,14 @@ public class AccountResourceRestController {
     public List<AccountDto> retrieveAllUserAccounts() {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        return accountService.findUserAccount(userDetails.getId());
+        return accountService.findUserAccounts(userDetails.getId(), false);
     }
 
     @ApiOperation(value = "[Employee] View a list of available user account on the system by user id. ", response = List.class)
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @GetMapping("/user/{id}")
     public List<AccountDto> retrieveAllUserAccounts(@PathVariable long id) {
-        return accountService.findUserAccount(id);
+        return accountService.findUserAccounts(id, true);
     }
 
     @ApiOperation(value = "[Employee] Deposit into account")

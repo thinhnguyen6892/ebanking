@@ -29,7 +29,7 @@ public class AccountService {
     @Autowired
     private TransactionService transactionService;
 
-    public List<AccountDto> findUserAccount(Long userId) {
+    public List<AccountDto> findUserAccounts(Long userId, boolean details) {
         Optional<User> userOp = userRepository.findById(userId);
         if(userOp.isPresent()) {
             return accountRepository.findAccountsByOwner(userOp.get()).stream()
@@ -37,8 +37,10 @@ public class AccountService {
                         AccountDto dto = new AccountDto();
                         dto.setAccountId(account.getAccountId());
                         dto.setBalance(account.getBalance());
-                        dto.setCreateDate(account.getCreateDate());
-                        dto.setExpired(account.getExpired());
+                        if(details) {
+                            dto.setCreateDate(account.getCreateDate());
+                            dto.setExpired(account.getExpired());
+                        }
                         dto.setOwnerName(account.getOwner().getUsername());
                         dto.setType(account.getType());
                         return dto;
