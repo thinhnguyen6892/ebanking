@@ -25,6 +25,21 @@ public class SavedAccountService {
     @Autowired
      private AccountRepository accountRepository;
 
+
+    public List<ReceiverDto> search(User owner, String name) {
+        return repository.findByOwnerAndNameSuggestionStartingWith(owner, name).stream()
+                .map(savedAccount -> {
+                    ReceiverDto dto = new ReceiverDto();
+                    dto.setId(savedAccount.getId());
+                    dto.setAccountId(savedAccount.getAccountId());
+                    dto.setBankId(savedAccount.getBankId());
+                    dto.setNameSuggestion(savedAccount.getNameSuggestion());
+                    dto.setFirstName(savedAccount.getFirstName());
+                    dto.setLastName(savedAccount.getLastName());
+                    return dto;
+                }).collect(Collectors.toList());
+    }
+
     public List<ReceiverDto> findAll(User owner) {
         return repository.findByOwner(owner).stream()
                 .map(savedAccount -> {

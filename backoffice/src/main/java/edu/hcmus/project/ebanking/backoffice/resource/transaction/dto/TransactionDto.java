@@ -1,6 +1,7 @@
-package edu.hcmus.project.ebanking.backoffice.resource.transaction;
+package edu.hcmus.project.ebanking.backoffice.resource.transaction.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import edu.hcmus.project.ebanking.backoffice.model.Transaction;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
 
@@ -18,7 +19,22 @@ public class TransactionDto implements Serializable {
     private Double amount;
     private TransactionType type;
     private TransactionFeeType feeType;
+
     private String otpCode;
+
+    public TransactionDto()  {
+
+    }
+
+    public TransactionDto(Transaction transaction) {
+        this.id = transaction.getId();
+        this.source = transaction.getSource();
+        this.target = transaction.getTarget();
+        this.createdDate = transaction.getDate();
+        this.content = transaction.getContent();
+        this.type = transaction.getType();
+        this.feeType = transaction.getFeeType();
+    }
 
     public String getSource() {
         return source;
@@ -76,19 +92,19 @@ public class TransactionDto implements Serializable {
         this.id = id;
     }
 
-    public String getOtpCode() {
-        return otpCode;
-    }
-
-    public void setOtpCode(String otpCode) {
-        this.otpCode = otpCode;
-    }
-
     public TransactionFeeType getFeeType() {
         return feeType;
     }
 
     public void setFeeType(TransactionFeeType feeType) {
         this.feeType = feeType;
+    }
+
+    public String getOtpCode() {
+        return otpCode;
+    }
+
+    public void setOtpCode(String otpCode) {
+        this.otpCode = otpCode;
     }
 }

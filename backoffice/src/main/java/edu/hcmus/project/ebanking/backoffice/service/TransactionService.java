@@ -10,10 +10,13 @@ import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.DepositAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.InvalidTransactionException;
-import edu.hcmus.project.ebanking.backoffice.resource.transaction.TransactionDto;
-import edu.hcmus.project.ebanking.backoffice.resource.transaction.TransactionRequestDto;
+import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.CreateTransactionRequestDto;
+import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionConfirmationDto;
+import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionDto;
+import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionQueryDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -45,17 +48,23 @@ public class TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Value("${app.transaction.validation.in.seconds}")
+    private Long transactionExpiration;
 
-    public List<TransactionDto> findAllTransaction(TransactionRequestDto request) {
+    @Value("${app.dev.mode}")
+    private Boolean devMode;
+
+
+    public List<TransactionDto> findAllTransaction(TransactionQueryDto request) {
         List<Transaction> transactions;
         if(request.getBankId() != null && request.getBankId() != "") {
             Optional<Bank> bankOpt = bankRepository.findById(request.getBankId());
             if(!bankOpt.isPresent()) {
                 throw new BadRequestException("Bank not found in the system");
             }
-            transactions = transactionRepository.findTransactionsByDateBetweenAndReferenceAndStatusNotOrderByDateDesc(request.getStartDate(), request.getEndDate(), bankOpt.get(), TransactionStatus.NEW);
+            transactions = transactionRepository.findTransactionsByDateBetweenAndReferenceAndStatusOrderByDateDesc(request.getStartDate(), request.getEndDate(), bankOpt.get(), TransactionStatus.COMPLETED);
         } else {
-            transactions = transactionRepository.findTransactionsByDateBetweenAndStatusNotOrderByDateDesc(request.getStartDate(), request.getEndDate(), TransactionStatus.NEW);
+            transactions = transactionRepository.findTransactionsByDateBetweenAndStatusOrderByDateDesc(request.getStartDate(), request.getEndDate(), TransactionStatus.COMPLETED);
         }
         return transactions.stream().map(transaction -> {
             TransactionDto dto = new TransactionDto();
@@ -68,28 +77,31 @@ public class TransactionService {
         }).collect(Collectors.toList());
     }
 
-    public List<TransactionDto> findAllAccountTransaction(String accountId, TransactionType type) {
-
-        Optional<Account> accountOpt = accountRepository.findById(accountId);
+    public List<TransactionDto> findUserAccountTransaction(@Nullable User owner, String accountId, TransactionType type) {
+        Optional<Account> accountOpt = owner == null ? accountRepository.findById(accountId) : accountRepository.findByOwnerAndAccountId(owner, accountId);
         if(!accountOpt.isPresent()) {
             throw new BadRequestException("Account not found in the system");
         }
         Account account = accountOpt.get();
-        return (type != null ? transactionRepository.findTransactionsBySourceAndTypeAndStatusNotOrderByDateDesc(account.getAccountId(), type, TransactionStatus.NEW) :
-                transactionRepository.findTransactionsBySourceAndStatusNotOrderByDateDesc(account.getAccountId(), TransactionStatus.NEW))
+        return (type != null ? transactionRepository.findTransactionsBySourceAndTypeAndStatusOrderByDateDesc(account.getAccountId(), type, TransactionStatus.COMPLETED) :
+                transactionRepository.findTransactionsBySourceAndStatusOrderByDateDesc(account.getAccountId(), TransactionStatus.COMPLETED))
                 .stream().map(transaction -> {
-            TransactionDto dto = new TransactionDto();
-            dto.setAmount(transaction.getAmount());
-            dto.setContent(transaction.getContent());
-            dto.setCreatedDate(transaction.getDate());
-            dto.setSource(transaction.getSource());
-            dto.setType(transaction.getType());
-            return dto;
-        }).collect(Collectors.toList());
+                    TransactionDto dto = new TransactionDto();
+                    dto.setAmount(transaction.getAmount());
+                    dto.setContent(transaction.getContent());
+                    dto.setCreatedDate(transaction.getDate());
+                    dto.setSource(transaction.getSource());
+                    dto.setType(transaction.getType());
+                    return dto;
+                }).collect(Collectors.toList());
     }
 
-    public TransactionDto requestTransaction(TransactionDto dto) {
-        Optional<Account> sourceOpt = accountRepository.findById(dto.getSource());
+    public List<TransactionDto> findAllAccountTransaction(String accountId, TransactionType type) {
+        return findUserAccountTransaction(null, accountId, type);
+    }
+
+    public TransactionDto requestTransaction(User owner, CreateTransactionRequestDto dto) {
+        Optional<Account> sourceOpt = accountRepository.findByOwnerAndAccountId(owner, dto.getSource());
         if(!sourceOpt.isPresent()) {
             throw new BadRequestException("Source account is not exist!");
         }
@@ -117,24 +129,24 @@ public class TransactionService {
         transaction.setType(dto.getType());
         transaction.setFeeType(dto.getFeeType());
 
-        long expires = currentTime + 1000L * (30 * 60);
+        long expires = currentTime + transactionExpiration;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
         String opt = tokenProvider.generateRandomSeries("0123456789", 6);
         transaction.setOtpCode(opt);
         transaction.setValidity(expires);
 
         transaction = transactionRepository.save(transaction);
-        dto.setId(transaction.getId());
-        dto.setOtpCode(opt);
-        dto.setCreatedDate(now);
-        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-        mailService.sendTransactionConfirmationEmail(userDetails, opt);
-        return dto;
+
+        TransactionDto transactionDto = new TransactionDto(transaction);
+        if(devMode) {
+            transactionDto.setOtpCode(opt);
+        }
+        mailService.sendTransactionConfirmationEmail(owner, opt);
+        return transactionDto;
     }
 
 
-    public void pay(TransactionDto dto) {
+    public void pay(User owner, TransactionConfirmationDto dto) {
         Optional<Transaction> transactionOptional = transactionRepository.findById(dto.getId());
         if(!transactionOptional.isPresent()) {
             throw new BadRequestException("Transaction is not exist!");
@@ -143,18 +155,19 @@ public class TransactionService {
         if(TransactionStatus.COMPLETED == transaction.getStatus() || TransactionStatus.CANCEL == transaction.getStatus()) {
             throw new BadRequestException("Transaction is not exist!");
         }
-        long currentTime = System.currentTimeMillis();
+        ZonedDateTime now = ZonedDateTime.now();
+        long currentTime =  now.toInstant().toEpochMilli();
         if(!dto.getOtpCode().equals(transaction.getOtpCode()) || transaction.getValidity() < currentTime) {
             transaction.setStatus(TransactionStatus.CANCEL);
             transactionRepository.save(transaction);
             throw new InvalidTransactionException("Invalid OTP or expired!");
         }
-        performTransaction(transaction);
+        performTransaction(owner, transaction);
     }
 
     @Transactional
-    public void performTransaction(Transaction transaction) {
-        Optional<Account> sourceOpt = accountRepository.findById(transaction.getSource());
+    public void performTransaction(User owner, Transaction transaction) {
+        Optional<Account> sourceOpt = accountRepository.findByOwnerAndAccountId(owner, transaction.getSource());
         if(!sourceOpt.isPresent()) {
             throw new BadRequestException("Source account is not exist!");
         }
