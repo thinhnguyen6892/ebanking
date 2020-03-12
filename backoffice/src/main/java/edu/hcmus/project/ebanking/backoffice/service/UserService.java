@@ -51,6 +51,7 @@ public class UserService {
     @Autowired
     private MailService mailService;
 
+
     public List<UserDto> findAllStaffs() {
         return findAllUsers("STAFF", false);
     }
@@ -185,6 +186,16 @@ public class UserService {
 //                mailService.sendRecoverPasswordEmail(user, emailToken.getToken(), buildBaseUrl(request));
             return emailToken.getToken();
         }
+    }
+
+    public String changePassword(User user, String rawOldPass, String rawNewPass) {
+        if(passwordEncoder.matches(rawOldPass, user.getPassword())) {
+            String encryptedPassword = passwordEncoder.encode(rawNewPass);
+            user.setPassword(encryptedPassword);
+            userRepository.save(user);
+            return "Password changed";
+        }
+        throw new BadRequestException("Your old password is incorrect");
     }
 
     public UserDto findUserByUserName(String userName){

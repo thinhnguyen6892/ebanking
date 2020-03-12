@@ -1,4 +1,4 @@
-package edu.hcmus.project.ebanking.backoffice.resource.transaction;
+package edu.hcmus.project.ebanking.backoffice.resource.transaction.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
-public class TransactionRequestDto implements Serializable {
+public class TransactionQueryDto implements Serializable {
     private String accountId;
 
     @ApiModelProperty(notes = "Transaction Type. [ DEPOSIT, WITHDRAW, TRANSFER, PAYMENT ]")

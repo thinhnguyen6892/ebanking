@@ -1,7 +1,9 @@
 package edu.hcmus.project.ebanking.backoffice.resource.user;
 
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ChangePasswordDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
+import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
 import edu.hcmus.project.ebanking.backoffice.service.UserService;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import io.swagger.annotations.ApiOperation;
@@ -89,6 +91,12 @@ public class UserResourceRestController {
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Change password", response = String.class)
+    @PostMapping(value = "/password")
+    public ResponseEntity<String> changePassword(@Valid ChangePasswordDto dto) {
+        return new ResponseEntity(userService.changePassword(JwtTokenUtil.getLoggedUser(), dto.getOldPassword(), dto.getNewPassword()), HttpStatus.OK);
+    }
+
     @ApiOperation(value = "Recover password via email", response = String.class)
     @RequestMapping(value = "/recover/{email:.+}",
             method = RequestMethod.POST,
@@ -105,7 +113,7 @@ public class UserResourceRestController {
     }
 
     @ApiOperation(value = "[Employee] Get user by userName")
-    @PreAuthorize("hasRole('ADMIN','STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     @GetMapping("/user/{id}")
     public ResponseEntity<UserDto> findUserByUserName(@PathVariable String id){
         UserDto user = userService.findUserByUserName(id);

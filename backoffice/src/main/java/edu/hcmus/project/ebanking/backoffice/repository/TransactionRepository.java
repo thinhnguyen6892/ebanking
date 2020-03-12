@@ -11,8 +11,8 @@ import java.util.List;
 
 
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
-    List<Transaction> findTransactionsByDateBetweenAndReferenceAndStatusNotOrderByDateDesc(ZonedDateTime startDate, ZonedDateTime endDate, Bank bank, TransactionStatus status);
-    List<Transaction> findTransactionsByDateBetweenAndStatusNotOrderByDateDesc(ZonedDateTime startDate, ZonedDateTime endDate, TransactionStatus status);
-    List<Transaction> findTransactionsBySourceAndTypeAndStatusNotOrderByDateDesc(String source, TransactionType type, TransactionStatus status);
-    List<Transaction> findTransactionsBySourceAndStatusNotOrderByDateDesc(String source, TransactionStatus status);
+    List<Transaction> findTransactionsByDateBetweenAndReferenceAndStatusOrderByDateDesc(ZonedDateTime startDate, ZonedDateTime endDate, Bank bank, TransactionStatus status);
+    List<Transaction> findTransactionsByDateBetweenAndStatusOrderByDateDesc(ZonedDateTime startDate, ZonedDateTime endDate, TransactionStatus status);
+    List<Transaction> findTransactionsBySourceAndTypeAndStatusOrderByDateDesc(String source, TransactionType type, TransactionStatus status);
+    List<Transaction> findTransactionsBySourceAndStatusOrderByDateDesc(String source, TransactionStatus status);
 }

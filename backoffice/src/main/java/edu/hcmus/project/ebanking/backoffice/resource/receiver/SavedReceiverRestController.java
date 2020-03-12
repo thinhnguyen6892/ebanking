@@ -59,5 +59,13 @@ public class SavedReceiverRestController {
         return ResponseEntity.ok().build();
     }
 
+    @ApiOperation(value = "1.3_3 [User] Search Receiver Information By Suggestion Name. ", response = List.class)
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/search/{name}")
+    public List<ReceiverDto> search(@PathVariable String name) {
+        return service.search(JwtTokenUtil.getLoggedUser(), name);
+    }
+
+
 
 }

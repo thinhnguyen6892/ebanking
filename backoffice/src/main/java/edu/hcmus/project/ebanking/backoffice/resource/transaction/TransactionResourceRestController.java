@@ -1,6 +1,12 @@
 package edu.hcmus.project.ebanking.backoffice.resource.transaction;
 
+import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.InvalidTransactionException;
+import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.CreateTransactionRequestDto;
+import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionConfirmationDto;
+import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionDto;
+import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionQueryDto;
+import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
 import edu.hcmus.project.ebanking.backoffice.service.TransactionService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,37 +25,37 @@ public class TransactionResourceRestController {
 
     @ApiOperation(value = "[Administrator] Retrieve all transaction including filtering by bank id.", response = List.class)
     @PreAuthorize("hasAnyRole('ADMIN')")
-    @PostMapping("/transactions")
-    public List<TransactionDto> retrieveAllTransaction(@RequestBody TransactionRequestDto request) {
+    @GetMapping("/transactions")
+    public List<TransactionDto> retrieveAllTransaction(TransactionQueryDto request) {
         if(request.getStartDate() == null || request.getEndDate() == null) {
             throw new InvalidTransactionException("Invalid parameters");
         }
         return tranferService.findAllTransaction(request);
     }
 
-    @ApiOperation(value = "[Employee] View account transaction. Filter by TransactionType [DEPOSIT, WITHDRAW, TRANSFER, PAYMENT]", response = List.class)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'STAFF')")
-    @PostMapping("/transactions/account")
-    public List<TransactionDto> retrieveUserAllTransaction(@Valid @RequestBody TransactionRequestDto dto) {
-        return tranferService.findAllAccountTransaction(dto.getAccountId(), dto.getType());
+    @ApiOperation(value = "1.6 [User - Employee] View account transaction. Filter by TransactionType [DEPOSIT- Nhan Tien, WITHDRAW - Rut Tien, TRANSFER - Chuyen Tien, PAYMENT - Thanh Toan No]", response = List.class)
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @GetMapping("/transactions/account")
+    public List<TransactionDto> retrieveUserAllTransaction(@Valid @RequestBody TransactionQueryDto dto) {
+        User user = JwtTokenUtil.getLoggedUser();
+        //TODO
+        String role = user.getRole().getRoleId();
+        return "USER".equalsIgnoreCase(role) ? tranferService.findUserAccountTransaction(user, dto.getAccountId(), dto.getType()) : tranferService.findAllAccountTransaction(dto.getAccountId(), dto.getType());
     }
 
-    @ApiOperation(value = "[USER] Request a new transaction", response = TransactionDto.class)
+    @ApiOperation(value = "1.4.1_01 [USER] Request a new transaction", response = TransactionDto.class)
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/transactions/request")
-    public TransactionDto requestTransaction(@Valid @RequestBody TransactionDto dto) {
-        TransactionDto opt = tranferService.requestTransaction(dto);
+    public TransactionDto requestTransaction(@Valid @RequestBody CreateTransactionRequestDto dto) {
+        TransactionDto opt = tranferService.requestTransaction(JwtTokenUtil.getLoggedUser(), dto);
         return opt;
     }
 
-    @ApiOperation(value = "[USER] Confirm to complete the transaction")
+    @ApiOperation(value = "1.4.1_02 [USER] Confirm to complete the transaction")
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/transactions/pay")
-    public ResponseEntity<Void> pay(@RequestBody TransactionDto dto) {
-        if(dto.getId() == null || dto.getId() == "" || dto.getOtpCode() == null || dto.getOtpCode() == "") {
-            return ResponseEntity.badRequest().build();
-        }
-        tranferService.pay(dto);
+    public ResponseEntity<Void> pay(@Valid @RequestBody TransactionConfirmationDto dto) {
+        tranferService.pay(JwtTokenUtil.getLoggedUser(), dto);
         return ResponseEntity.ok().build();
     }
 
