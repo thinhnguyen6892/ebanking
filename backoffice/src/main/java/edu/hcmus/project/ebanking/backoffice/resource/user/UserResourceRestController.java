@@ -91,7 +91,8 @@ public class UserResourceRestController {
         return new ResponseEntity<UserDto>(dto, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Change password", response = String.class)
+    @ApiOperation(value = "1.7 [User] Change password", response = String.class)
+    @PreAuthorize("hasRole('USER')")
     @PostMapping(value = "/password")
     public ResponseEntity<String> changePassword(@Valid ChangePasswordDto dto) {
         return new ResponseEntity(userService.changePassword(JwtTokenUtil.getLoggedUser(), dto.getOldPassword(), dto.getNewPassword()), HttpStatus.OK);
