@@ -16,6 +16,8 @@ import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.Transactio
 import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionQueryDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +27,6 @@ import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
@@ -55,18 +56,18 @@ public class TransactionService {
     private Boolean devMode;
 
 
-    public List<TransactionDto> findAllTransaction(TransactionQueryDto request) {
-        List<Transaction> transactions;
+    public Page<TransactionDto> findAllTransaction(TransactionQueryDto request, Pageable pageable) {
+        Page<Transaction> transactions;
         if(request.getBankId() != null && request.getBankId() != "") {
             Optional<Bank> bankOpt = bankRepository.findById(request.getBankId());
             if(!bankOpt.isPresent()) {
                 throw new BadRequestException("Bank not found in the system");
             }
-            transactions = transactionRepository.findTransactionsByDateBetweenAndReferenceAndStatusOrderByDateDesc(request.getStartDate(), request.getEndDate(), bankOpt.get(), TransactionStatus.COMPLETED);
+            transactions = transactionRepository.findTransactionsByDateBetweenAndReferenceAndStatus(request.getStartDate(), request.getEndDate(), bankOpt.get(), TransactionStatus.COMPLETED, pageable);
         } else {
-            transactions = transactionRepository.findTransactionsByDateBetweenAndStatusOrderByDateDesc(request.getStartDate(), request.getEndDate(), TransactionStatus.COMPLETED);
+            transactions = transactionRepository.findTransactionsByDateBetweenAndStatus(request.getStartDate(), request.getEndDate(), TransactionStatus.COMPLETED, pageable);
         }
-        return transactions.stream().map(transaction -> {
+        return transactions.map(transaction -> {
             TransactionDto dto = new TransactionDto();
             dto.setAmount(transaction.getAmount());
             dto.setContent(transaction.getContent());
@@ -74,18 +75,18 @@ public class TransactionService {
             dto.setSource(transaction.getSource());
             dto.setType(transaction.getType());
             return dto;
-        }).collect(Collectors.toList());
+        });
     }
 
-    public List<TransactionDto> findUserAccountTransaction(@Nullable User owner, String accountId, TransactionType type) {
+    public Page<TransactionDto> findUserAccountTransaction(@Nullable User owner, String accountId, TransactionType type, Pageable pageable) {
         Optional<Account> accountOpt = owner == null ? accountRepository.findById(accountId) : accountRepository.findByOwnerAndAccountId(owner, accountId);
         if(!accountOpt.isPresent()) {
             throw new BadRequestException("Account not found in the system");
         }
         Account account = accountOpt.get();
-        return (type != null ? transactionRepository.findTransactionsBySourceAndTypeAndStatusOrderByDateDesc(account.getAccountId(), type, TransactionStatus.COMPLETED) :
-                transactionRepository.findTransactionsBySourceAndStatusOrderByDateDesc(account.getAccountId(), TransactionStatus.COMPLETED))
-                .stream().map(transaction -> {
+        return (type != null ? transactionRepository.findTransactionsBySourceAndTypeAndStatus(account.getAccountId(), type, TransactionStatus.COMPLETED, pageable) :
+                transactionRepository.findTransactionsBySourceAndStatusOrderByDateDesc(account.getAccountId(), TransactionStatus.COMPLETED, pageable))
+                .map(transaction -> {
                     TransactionDto dto = new TransactionDto();
                     dto.setAmount(transaction.getAmount());
                     dto.setContent(transaction.getContent());
@@ -93,11 +94,11 @@ public class TransactionService {
                     dto.setSource(transaction.getSource());
                     dto.setType(transaction.getType());
                     return dto;
-                }).collect(Collectors.toList());
+                });
     }
 
-    public List<TransactionDto> findAllAccountTransaction(String accountId, TransactionType type) {
-        return findUserAccountTransaction(null, accountId, type);
+    public Page<TransactionDto> findAllAccountTransaction(String accountId, TransactionType type, Pageable pageable) {
+        return findUserAccountTransaction(null, accountId, type, pageable);
     }
 
     public TransactionDto requestTransaction(User owner, CreateTransactionRequestDto dto) {

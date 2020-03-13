@@ -1,6 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.exception;
 
-import edu.hcmus.project.ebanking.backoffice.resource.authentication.JwtAuthenticationException;
+import edu.hcmus.project.ebanking.backoffice.security.authentication.JwtAuthenticationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

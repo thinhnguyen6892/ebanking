@@ -1,4 +1,4 @@
-package edu.hcmus.project.ebanking.backoffice.resource.authentication;
+package edu.hcmus.project.ebanking.backoffice.security.authentication;
 
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;

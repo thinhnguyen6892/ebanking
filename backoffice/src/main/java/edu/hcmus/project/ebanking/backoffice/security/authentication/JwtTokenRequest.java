@@ -1,4 +1,4 @@
-package edu.hcmus.project.ebanking.backoffice.resource.authentication;
+package edu.hcmus.project.ebanking.backoffice.security.authentication;
 
 public class JwtTokenRequest {
 
