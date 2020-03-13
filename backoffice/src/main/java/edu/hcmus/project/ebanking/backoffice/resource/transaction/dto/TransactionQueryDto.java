@@ -4,6 +4,8 @@ package edu.hcmus.project.ebanking.backoffice.resource.transaction.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
 import io.swagger.annotations.ApiModelProperty;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -13,8 +15,10 @@ public class TransactionQueryDto implements Serializable {
 
     @ApiModelProperty(notes = "Transaction Type. [ DEPOSIT, WITHDRAW, TRANSFER, PAYMENT ]")
     private TransactionType type;
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private ZonedDateTime startDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private ZonedDateTime endDate;
 

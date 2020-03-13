@@ -4,15 +4,18 @@ import edu.hcmus.project.ebanking.backoffice.model.Bank;
 import edu.hcmus.project.ebanking.backoffice.model.Transaction;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionStatus;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
-
+@Repository
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
-    List<Transaction> findTransactionsByDateBetweenAndReferenceAndStatusOrderByDateDesc(ZonedDateTime startDate, ZonedDateTime endDate, Bank bank, TransactionStatus status);
-    List<Transaction> findTransactionsByDateBetweenAndStatusOrderByDateDesc(ZonedDateTime startDate, ZonedDateTime endDate, TransactionStatus status);
-    List<Transaction> findTransactionsBySourceAndTypeAndStatusOrderByDateDesc(String source, TransactionType type, TransactionStatus status);
-    List<Transaction> findTransactionsBySourceAndStatusOrderByDateDesc(String source, TransactionStatus status);
+    Page<Transaction> findTransactionsByDateBetweenAndReferenceAndStatus(ZonedDateTime startDate, ZonedDateTime endDate, Bank bank, TransactionStatus status, Pageable pageable);
+    Page<Transaction> findTransactionsByDateBetweenAndStatus(ZonedDateTime startDate, ZonedDateTime endDate, TransactionStatus status, Pageable pageable);
+    Page<Transaction> findTransactionsBySourceAndTypeAndStatus(String source, TransactionType type, TransactionStatus status, Pageable pageable);
+    Page<Transaction> findTransactionsBySourceAndStatusOrderByDateDesc(String source, TransactionStatus status,  Pageable pageable);
 }
