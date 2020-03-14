@@ -133,7 +133,7 @@ public class Transaction {
     }
 
     @Basic
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "fee_type")
     public TransactionFeeType getFeeType() {
         return feeType;
