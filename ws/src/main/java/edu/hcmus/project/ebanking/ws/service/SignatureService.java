@@ -1,6 +1,7 @@
 package edu.hcmus.project.ebanking.ws.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
@@ -26,28 +27,32 @@ public class SignatureService {
     private File publicKey;
     private Cipher cipher;
 
+    @Value(value = "app.signature.private-key")
+    private String privateKeyPath;
+
+    @Value(value = "app.signature.public_key.der")
+    private String publicKeyPath;
+
+
     @PostConstruct
     public void init() throws IOException {
-        Resource privateKeyResource = resourceLoader.getResource("classpath:static/privatekey.pem");
+        Resource privateKeyResource = resourceLoader.getResource(privateKeyPath);
         this.privateKey = privateKeyResource.getFile();
 
-        Resource publicKeyResource = resourceLoader.getResource("classpath:static/publickey.pem");
+        Resource publicKeyResource = resourceLoader.getResource(publicKeyPath);
         this.publicKey = publicKeyResource.getFile();
     }
 
     public String signWithPrivateKey(String content) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, InvalidKeyException, SignatureException {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(1024);
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
         Signature rsa = Signature.getInstance("SHA256withRSA");
         byte[] keyBytes = Files.readAllBytes(privateKey.toPath());
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-//        KeyFactory kf = KeyFactory.getInstance("RSA");
-//        PrivateKey privateKey = kf.generatePrivate(spec);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        PrivateKey privateKey = kf.generatePrivate(spec);
 //        this.cipher.init(Cipher.ENCRYPT_MODE, privateKey);
 //        this.cipher.doFinal(content.getBytes())
-        rsa.initSign(keyPair.getPrivate());
+        rsa.initSign(privateKey);
         rsa.update(content.getBytes());
         return new String(Base64Utils.encode(rsa.sign()));
     }
