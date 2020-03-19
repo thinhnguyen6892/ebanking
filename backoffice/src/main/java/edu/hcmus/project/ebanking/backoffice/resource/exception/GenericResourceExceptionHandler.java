@@ -4,6 +4,7 @@ import edu.hcmus.project.ebanking.backoffice.resource.authentication.JwtAuthenti
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,7 +26,7 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
     }
 
     @ExceptionHandler(InvalidTransactionException.class)
-    public final ResponseEntity<Object> handleInvalidTransactionException(ResourceNotFoundException ex, WebRequest request) {
+    public final ResponseEntity<Object> handleInvalidTransactionException(InvalidTransactionException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
                 request.getDescription(false));
         return new ResponseEntity(exceptionResponse, HttpStatus.NOT_ACCEPTABLE);
@@ -38,11 +39,11 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
         return new ResponseEntity(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(TokenException.class)
-    public final ResponseEntity<Object> handleTokenException(ResourceNotFoundException ex, WebRequest request) {
+    @ExceptionHandler(AccessDeniedException.class)
+    public final ResponseEntity<Object> handleAccessDeniedExceptionException(AccessDeniedException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
                 request.getDescription(false));
-        return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(exceptionResponse, HttpStatus.FORBIDDEN);
     }
 
 
@@ -53,8 +54,8 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
         return new ResponseEntity(exceptionResponse, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(EntityNotExistException.class)
-    public final ResponseEntity<Object> handleEntityNotExistException(ResourceNotFoundException ex, WebRequest request) {
+    @ExceptionHandler({EntityNotExistException.class, TokenException.class})
+    public final ResponseEntity<Object> handleEntityNotExistException(TokenException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
                 request.getDescription(false));
         return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);

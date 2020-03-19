@@ -1,6 +1,8 @@
 package edu.hcmus.project.ebanking.backoffice.resource.authentication;
 
+import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
 import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
+import edu.hcmus.project.ebanking.backoffice.service.CaptchaValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -32,9 +34,16 @@ public class JwtAuthenticationRestController {
     @Autowired
     private UserDetailsService jwtUserDetailsService;
 
+    @Autowired
+    private CaptchaValidator captchaValidator;
+
     @RequestMapping(value = "${jwt.get.token.uri}", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(JwtTokenRequest authenticationRequest)
             throws JwtAuthenticationException {
+
+        if(!captchaValidator.validateCaptcha(authenticationRequest.getReCAPTCHA())){
+            throw new TokenException("Captcha is not valid");
+        }
 
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 

@@ -3,13 +3,14 @@ package edu.hcmus.project.ebanking.backoffice.model;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Objects;
 
 @Entity
 public class Transaction {
     private String id;
-    private Date date;
+    private ZonedDateTime date;
     private TransactionType type;
     private String source;
     private String target;
@@ -21,6 +22,8 @@ public class Transaction {
     private Long validity;
 
     private TransactionFeeType feeType;
+
+    private Bank reference;
 
 
     @Id
@@ -37,12 +40,11 @@ public class Transaction {
 
     @Basic
     @Column(name = "date")
-    @Temporal(TemporalType.TIMESTAMP)
-    public Date getDate() {
+    public ZonedDateTime getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(ZonedDateTime date) {
         this.date = date;
     }
 
@@ -137,6 +139,16 @@ public class Transaction {
 
     public void setFeeType(TransactionFeeType feeType) {
         this.feeType = feeType;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "reference", referencedColumnName = "id", nullable = false)
+    public Bank getReference() {
+        return reference;
+    }
+
+    public void setReference(Bank reference) {
+        this.reference = reference;
     }
 
     @Override

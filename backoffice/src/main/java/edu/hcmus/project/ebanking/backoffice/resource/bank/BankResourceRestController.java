@@ -6,6 +6,7 @@ import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFound
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +17,10 @@ public class BankResourceRestController {
     @Autowired
     private BankRepository BankRepository;
 
+
+    //@Secured("ROLE_USER")
+//    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/bank")
     public List<Bank> getAllBank() {
         return BankRepository.findAll();

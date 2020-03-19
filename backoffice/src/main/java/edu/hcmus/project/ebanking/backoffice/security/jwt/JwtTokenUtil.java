@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.security.jwt;
 
+import edu.hcmus.project.ebanking.backoffice.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.Jwts;
@@ -89,7 +90,7 @@ public class JwtTokenUtil implements Serializable {
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        JwtUserDetails user = (JwtUserDetails) userDetails;
+        User user = (User) userDetails;
         final String username = getUsernameFromToken(token);
         return (username.equals(user.getUsername()) && !isTokenExpired(token));
     }
