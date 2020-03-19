@@ -65,9 +65,8 @@ public class TransactionResourceRestController {
     @ApiOperation(value = "1.4.1_02 [USER] Confirm to complete the transaction")
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/pay")
-    public ResponseEntity<Void> pay(@Valid @RequestBody TransactionConfirmationDto dto) {
-        tranferService.pay(JwtTokenUtil.getLoggedUser(), dto);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<TransactionDto> pay(@Valid @RequestBody TransactionConfirmationDto dto) {
+        return ResponseEntity.ok().body(tranferService.pay(JwtTokenUtil.getLoggedUser(), dto));
     }
 
 }

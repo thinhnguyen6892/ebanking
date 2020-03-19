@@ -33,6 +33,7 @@ public class TransactionDto implements Serializable {
         this.createdDate = transaction.getDate();
         this.content = transaction.getContent();
         this.type = transaction.getType();
+        this.amount = transaction.getAmount();
         this.feeType = transaction.getFeeType();
     }
 

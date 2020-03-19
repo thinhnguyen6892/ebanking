@@ -3,6 +3,7 @@ package edu.hcmus.project.ebanking.backoffice.resource.transaction.dto;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 public class CreateTransactionRequestDto implements Serializable {
@@ -11,6 +12,7 @@ public class CreateTransactionRequestDto implements Serializable {
     private String content;
     private Double amount;
     private TransactionType type;
+    @NotNull
     private TransactionFeeType feeType;
     private String otpCode;
 

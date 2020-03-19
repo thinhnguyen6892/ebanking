@@ -7,11 +7,12 @@ public class ExceptionResponse {
 	private String message;
 	private String details;
 
-	public ExceptionResponse(Date timestamp, String message, String details) {
+
+	public ExceptionResponse(Date timestamp, String message, String details, boolean showDetails) {
 		super();
 		this.timestamp = timestamp;
 		this.message = message;
-		this.details = details;
+		this.details = showDetails ? details : "";
 	}
 
 	public Date getTimestamp() {
