@@ -10,7 +10,6 @@ import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.DebtDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -33,10 +32,12 @@ public class DebtService {
     public List<DebtDto> GetAllDebt(){
         return debtRepository.findAll().stream().map(debt -> {
             DebtDto dto = new DebtDto();
+            dto.setStatus(debt.getStatus());
             dto.setHolder(debt.getHolder().getId());
             dto.setDebtor(debt.getDebtor().getId());
             dto.setDebtor_acc(debt.getDebtor_acc().getAccountId());
-            dto.setStatus(debt.getStatus());
+            dto.setContent(debt.getContent());
+            dto.setAmount(debt.getAmount());
             return dto;
         }).collect(Collectors.toList());
     }
@@ -46,10 +47,12 @@ public class DebtService {
         if(DebtOp.isPresent()){
             Debt debt = DebtOp.get();
             DebtDto dto = new DebtDto();
+            dto.setStatus(debt.getStatus());
             dto.setHolder(debt.getHolder().getId());
             dto.setDebtor(debt.getDebtor().getId());
             dto.setDebtor_acc(debt.getDebtor_acc().getAccountId());
-            dto.setStatus(debt.getStatus());
+            dto.setContent(debt.getContent());
+            dto.setAmount(debt.getAmount());
             return dto;
         }
         throw new ResourceNotFoundException("Debt not found");
@@ -60,10 +63,12 @@ public class DebtService {
         if (userOp.isPresent()) {
             return debtRepository.findDebtByHolderOrDebtor(userOp.get(), userOp.get()).stream().map(debt -> {
                 DebtDto dto = new DebtDto();
+                dto.setStatus(debt.getStatus());
                 dto.setHolder(debt.getHolder().getId());
                 dto.setDebtor(debt.getDebtor().getId());
                 dto.setDebtor_acc(debt.getDebtor_acc().getAccountId());
-                dto.setStatus(debt.getStatus());
+                dto.setContent(debt.getContent());
+                dto.setAmount(debt.getAmount());
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -75,10 +80,12 @@ public class DebtService {
         if(userOp.isPresent()){
             return debtRepository.findNewDebtByDebtorAndStatus(userOp.get(), DebtStatus.NEW).stream().map(debt -> {
                 DebtDto dto = new DebtDto();
+                dto.setStatus(debt.getStatus());
                 dto.setHolder(debt.getHolder().getId());
                 dto.setDebtor(debt.getDebtor().getId());
                 dto.setDebtor_acc(debt.getDebtor_acc().getAccountId());
-                dto.setStatus(debt.getStatus());
+                dto.setContent(debt.getContent());
+                dto.setAmount(debt.getAmount());
                 return dto;
             }).collect(Collectors.toList());
         }
@@ -88,17 +95,18 @@ public class DebtService {
     @Transactional
     public boolean createDebt(DebtDto dto){
         Optional<User> Debtorop = userRepository.findById(dto.getDebtor());
-        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
+        Optional<User> Holderop = userRepository.findById(dto.getHolder());
         if (Debtorop.isPresent()) {
             Optional<Account> accop = accountRepository.findById(dto.getDebtor_acc());
             if (accop.isPresent()) {
                 Debt newDebt = new Debt();
                 newDebt.setCreateDate(new Date());
                 newDebt.setStatus(DebtStatus.NEW);
-                newDebt.setHolder(userDetails);
+                newDebt.setHolder(Holderop.get());
                 newDebt.setDebtor(Debtorop.get());
                 newDebt.setDebtor_acc(accop.get());
+                newDebt.setContent(dto.getContent());
+                newDebt.setAmount(dto.getAmount());
                 debtRepository.save(newDebt);
                 return true;
             }
@@ -121,6 +129,8 @@ public class DebtService {
                     upDebt.setHolder(Holderop.get());
                     upDebt.setDebtor(Debtorop.get());
                     upDebt.setDebtor_acc(accop.get());
+                    upDebt.setContent(dto.getContent());
+                    upDebt.setAmount(dto.getAmount());
                     debtRepository.save(upDebt);
                     return true;
                 }

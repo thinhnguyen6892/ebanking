@@ -210,4 +210,15 @@ public class UserService {
         return user;
     }
 
+    public boolean deleteEmployee(long id){
+        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
+        if(roleOp.isPresent()) {
+            Optional<User> deUser = userRepository.findById(id);
+            if(deUser.isPresent()){
+                userRepository.deleteById(id);
+                return true;
+            }
+        }
+        return false;
+    }
 }
