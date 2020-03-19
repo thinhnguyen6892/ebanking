@@ -1,6 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
 import edu.hcmus.project.ebanking.backoffice.model.*;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionStatus;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
@@ -115,6 +116,18 @@ public class TransactionService {
         Account target = targetOpt.get();
         Double sourceBalance = source.getBalance();
         Double transactionAmount = dto.getAmount();
+        Double fee = 7000d;
+        switch (dto.getFeeType()){
+            case SENDER:
+                transactionAmount += fee;
+                break;
+            case RECEIVER:
+                transactionAmount -= fee;
+                if(transactionAmount <= 0) {
+                    throw new InvalidTransactionException("The transaction amount should greater than transaction fee (" + fee +")!");
+                }
+                break;
+        }
         if(sourceBalance < transactionAmount) {
             throw new InvalidTransactionException("Insufficient balance. Cannot execute this transaction!");
         }
@@ -129,6 +142,7 @@ public class TransactionService {
         transaction.setStatus(TransactionStatus.NEW);
         transaction.setType(dto.getType());
         transaction.setFeeType(dto.getFeeType());
+        transaction.setFee(fee);
 
         long expires = currentTime + transactionExpiration;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
@@ -147,7 +161,7 @@ public class TransactionService {
     }
 
 
-    public void pay(User owner, TransactionConfirmationDto dto) {
+    public TransactionDto pay(User owner, TransactionConfirmationDto dto) {
         Optional<Transaction> transactionOptional = transactionRepository.findById(dto.getId());
         if(!transactionOptional.isPresent()) {
             throw new BadRequestException("Transaction is not exist!");
@@ -163,11 +177,11 @@ public class TransactionService {
             transactionRepository.save(transaction);
             throw new InvalidTransactionException("Invalid OTP or expired!");
         }
-        performTransaction(owner, transaction);
+        return performTransaction(owner, transaction);
     }
 
     @Transactional
-    public void performTransaction(User owner, Transaction transaction) {
+    public TransactionDto performTransaction(User owner, Transaction transaction) {
         Optional<Account> sourceOpt = accountRepository.findByOwnerAndAccountId(owner, transaction.getSource());
         if(!sourceOpt.isPresent()) {
             throw new BadRequestException("Source account is not exist!");
@@ -181,15 +195,28 @@ public class TransactionService {
         Account target = targetOpt.get();
         Double sourceBalance = source.getBalance();
         Double transactionAmount = transaction.getAmount();
+        Double fee = transaction.getFee();
+        TransactionFeeType feeType = transaction.getFeeType();
+        switch (feeType){
+            case SENDER:
+                transactionAmount += fee;
+                break;
+            case RECEIVER:
+                transactionAmount -= fee;
+                if(transactionAmount <= 0) {
+                    throw new InvalidTransactionException("The transaction amount should greater than transaction fee (" + fee +")!");
+                }
+                break;
+        }
         if(sourceBalance < transactionAmount) {
             throw new InvalidTransactionException("Insufficient balance. Cannot execute this transaction!");
         }
 
-        source.setBalance(sourceBalance - transactionAmount);
+        source.setBalance(sourceBalance - (TransactionFeeType.SENDER.equals(feeType) ? transactionAmount : transaction.getAmount()));
         accountRepository.save(source);
 
         Double targetBalance = target.getBalance();
-        target.setBalance(targetBalance + transactionAmount);
+        target.setBalance(targetBalance + (TransactionFeeType.RECEIVER.equals(feeType) ? transactionAmount : transaction.getAmount()));
         accountRepository.save(source);
 
         transaction.setStatus(TransactionStatus.COMPLETED);
@@ -197,6 +224,7 @@ public class TransactionService {
 
         Transaction receive = new Transaction();
         receive.setFeeType(transaction.getFeeType());
+        receive.setFee(transaction.getFee());
         receive.setAmount(transaction.getAmount());
         receive.setContent(transaction.getContent());
         receive.setDate(ZonedDateTime.now());
@@ -205,6 +233,8 @@ public class TransactionService {
         receive.setStatus(TransactionStatus.COMPLETED);
         receive.setType(TransactionType.DEPOSIT);
         transactionRepository.save(receive);
+        TransactionDto transactionDto = new TransactionDto(transaction);
+        return transactionDto;
     }
 
 

@@ -24,6 +24,7 @@ public class Transaction {
     private Long validity;
 
     private TransactionFeeType feeType;
+    private double fee;
 
     private Bank reference;
 
@@ -144,13 +145,23 @@ public class Transaction {
     }
 
     @ManyToOne
-    @JoinColumn(name = "reference", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "reference", referencedColumnName = "id", nullable = true)
     public Bank getReference() {
         return reference;
     }
 
     public void setReference(Bank reference) {
         this.reference = reference;
+    }
+
+    @Basic
+    @Column(name = "fee")
+    public double getFee() {
+        return fee;
+    }
+
+    public void setFee(double fee) {
+        this.fee = fee;
     }
 
     @Override
