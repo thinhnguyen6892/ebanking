@@ -8,7 +8,9 @@ import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.CreateAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
+import edu.hcmus.project.ebanking.backoffice.resource.exception.ExceptionResponse;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ClassDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -220,5 +222,22 @@ public class UserService {
             }
         }
         return false;
+    }
+
+    public boolean checkUsername(ClassDto dto){
+        String msg;
+        User user = userRepository.findByUsername(dto.getUsername());
+        if(user != null){
+            return false;
+        }
+        return true;
+    }
+
+    public boolean checkEmail(ClassDto dto){
+        User user = userRepository.findByEmail(dto.getEmail());
+        if(user != null){
+            return false;
+        }
+        return true;
     }
 }
