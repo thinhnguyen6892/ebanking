@@ -5,7 +5,6 @@ import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
 import edu.hcmus.project.ebanking.backoffice.service.UserService;
-import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +26,6 @@ public class UserResourceRestController {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserService userService;
@@ -96,9 +92,8 @@ public class UserResourceRestController {
     }
 
     @ApiOperation(value = "1.7 [User] Change password", response = String.class)
-    @PreAuthorize("hasRole('USER')")
     @PostMapping(value = "/password")
-    public ResponseEntity<String> changePassword(@Valid ChangePasswordDto dto) {
+    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordDto dto) {
         return new ResponseEntity(userService.changePassword(JwtTokenUtil.getLoggedUser(), dto.getOldPassword(), dto.getNewPassword()), HttpStatus.OK);
     }
 
@@ -123,5 +118,15 @@ public class UserResourceRestController {
     public ResponseEntity<UserDto> findUserByUserName(@PathVariable String id){
         UserDto user = userService.findUserByUserName(id);
         return new ResponseEntity<UserDto>(user, HttpStatus.OK);
+    }
+
+    @GetMapping("/checkUsername")
+    public ResponseEntity<String> checkUsername(@Valid ClassDto dto){
+        return new ResponseEntity(userService.checkUsername(dto), HttpStatus.OK);
+    }
+
+    @GetMapping("/checkEmail")
+    public ResponseEntity<String> checkEmail(@Valid ClassDto dto){
+        return new ResponseEntity(userService.checkEmail(dto), HttpStatus.OK);
     }
 }

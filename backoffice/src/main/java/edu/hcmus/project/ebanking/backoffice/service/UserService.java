@@ -8,7 +8,9 @@ import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.CreateAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
+import edu.hcmus.project.ebanking.backoffice.resource.exception.ExceptionResponse;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ClassDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,49 +83,6 @@ public class UserService {
         }).collect(Collectors.toList());
     }
 
-    public AccountDto findAccount(String accountId) {
-        Optional<Account> accountOpt = accountRepository.findById(accountId);
-        if(accountOpt.isPresent()) {
-            Account account = accountOpt.get();
-            AccountDto dto = new AccountDto();
-            dto.setAccountId(account.getAccountId());
-            dto.setBalance(account.getBalance());
-            dto.setCreateDate(account.getCreateDate());
-            dto.setExpired(account.getExpired());
-            dto.setOwnerName(account.getOwner().getUsername());
-            dto.setType(account.getType());
-            return dto;
-        }
-        throw new ResourceNotFoundException("Account not found");
-    }
-
-    public List<AccountDto> findUserAccount(Long userId) {
-        Optional<User> userOp = userRepository.findById(userId);
-        if(userOp.isPresent()) {
-            return accountRepository.findAccountsByOwner(userOp.get()).stream()
-                    .map(account -> {
-                        AccountDto dto = new AccountDto();
-                        dto.setAccountId(account.getAccountId());
-                        dto.setBalance(account.getBalance());
-                        dto.setCreateDate(account.getCreateDate());
-                        dto.setExpired(account.getExpired());
-                        dto.setOwnerName(account.getOwner().getUsername());
-                        dto.setType(account.getType());
-                        return dto;
-                    }).collect(Collectors.toList());
-        }
-        throw new EntityNotExistException("User is not exist");
-    }
-
-    public String createAccount(AccountDto dto) {
-        Optional<User> userOp = userRepository.findById(dto.getOwnerId());
-        if(userOp.isPresent()) {
-            return createAccount(userOp.get(), dto);
-        } else {
-            throw new EntityNotExistException("User not found in the system");
-        }
-    }
-
     public String updateAccount(AccountDto dto) {
         Optional<Account> accountOpt = accountRepository.findById(dto.getAccountId());
         if(accountOpt.isPresent()) {
@@ -173,7 +132,6 @@ public class UserService {
                 mailService.sendUserPasswordEmail(newUser, rawPassword);
                 return new UserDto(newUser);
             }
-            return true;
         }
         throw new BadRequestException("Invalid user information!");
     }
@@ -254,4 +212,32 @@ public class UserService {
         return user;
     }
 
+    public boolean deleteEmployee(long id){
+        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
+        if(roleOp.isPresent()) {
+            Optional<User> deUser = userRepository.findById(id);
+            if(deUser.isPresent()){
+                userRepository.deleteById(id);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkUsername(ClassDto dto){
+        String msg;
+        User user = userRepository.findByUsername(dto.getUsername());
+        if(user != null){
+            return false;
+        }
+        return true;
+    }
+
+    public boolean checkEmail(ClassDto dto){
+        User user = userRepository.findByEmail(dto.getEmail());
+        if(user != null){
+            return false;
+        }
+        return true;
+    }
 }

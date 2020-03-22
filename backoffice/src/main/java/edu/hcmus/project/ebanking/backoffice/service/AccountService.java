@@ -66,21 +66,39 @@ public class AccountService {
 
     public String createAccount(CreateAccount dto) {
         Optional<User> userOp = userRepository.findById(dto.getOwnerId());
+<<<<<<< HEAD
         if(userOp.isPresent()) {
+=======
+        if (userOp.isPresent()) {
+>>>>>>> 06ce67bc938ae7cf1ffa59c08ce92075f2ba8312
             return createAccount(userOp.get(), dto, AccountType.SAVING);
         } else {
             throw new BadRequestException("User not found in the system");
         }
     }
 
-    public AccountDto findAccountByAccountId(String accountId){
+    public AccountDto findAccountByAccountId(String accountId) {
         AccountDto result = new AccountDto();
         Optional<Account> accountOpt = accountRepository.findById(accountId);
-        if(accountOpt.isPresent()) {
+        if (accountOpt.isPresent()) {
             Account account = accountOpt.get();
             result.setAccountId(account.getAccountId());
             result.setOwnerName(account.getOwner().getUsername());
         }
         return result;
+    }
+
+    public List<AccountDto> findAccountByUserName(String userName) {
+        Optional<User> user = Optional.ofNullable(userRepository.findByUsername(userName));
+        if (user.isPresent()) {
+            return  accountRepository.findAccountsByOwner(user.get()).stream()
+                    .map(account -> {
+                        AccountDto accountDto = new AccountDto();
+                        accountDto.setOwnerName(account.getOwner().getUsername());
+                        accountDto.setAccountId(account.getAccountId());
+                        return accountDto;
+                    }).collect(Collectors.toList());
+        }
+        return null;
     }
 }
