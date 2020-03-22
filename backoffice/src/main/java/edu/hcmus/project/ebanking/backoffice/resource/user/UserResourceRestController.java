@@ -1,6 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.resource.user;
 
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ChangePasswordDto;
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ClassDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ClassDto;
