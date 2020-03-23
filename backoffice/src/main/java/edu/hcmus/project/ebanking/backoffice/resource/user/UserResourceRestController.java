@@ -3,6 +3,7 @@ package edu.hcmus.project.ebanking.backoffice.resource.user;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ChangePasswordDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ClassDto;
 import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
 import edu.hcmus.project.ebanking.backoffice.service.UserService;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
@@ -73,6 +74,13 @@ public class UserResourceRestController {
     @GetMapping("/customers")
     public List<UserDto> retrieveAllCustomer() {
         return userService.findAllCustomer();
+    }
+
+    @ApiOperation(value = "[Administrator] View a employee on the system. ", response = UserDto.class)
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/employee/{username}")
+    public UserDto findEmployee(@Valid @PathVariable String username){
+        return userService.findEmployeeByUsername(username);
     }
 
     @ApiOperation(value = "[Administrator] Create new employee on the system. ", response = UserDto.class)

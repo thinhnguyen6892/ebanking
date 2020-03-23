@@ -66,11 +66,7 @@ public class AccountService {
 
     public String createAccount(CreateAccount dto) {
         Optional<User> userOp = userRepository.findById(dto.getOwnerId());
-<<<<<<< HEAD
-        if(userOp.isPresent()) {
-=======
         if (userOp.isPresent()) {
->>>>>>> 06ce67bc938ae7cf1ffa59c08ce92075f2ba8312
             return createAccount(userOp.get(), dto, AccountType.SAVING);
         } else {
             throw new BadRequestException("User not found in the system");

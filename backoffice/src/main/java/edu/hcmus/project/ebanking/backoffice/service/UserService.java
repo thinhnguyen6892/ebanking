@@ -240,4 +240,18 @@ public class UserService {
         }
         return true;
     }
+
+    public UserDto findEmployeeByUsername(String username){
+        UserDto dto = new UserDto();
+        Optional<Role> roleOp = roleRepository.findById("STAFF");
+        if(roleOp.isPresent()){
+            User user = userRepository.findByUsername(username);
+            dto.setFirstName(user.getFirstName());
+            dto.setLastName(user.getLastName());
+            dto.setEmail(user.getEmail());
+            dto.setPhone(user.getPhone());
+            return dto;
+        }
+        throw new BadRequestException("Employee not found in the system");
+    }
 }
