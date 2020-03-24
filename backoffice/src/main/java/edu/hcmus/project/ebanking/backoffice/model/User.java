@@ -54,6 +54,14 @@ public class User implements UserDetails {
     @JoinColumn(name = "role_id", referencedColumnName = "role_id", nullable = false)
     private Role role;
 
+    @Basic
+    @Column(name = "recover_opt")
+    private String otpCode;
+
+    @Basic
+    @Column(name = "recover_validity")
+    private Long validity;
+
 
     @OneToMany(mappedBy = "owner")
     private List<Account> accounts = Lists.newArrayList();
@@ -172,5 +180,23 @@ public class User implements UserDetails {
 
     public void setAccounts(List<Account> accounts) {
         this.accounts = accounts;
+    }
+
+
+    public String getOtpCode() {
+        return otpCode;
+    }
+
+    public void setOtpCode(String otpCode) {
+        this.otpCode = otpCode;
+    }
+
+
+    public Long getValidity() {
+        return validity;
+    }
+
+    public void setValidity(Long validity) {
+        this.validity = validity;
     }
 }

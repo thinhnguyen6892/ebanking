@@ -29,6 +29,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static edu.hcmus.project.ebanking.backoffice.service.TokenProvider.DIGITS;
+
 @Service
 public class TransactionService {
 
@@ -146,7 +148,7 @@ public class TransactionService {
 
         long expires = currentTime + transactionExpiration;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
-        String opt = tokenProvider.generateRandomSeries("0123456789", 6);
+        String opt = tokenProvider.generateRandomSeries(DIGITS, 6);
         transaction.setOtpCode(opt);
         transaction.setValidity(expires);
 

@@ -24,7 +24,7 @@ public class Transaction {
     private Long validity;
 
     private TransactionFeeType feeType;
-    private double fee;
+    private Double fee;
 
     private Bank reference;
 
@@ -156,11 +156,11 @@ public class Transaction {
 
     @Basic
     @Column(name = "fee")
-    public double getFee() {
+    public Double getFee() {
         return fee;
     }
 
-    public void setFee(double fee) {
+    public void setFee(Double fee) {
         this.fee = fee;
     }
 

@@ -107,18 +107,12 @@ public class UserResourceRestController {
     }
 
     @ApiOperation(value = "Recover password via email", response = String.class)
-    @RequestMapping(value = "/recover/{email:.+}",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/recover/{email:.+}")
     public ResponseEntity<String> recoverPassword(@NotNull @PathVariable String email,
+                                                  @RequestParam(value = "redirect", required = false) String redirectUrl,
                                                   @RequestParam(value = "token", required = false) String token,
-                                                  @RequestParam(value = "password", required = false) String password,
-                                                  HttpServletRequest request) {
-        try {
-            return new ResponseEntity(userService.recoverPassword(email, token, password, request), HttpStatus.OK);
-        } catch (URISyntaxException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+                                                  @RequestParam(value = "password", required = false) String password) {
+        return new ResponseEntity(userService.recoverPassword(email, redirectUrl, token, password), HttpStatus.OK);
     }
 
     @ApiOperation(value = "[Employee] Get user by userName")

@@ -2,6 +2,7 @@ package edu.hcmus.project.ebanking.backoffice.service;
 
 import edu.hcmus.project.ebanking.backoffice.model.*;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.AccountType;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionStatus;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.RoleRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
@@ -14,6 +15,7 @@ import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ClassDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.net.URISyntaxException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +56,11 @@ public class UserService {
     @Autowired
     private MailService mailService;
 
+    @Value("${app.user.password.recovery.validation.in.seconds}")
+    private Long expiration;
+
+    @Value("${app.dev.mode}")
+    private Boolean devMode;
 
     public List<UserDto> findAllStaffs() {
         return findAllUsers("STAFF", false);
@@ -168,25 +176,36 @@ public class UserService {
         throw new BadRequestException("User not found exception");
     }
 
-    public String recoverPassword(String email, String token, String password, HttpServletRequest request) throws URISyntaxException {
+    public String recoverPassword(String email, String redirectUrl, String token, String password) {
         Optional<User> userOpt = userRepository.findOneByEmail(email);
         if (!userOpt.isPresent()) {
             throw new BadRequestException("User not found in the system");
         }
         User user = userOpt.get();
-        List<GrantedAuthority> grantedAuthorities = new ArrayList<>(user.getAuthorities());
         if (!StringUtils.isEmpty(token)) {
-            if(!tokenProvider.validateToken(token, user)) {
-                throw new TokenException("Invalid token!");
+            ZonedDateTime now = ZonedDateTime.now();
+            long currentTime =  now.toInstant().toEpochMilli();
+            if(!token.equals(user.getOtpCode()) || user.getValidity() < currentTime) {
+                throw new TokenException("Invalid OTP or expired!");
+            }
+            if(StringUtils.isEmpty(password)) {
+                throw new BadRequestException("Password cannot be blank");
             }
             String encryptedPassword = passwordEncoder.encode(password);
             user.setPassword(encryptedPassword);
             userRepository.save(user);
             return "Password changed";
         } else {
-            Token emailToken = tokenProvider.createToken(user);
-//                mailService.sendRecoverPasswordEmail(user, emailToken.getToken(), buildBaseUrl(request));
-            return emailToken.getToken();
+            if(StringUtils.isEmpty(redirectUrl)) {
+                throw new BadRequestException("Redirect Url is required.");
+            }
+            redirectUrl = redirectUrl.concat(email);
+            String emailToken = tokenProvider.generateRandomSeries(DIGITS, 12);
+            mailService.sendRecoverPasswordEmail(user, emailToken, redirectUrl);
+            if(devMode) {
+                return emailToken;
+            }
+            return "Mail is sent!";
         }
     }
 
