@@ -10,7 +10,7 @@ import java.util.Objects;
 public class Account {
 
     private String accountId;
-    private String type;
+    private AccountType type;
     private Double balance = new Double(0);
     private Date createDate = new Date();
     private Date expired;
@@ -22,6 +22,11 @@ public class Account {
 //    @GeneratedValue(generator = "uuid")
 //    @GenericGenerator(name = "uuid", strategy = "uuid")
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_seq")
+    @GenericGenerator(
+            name = "account_seq",
+            strategy = "edu.hcmus.project.ebanking.backoffice.generator.TimestampGenerator"
+    )
     @Column(name = "account_id")
     public String getAccountId() {
         return accountId;
@@ -44,11 +49,12 @@ public class Account {
 
     @Basic
     @Column(name = "type")
-    public String getType() {
+    @Enumerated(EnumType.STRING)
+    public AccountType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(AccountType type) {
         this.type = type;
     }
 

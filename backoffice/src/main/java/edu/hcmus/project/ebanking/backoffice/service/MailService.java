@@ -64,10 +64,11 @@ public class MailService {
     public void sendUserPasswordEmail(User user, String password) {
         log.debug("Sending transaction confirmation e-mail to '{}'", user.getEmail());
         Context context = new Context(Locale.ENGLISH);
+        context.setVariable("name", String.format("%s %s", user.getFirstName(), user.getLastName()));
         context.setVariable("user_name", user.getUsername());
         context.setVariable("password", password);
         String content = templateEngine.process("user_creation", context);
-        String subject = "Your account information";
+        String subject = "Welcome to T2TrC e-Banking!";
         sendEmail(user.getEmail(), subject, content, false, true);
     }
 
@@ -80,16 +81,13 @@ public class MailService {
         sendEmail(user.getEmail(), subject, content, false, true);
     }
 
-
-    public void sendRecoverPasswordEmail(User user, String token, String baseUrl) throws URISyntaxException {
-//        Context context = new Context(Locale.ENGLISH);
-//        context.setVariable("user", user);
-//        StringBuffer stringBuffer = new StringBuffer(baseUrl).append("/#/reset-password/?email=")
-//                .append(user.getEmail()).append("&token=").append(token);
-//        context.setVariable("changePasswordUrl", stringBuffer);
-//        context.setVariable("token", token);
-//        String content = templateEngine.process("recoverPassword", context);
-//        String subject = messageSource.getMessage("email.recover.password.title", null, Locale.ENGLISH);
-//        sendEmail(user.getEmail(), subject, content, false, true);
+    public void sendRecoverPasswordEmail(User user, String otp, String baseUrl){
+        log.debug("Sending password recovery instruction e-mail to '{}'", user.getEmail());
+        Context context = new Context(Locale.ENGLISH);
+        context.setVariable("otp_code", otp);
+        context.setVariable("redirect_url", baseUrl);
+        String content = templateEngine.process("password_recovery", context);
+        String subject = "Password assistance";
+        sendEmail(user.getEmail(), subject, content, false, true);
     }
 }

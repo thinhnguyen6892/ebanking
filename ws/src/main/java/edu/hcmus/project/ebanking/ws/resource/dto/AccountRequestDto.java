@@ -1,10 +1,16 @@
-package edu.hcmus.project.ebanking.ws.resource;
+package edu.hcmus.project.ebanking.ws.resource.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 
-public class AccountRequest {
+public class AccountRequestDto {
+
     @NotNull
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private ZonedDateTime submittedDate;
     @NotNull
     private Long validity;
