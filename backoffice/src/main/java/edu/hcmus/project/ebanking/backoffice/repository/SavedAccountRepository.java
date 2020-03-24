@@ -14,4 +14,5 @@ public interface SavedAccountRepository extends JpaRepository<SavedAccount, Inte
     List<SavedAccount> findByOwner(User owner);
     Optional<SavedAccount> findByIdAndOwner(Integer id, User owner);
     List<SavedAccount> findByOwnerAndNameSuggestionStartingWith(User owner, String name);
+    List<SavedAccount> findByAccountIdStartingWith(String accountid);
 }

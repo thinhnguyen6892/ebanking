@@ -11,6 +11,8 @@ import java.util.Optional;
 @Repository
 public interface AccountRepository extends JpaRepository<Account, String> {
     Optional<Account> findByOwnerAndAccountId(User owner, String id);
+    Optional<Account> findAccountByOwner(User owner);
     List<Account> findAccountsByOwner(User owner);
     List<Account> findAccountsByOwnerAndType(User owner, String type);
+    List<Account> findByAccountIdStartingWith(String id);
 }

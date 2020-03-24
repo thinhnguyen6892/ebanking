@@ -12,8 +12,7 @@ public class Debt {
     private Date createDate;
     private DebtStatus status;
     private User holder;
-    private User debtor;
-    private Account debtor_acc;
+    private Account debtor;
     private String content;
     private Double amount;
 
@@ -61,23 +60,13 @@ public class Debt {
     }
 
     @ManyToOne
-    @JoinColumn (name = "debtor", referencedColumnName = "id", nullable = false)
-    public User getDebtor() {
+    @JoinColumn (name = "debtor", referencedColumnName = "account_id", nullable = false)
+    public Account getDebtor() {
         return debtor;
     }
 
-    public void setDebtor(User debtor) {
+    public void setDebtor(Account debtor) {
         this.debtor = debtor;
-    }
-
-    @ManyToOne
-    @JoinColumn (name = "debtor_acc", referencedColumnName = "account_id", nullable = false)
-    public Account getDebtor_acc() {
-        return debtor_acc;
-    }
-
-    public void setDebtor_acc(Account debtor_acc) {
-        this.debtor_acc = debtor_acc;
     }
 
     @Basic
@@ -110,14 +99,13 @@ public class Debt {
                 Objects.equals(status, debt.status) &&
                 Objects.equals(holder, debt.holder) &&
                 Objects.equals(debtor, debt.debtor) &&
-                Objects.equals(debtor_acc, debt.debtor_acc) &&
                 Objects.equals(content, debt.content) &&
                 Objects.equals(amount, debt.amount);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createDate, status, holder, debtor, debtor_acc, content, amount);
+        return Objects.hash(id, createDate, status, holder, debtor, content, amount);
     }
 
 }

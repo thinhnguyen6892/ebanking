@@ -1,61 +1,90 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt;
 
+import edu.hcmus.project.ebanking.backoffice.model.Account;
+import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.CreateDebtDto;
+import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtDto;
+import edu.hcmus.project.ebanking.backoffice.resource.receiver.dto.ReceiverDto;
+import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
 import edu.hcmus.project.ebanking.backoffice.service.DebtService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
 
 @RestController
+@RequestMapping("/debt")
 public class DebtResourceRestController {
 
     @Autowired
     private DebtService debtService;
 
-    @GetMapping("/debt")
-    public List<DebtDto> getAllDebt() {
+    @ApiOperation(value = "1.1 [User] Debt All Information. ", response = List.class)
+    @GetMapping
+    public List<CreateDebtDto> getAllDebt() {
         return debtService.GetAllDebt();
     }
 
-    @GetMapping("/debt/{id}")
-    public DebtDto findDebt(@Valid @PathVariable int id){
+    @ApiOperation(value = "1.2 [User] Debt Information By ID. ", response = List.class)
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/{id}")
+    public CreateDebtDto findDebt(@Valid @PathVariable int id){
         return debtService.findDebt(id);
     }
 
-    @GetMapping("/debt/had/{user}")
-    public List<DebtDto> findDebtByHolderOrDebtor(@Valid @PathVariable int user){
+    @ApiOperation(value = "1.3 [User] Debt Information By Holder or Debtor. ", response = List.class)
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/had/{user}")
+    public List<CreateDebtDto> findDebtByHolderOrDebtor(@Valid @PathVariable long user){
         return debtService.findDebtbyHolderOrDebtor(user);
     }
 
-    @GetMapping("/debt/debtor/{user}")
-    public List<DebtDto> findNewDebtByDebtor(@Valid @PathVariable int user){
-        return debtService.findNewDebtByDebtor(user);
+    @ApiOperation(value = "1.4 [User] New Debt Information By Debtor. ", response = List.class)
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/debtor/{accountDebtor}")
+    public List<CreateDebtDto> findNewDebtByDebtor(@Valid @PathVariable String accountDebtor){
+        return debtService.findNewDebtByDebtor(accountDebtor);
     }
 
-    @PostMapping("/debt/create")
-    public ResponseEntity<DebtDto> createDebt(@RequestBody DebtDto dto) {
+    @ApiOperation(value = "1.5 [User] Search Debtor Information By Account ID. ", response = List.class)
+    @GetMapping("/search/{account}")
+    public List<DebtDto> search(@PathVariable String account) {
+        return debtService.search(account);
+    }
+
+    @ApiOperation(value = "1.6 [User] Create Debt Information. ", response = List.class)
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/create")
+    public ResponseEntity<CreateDebtDto> createDebt(@RequestBody CreateDebtDto dto) {
         boolean result = debtService.createDebt(dto);
-        return new ResponseEntity<DebtDto>(dto, HttpStatus.OK);
+        return new ResponseEntity<CreateDebtDto>(dto, HttpStatus.OK);
     }
 
-    @PutMapping("/debt/update/{id}")
-    public ResponseEntity<DebtDto> updateDebt(@RequestBody DebtDto dto, @PathVariable int id){
+    @ApiOperation(value = "1.7 [User] Update Debt Information. ", response = List.class)
+    @PreAuthorize("hasRole('USER')")
+    @PutMapping("/update/{id}")
+    public ResponseEntity<CreateDebtDto> updateDebt(@RequestBody CreateDebtDto dto, @PathVariable int id){
         boolean result = debtService.updateDebt(dto, id);
-        return new ResponseEntity<DebtDto>(dto, HttpStatus.OK);
+        return new ResponseEntity<CreateDebtDto>(dto, HttpStatus.OK);
     }
 
-    @DeleteMapping("/debt/delete/{id}")
+    @ApiOperation(value = "1.8 [User] Delete Debt. ", response = List.class)
+    @PreAuthorize("hasRole('USER')")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteDebt(@PathVariable int id) {
         boolean result = debtService.deleteDebt(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("debt/updatestatus/{id}")
-    public ResponseEntity<DebtDto> updateStatus(@RequestBody DebtDto dto, @PathVariable int id){
+    @ApiOperation(value = "1.9 [User] Update Status Debt. ", response = List.class)
+    @PreAuthorize("hasRole('USER')")
+    @PutMapping("/updatestatus/{id}")
+    public ResponseEntity<CreateDebtDto> updateStatus(@RequestBody CreateDebtDto dto, @PathVariable int id){
         boolean result = debtService.changeStatus(dto, id);
-        return new ResponseEntity<DebtDto>(dto, HttpStatus.OK);
+        return new ResponseEntity<CreateDebtDto>(dto, HttpStatus.OK);
     }
 }

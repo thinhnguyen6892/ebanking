@@ -1,4 +1,4 @@
-package edu.hcmus.project.ebanking.backoffice.resource.debt;
+package edu.hcmus.project.ebanking.backoffice.resource.debt.dto;
 
 import edu.hcmus.project.ebanking.backoffice.model.contranst.DebtStatus;
 
@@ -6,12 +6,11 @@ import java.io.Serializable;
 import java.util.Date;
 
 
-public class DebtDto implements Serializable {
+public class CreateDebtDto implements Serializable {
     private Date createDate;
     private DebtStatus status;
     private Long holder;
-    private Long debtor;
-    private String debtor_acc;
+    private String debtor;
     private String content;
     private Double amount;
 
@@ -39,20 +38,12 @@ public class DebtDto implements Serializable {
         this.holder = holder;
     }
 
-    public Long getDebtor() {
+    public String getDebtor() {
         return debtor;
     }
 
-    public void setDebtor(Long debtor) {
+    public void setDebtor(String debtor) {
         this.debtor = debtor;
-    }
-
-    public String getDebtor_acc() {
-        return debtor_acc;
-    }
-
-    public void setDebtor_acc(String debtor_acc) {
-        this.debtor_acc = debtor_acc;
     }
 
     public String getContent() {
