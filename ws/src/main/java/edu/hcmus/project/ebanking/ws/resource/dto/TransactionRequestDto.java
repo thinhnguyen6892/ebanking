@@ -1,24 +1,24 @@
-package edu.hcmus.project.ebanking.ws.resource;
+package edu.hcmus.project.ebanking.ws.resource.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import edu.hcmus.project.ebanking.ws.model.TransactionType;
 
 import javax.validation.constraints.NotNull;
-import java.util.Objects;
 
-public class TransactionRequest extends AccountRequest {
+public class TransactionRequestDto extends AccountRequestDto {
     @NotNull
-    private TransType transType;
+    private TransactionType transType;
     @NotNull
     private Double amount;
     private String note;
 
     private String sign;
 
-    public TransType getTransType() {
+    public TransactionType getTransType() {
         return transType;
     }
 
-    public void setTransType(TransType transType) {
+    public void setTransType(TransactionType transType) {
         this.transType = transType;
     }
 
