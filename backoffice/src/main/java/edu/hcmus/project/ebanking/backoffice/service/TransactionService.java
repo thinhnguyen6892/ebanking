@@ -219,7 +219,7 @@ public class TransactionService {
 
         Double targetBalance = target.getBalance();
         target.setBalance(targetBalance + (TransactionFeeType.RECEIVER.equals(feeType) ? transactionAmount : transaction.getAmount()));
-        accountRepository.save(source);
+        accountRepository.save(target);
 
         transaction.setStatus(TransactionStatus.COMPLETED);
         transactionRepository.save(transaction);
@@ -276,8 +276,8 @@ public class TransactionService {
         transaction.setAmount(transactionDto.getAmount());
         transaction.setContent(transactionDto.getContent());
         transaction.setDate(now);
-        transaction.setSource(senderAccount.getAccountId());
-        transaction.setTarget(receiverAccount.getAccountId());
+        transaction.setTarget(senderAccount.getAccountId());
+        transaction.setSource(receiverAccount.getAccountId());
         transaction.setType(TransactionType.DEPOSIT);
         transaction.setFeeType(transactionDto.getFeeType());
         transaction.setStatus(TransactionStatus.COMPLETED);
