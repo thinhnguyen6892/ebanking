@@ -76,7 +76,7 @@ public class AccountResourceRestController {
     }
 
     @ApiOperation(value = "[Employee] Find account by acountId")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'USER')")
     @GetMapping("/account/{accountId}")
     public AccountDto findAccountByAccountId(@PathVariable String accountId) {
         return accountService.findAccountByAccountId(accountId);
