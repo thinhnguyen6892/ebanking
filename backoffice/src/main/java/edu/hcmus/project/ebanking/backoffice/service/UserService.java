@@ -269,6 +269,7 @@ public class UserService {
             dto.setLastName(user.getLastName());
             dto.setEmail(user.getEmail());
             dto.setPhone(user.getPhone());
+            dto.setAddress(user.getAddress());
             return dto;
         }
         throw new BadRequestException("Employee not found in the system");

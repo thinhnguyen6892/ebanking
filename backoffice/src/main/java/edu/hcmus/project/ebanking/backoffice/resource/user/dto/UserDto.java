@@ -21,6 +21,7 @@ public class UserDto implements Serializable {
         this.email = user.getEmail();
         this.phone = user.getPhone();
         this.userType = user.getRole().getName();
+        this.address = user.getAddress();
     }
     
     @NotNull
@@ -38,6 +39,8 @@ public class UserDto implements Serializable {
 
     @NotBlank
     private String email;
+
+    private String address;
 
     public String getUsername() {
         return username;
@@ -101,5 +104,13 @@ public class UserDto implements Serializable {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }
