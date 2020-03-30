@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,7 +32,7 @@ public class AccountService {
 
     public List<AccountDto> findUserAccounts(Long userId, boolean details) {
         Optional<User> userOp = userRepository.findById(userId);
-        if(userOp.isPresent()) {
+        if (userOp.isPresent()) {
             return accountRepository.findAccountsByOwner(userOp.get()).stream()
                     .map(account -> {
                         AccountDto dto = new AccountDto();
