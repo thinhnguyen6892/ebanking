@@ -163,7 +163,7 @@ public class TransactionService {
     }
 
 
-    public TransactionDto pay(User owner, TransactionConfirmationDto dto) {
+    public TransactionDto confirm(User owner, TransactionConfirmationDto dto) {
         Optional<Transaction> transactionOptional = transactionRepository.findById(dto.getId());
         if(!transactionOptional.isPresent()) {
             throw new BadRequestException("Transaction is not exist!");

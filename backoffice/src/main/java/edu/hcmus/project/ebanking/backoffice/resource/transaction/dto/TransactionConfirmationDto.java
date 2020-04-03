@@ -11,31 +11,11 @@ public class TransactionConfirmationDto implements Serializable {
     @NotNull
     @ApiModelProperty(notes = "[Required] Transaction Identify")
     private String id;
-    @ApiModelProperty(notes = "[Required] Sender's account")
-    private String source;
-    @ApiModelProperty(notes = "[Required] Receiver's account")
-    private String target;
 
     @ApiModelProperty(notes = "[Required] Otp Code")
     @NotBlank
     private String otpCode;
 
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public String getTarget() {
-        return target;
-    }
-
-    public void setTarget(String target) {
-        this.target = target;
-    }
 
     public String getId() {
         return id;
