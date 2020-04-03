@@ -1,4 +1,4 @@
-package edu.hcmus.project.ebanking.backoffice.resource.bank;
+package edu.hcmus.project.ebanking.backoffice.resource.bank.dto;
 
 import java.io.Serializable;
 
