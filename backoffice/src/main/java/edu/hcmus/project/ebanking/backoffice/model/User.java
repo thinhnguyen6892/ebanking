@@ -46,10 +46,6 @@ public class User implements UserDetails {
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "gender")
-    @Enumerated(EnumType.ORDINAL)
-    private UserGender gender;
-
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "role_id", nullable = false)
     private Role role;
@@ -167,14 +163,6 @@ public class User implements UserDetails {
 
     public void setPhone(String phone) {
         this.phone = phone;
-    }
-
-    public UserGender getGender() {
-        return gender;
-    }
-
-    public void setGender(UserGender gender) {
-        this.gender = gender;
     }
 
     public List<Account> getAccounts() {

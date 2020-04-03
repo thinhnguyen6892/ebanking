@@ -2,33 +2,32 @@ package edu.hcmus.project.ebanking.backoffice.resource.bank;
 
 import edu.hcmus.project.ebanking.backoffice.model.Bank;
 import edu.hcmus.project.ebanking.backoffice.repository.BankRepository;
+import edu.hcmus.project.ebanking.backoffice.resource.bank.dto.BankDto;
+import edu.hcmus.project.ebanking.backoffice.resource.bank.dto.BankSimpleDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping("/banks")
 public class BankResourceRestController {
     @Autowired
-    private BankRepository BankRepository;
+    private BankRepository bankRepository;
 
-
-    //@Secured("ROLE_USER")
-//    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/bank")
-    public List<Bank> getAllBank() {
-        return BankRepository.findAll();
+    @GetMapping
+    public List<BankSimpleDto> getListLinkedBank() {
+        return bankRepository.findAll().stream().map(bank -> new BankSimpleDto(bank)).collect(Collectors.toList());
     }
 
-    @GetMapping("/bank/{id}")
+    @GetMapping("/{id}")
     public BankDto findBank(@PathVariable String id){
-        Optional<Bank> BankOp = BankRepository.findById(id);
+        Optional<Bank> BankOp = bankRepository.findById(id);
         if(BankOp.isPresent()){
             Bank bank = BankOp.get();
             BankDto dto = new BankDto();
@@ -44,7 +43,7 @@ public class BankResourceRestController {
         throw new ResourceNotFoundException("Bank not found");
     }
 
-    @PostMapping("/bank/create")
+    @PostMapping("/create")
     public ResponseEntity<BankDto> createBank(@RequestBody BankDto dto) {
         Bank newBank = new Bank();
         newBank.setId(dto.getId());
@@ -54,13 +53,13 @@ public class BankResourceRestController {
         newBank.setPhone(dto.getPhone());
         newBank.setStatus(dto.getStatus());
         newBank.setKey(dto.getKey());
-        newBank = BankRepository.save(newBank);
+        newBank = bankRepository.save(newBank);
         return new ResponseEntity<BankDto>(dto, HttpStatus.OK);
     }
 
-    @PutMapping("/bank/update/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<BankDto> updateBank(@RequestBody BankDto dto, @PathVariable String id){
-        Optional<Bank> BankOp = BankRepository.findById(id);
+        Optional<Bank> BankOp = bankRepository.findById(id);
         if(BankOp.isPresent()) {
             Bank upBank = BankOp.get();
             upBank.setBankName(dto.getBankName());
@@ -69,18 +68,18 @@ public class BankResourceRestController {
             upBank.setPhone(dto.getPhone());
             upBank.setStatus(dto.getStatus());
             upBank.setKey(dto.getKey());
-            upBank = BankRepository.save(upBank);
+            upBank = bankRepository.save(upBank);
             return new ResponseEntity<BankDto>(dto, HttpStatus.OK);
         }
         throw new ResourceNotFoundException("Bank not found");
     }
 
-    @DeleteMapping("/bank/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
-        Optional<Bank> deBank = BankRepository.findById(id);
+        Optional<Bank> deBank = bankRepository.findById(id);
         if(deBank.isPresent())
         {
-            BankRepository.deleteById(id);
+            bankRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         }
         throw new ResourceNotFoundException("Bank not found");
