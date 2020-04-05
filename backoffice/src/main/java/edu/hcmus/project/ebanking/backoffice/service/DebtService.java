@@ -8,11 +8,11 @@ import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.DebtRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.SavedAccountRepository;
-import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.CreateDebtDto;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtDto;
+import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtUserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
-import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
+import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,9 +36,9 @@ public class DebtService {
     @Autowired
     private SavedAccountRepository savedAccountRepository;
 
-    public List<CreateDebtDto> GetAllDebt(){
+    public List<DebtDto> GetAllDebt(){
         return debtRepository.findAll().stream().map(debt -> {
-            CreateDebtDto dto = new CreateDebtDto();
+            DebtDto dto = new DebtDto();
             dto.setStatus(debt.getStatus());
             dto.setHolder(debt.getHolder().getId());
             dto.setDebtor(debt.getDebtor().getAccountId());
@@ -48,11 +48,11 @@ public class DebtService {
         }).collect(Collectors.toList());
     }
 
-    public CreateDebtDto findDebt(int id){
+    public DebtDto findDebt(int id){
         Optional<Debt> DebtOp = debtRepository.findById(id);
         if(DebtOp.isPresent()){
             Debt debt = DebtOp.get();
-            CreateDebtDto dto = new CreateDebtDto();
+            DebtDto dto = new DebtDto();
             dto.setStatus(debt.getStatus());
             dto.setHolder(debt.getHolder().getId());
             dto.setDebtor(debt.getDebtor().getAccountId());
@@ -68,13 +68,13 @@ public class DebtService {
         return accountOp.get();
     }
 
-    public List<CreateDebtDto> findDebtbyHolderOrDebtor(long userid) {
-        Optional<User> userOp = userRepository.findById(userid);
+    public List<DebtDto> findDebtbyHolderOrDebtor() {
+        Optional<User> userOp = userRepository.findById(JwtTokenUtil.getLoggedUser().getId());
         List<Account> accountOp = accountRepository.findAccountsByOwner(userOp.get());
         if(userOp.isPresent()){
             for (Account account : accountOp){
                 return debtRepository.findDebtByHolderOrDebtor(userOp.get(), account).stream().map(debt -> {
-                    CreateDebtDto dto = new CreateDebtDto();
+                    DebtDto dto = new DebtDto();
                     dto.setStatus(debt.getStatus());
                     dto.setHolder(debt.getHolder().getId());
                     dto.setDebtor(debt.getDebtor().getAccountId());
@@ -87,11 +87,11 @@ public class DebtService {
         return null;
     }
 
-    public List<CreateDebtDto> findNewDebtByDebtor(String accountId){
+    public List<DebtDto> findNewDebtByDebtor(String accountId){
         Optional<Account> accountOp = accountRepository.findById(accountId);
         if(accountOp.isPresent()){
             return debtRepository.findNewDebtByDebtorAndStatus(accountOp.get(), DebtStatus.NEW).stream().map(debt -> {
-                CreateDebtDto dto = new CreateDebtDto();
+                DebtDto dto = new DebtDto();
                 dto.setStatus(debt.getStatus());
                 dto.setHolder(debt.getHolder().getId());
                 dto.setDebtor(debt.getDebtor().getAccountId());
@@ -103,11 +103,11 @@ public class DebtService {
         return null;
     }
 
-    public List<DebtDto> search (String id){
+    public List<DebtUserDto> search (String id){
         Optional<Account> accountOp = accountRepository.findById(id);
         if(accountOp.isPresent()){
             return accountRepository.findByAccountIdStartingWith(id).stream().map(account -> {
-                DebtDto dto = new DebtDto();
+                DebtUserDto dto = new DebtUserDto();
                 dto.setAccountId(account.getAccountId());
                 Optional<User> user = userRepository.findById(account.getOwner().getId());
                 dto.setFirstName(user.get().getFirstName());
@@ -122,13 +122,12 @@ public class DebtService {
 
     @Transactional
     public boolean createDebt(CreateDebtDto dto){
-        Optional<User> Holderop = userRepository.findById(dto.getHolder());
         Optional<Account> accop = accountRepository.findById(dto.getDebtor());
         if (accop.isPresent()) {
             Debt newDebt = new Debt();
             newDebt.setCreateDate(new Date());
             newDebt.setStatus(DebtStatus.NEW);
-            newDebt.setHolder(Holderop.get());
+            newDebt.setHolder(JwtTokenUtil.getLoggedUser());
             newDebt.setDebtor(accop.get());
             newDebt.setContent(dto.getContent());
             newDebt.setAmount(dto.getAmount());
@@ -141,14 +140,13 @@ public class DebtService {
     @Transactional
     public boolean updateDebt(CreateDebtDto dto, int id){
         Optional<Debt> DebtOp = debtRepository.findById(id);
-        Optional<User> Holderop = userRepository.findById(dto.getHolder());
         Optional<Account> accop = accountRepository.findById(dto.getDebtor());
         if(DebtOp.isPresent()) {
             if(accop.isPresent()){
                 Debt upDebt = new Debt();
                 upDebt.setCreateDate(new Date());
                 upDebt.setStatus(dto.getStatus());
-                upDebt.setHolder(Holderop.get());
+                upDebt.setHolder(JwtTokenUtil.getLoggedUser());
                 upDebt.setDebtor(accop.get());
                 upDebt.setContent(dto.getContent());
                 upDebt.setAmount(dto.getAmount());

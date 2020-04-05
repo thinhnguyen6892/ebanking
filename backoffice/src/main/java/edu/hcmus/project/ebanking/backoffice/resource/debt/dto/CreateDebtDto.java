@@ -5,11 +5,9 @@ import edu.hcmus.project.ebanking.backoffice.model.contranst.DebtStatus;
 import java.io.Serializable;
 import java.util.Date;
 
-
 public class CreateDebtDto implements Serializable {
     private Date createDate;
     private DebtStatus status;
-    private Long holder;
     private String debtor;
     private String content;
     private Double amount;
@@ -28,14 +26,6 @@ public class CreateDebtDto implements Serializable {
 
     public void setStatus(DebtStatus status) {
         this.status = status;
-    }
-
-    public Long getHolder() {
-        return holder;
-    }
-
-    public void setHolder(Long holder) {
-        this.holder = holder;
     }
 
     public String getDebtor() {

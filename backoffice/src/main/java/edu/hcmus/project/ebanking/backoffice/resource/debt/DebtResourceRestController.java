@@ -1,10 +1,9 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt;
 
-import edu.hcmus.project.ebanking.backoffice.model.Account;
+import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.CreateDebtDto;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtDto;
-import edu.hcmus.project.ebanking.backoffice.resource.receiver.dto.ReceiverDto;
-import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
+import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtUserDto;
 import edu.hcmus.project.ebanking.backoffice.service.DebtService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.*;
@@ -25,34 +24,34 @@ public class DebtResourceRestController {
 
     @ApiOperation(value = "1.1 [User] Debt All Information. ", response = List.class)
     @GetMapping
-    public List<CreateDebtDto> getAllDebt() {
+    public List<DebtDto> getAllDebt() {
         return debtService.GetAllDebt();
     }
 
     @ApiOperation(value = "1.2 [User] Debt Information By ID. ", response = List.class)
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/{id}")
-    public CreateDebtDto findDebt(@Valid @PathVariable int id){
+    public DebtDto findDebt(@Valid @PathVariable int id){
         return debtService.findDebt(id);
     }
 
-    @ApiOperation(value = "1.3 [User] Debt Information By Holder or Debtor. ", response = List.class)
+    @ApiOperation(value = "1.3 [User] Debt Information By Holder or Debtor by current userid. ", response = List.class)
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/had/{user}")
-    public List<CreateDebtDto> findDebtByHolderOrDebtor(@Valid @PathVariable long user){
-        return debtService.findDebtbyHolderOrDebtor(user);
+    @GetMapping("/had/")
+    public List<DebtDto> findDebtByHolderOrDebtor(){
+        return debtService.findDebtbyHolderOrDebtor();
     }
 
     @ApiOperation(value = "1.4 [User] New Debt Information By Debtor. ", response = List.class)
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/debtor/{accountDebtor}")
-    public List<CreateDebtDto> findNewDebtByDebtor(@Valid @PathVariable String accountDebtor){
+    public List<DebtDto> findNewDebtByDebtor(@Valid @PathVariable String accountDebtor){
         return debtService.findNewDebtByDebtor(accountDebtor);
     }
 
     @ApiOperation(value = "1.5 [User] Search Debtor Information By Account ID. ", response = List.class)
     @GetMapping("/search/{account}")
-    public List<DebtDto> search(@PathVariable String account) {
+    public List<DebtUserDto> search(@PathVariable String account) {
         return debtService.search(account);
     }
 
