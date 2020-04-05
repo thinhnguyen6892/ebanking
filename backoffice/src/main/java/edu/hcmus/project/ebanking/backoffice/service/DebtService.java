@@ -87,8 +87,8 @@ public class DebtService {
         return null;
     }
 
-    public List<DebtDto> findNewDebtByDebtor(String accountId){
-        Optional<Account> accountOp = accountRepository.findById(accountId);
+    public List<DebtDto> findNewDebtByDebtor(){
+        Optional<Account> accountOp = accountRepository.findAccountByOwner(JwtTokenUtil.getLoggedUser());
         if(accountOp.isPresent()){
             return debtRepository.findNewDebtByDebtorAndStatus(accountOp.get(), DebtStatus.NEW).stream().map(debt -> {
                 DebtDto dto = new DebtDto();

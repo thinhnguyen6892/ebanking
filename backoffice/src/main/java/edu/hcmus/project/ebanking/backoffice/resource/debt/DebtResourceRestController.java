@@ -44,9 +44,9 @@ public class DebtResourceRestController {
 
     @ApiOperation(value = "1.4 [User] New Debt Information By Debtor. ", response = List.class)
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/debtor/{accountDebtor}")
-    public List<DebtDto> findNewDebtByDebtor(@Valid @PathVariable String accountDebtor){
-        return debtService.findNewDebtByDebtor(accountDebtor);
+    @GetMapping("/debtor")
+    public List<DebtDto> findNewDebtByDebtor(){
+        return debtService.findNewDebtByDebtor();
     }
 
     @ApiOperation(value = "1.5 [User] Search Debtor Information By Account ID. ", response = List.class)
