@@ -177,4 +177,15 @@ public class DebtService {
         return false;
     }
 
+    public boolean CancelDebt(CreateDebtDto dto, int id){
+        Optional<Debt> debtOp = debtRepository.findById(id);
+        if(debtOp.isPresent()){
+            Debt debt = new Debt();
+            debt.setContent(dto.getContent());
+            debt.setStatus(DebtStatus.CANCEL);
+            debtRepository.save(debt);
+            return true;
+        }
+        return false;
+    }
 }

@@ -71,6 +71,14 @@ public class DebtResourceRestController {
         return new ResponseEntity<CreateDebtDto>(dto, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "1.7 [User] Cancel Debt Information. ", response = List.class)
+    @PreAuthorize("hasRole('USER')")
+    @PutMapping("/Cancel/{id}")
+    public ResponseEntity<CreateDebtDto> CancelDebt(@RequestBody CreateDebtDto dto, @PathVariable int id){
+        boolean result = debtService.CancelDebt(dto, id);
+        return new ResponseEntity<CreateDebtDto>(dto, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "1.8 [User] Delete Debt. ", response = List.class)
     @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/delete/{id}")
