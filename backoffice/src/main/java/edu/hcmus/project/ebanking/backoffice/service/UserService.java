@@ -193,8 +193,13 @@ public class UserService {
             if(StringUtils.isEmpty(redirectUrl)) {
                 throw new BadRequestException("Redirect Url is required.");
             }
-            redirectUrl = redirectUrl.concat(email);
+
             String emailToken = tokenProvider.generateRandomSeries(DIGITS, 12);
+            long currentTime =  ZonedDateTime.now().toInstant().toEpochMilli();
+            long expires = currentTime + expiration;
+            user.setOtpCode(emailToken);
+            user.setValidity(expires);
+            userRepository.save(user);
             mailService.sendRecoverPasswordEmail(user, emailToken, redirectUrl);
             if(devMode) {
                 return emailToken;
