@@ -35,11 +35,11 @@ public class DebtResourceRestController {
         return debtService.findDebt(id);
     }
 
-    @ApiOperation(value = "1.3 [User] Debt Information By Holder or Debtor by current userid. ", response = List.class)
+    @ApiOperation(value = "1.3 [User] Debt Information By Holder or Debtor, 0: All; 1: Holder; 2: Debtor. ", response = List.class)
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/had/")
-    public List<DebtDto> findDebtByHolderOrDebtor(){
-        return debtService.findDebtbyHolderOrDebtor();
+    @GetMapping("/holderanddebtor/{type}")
+    public List<DebtDto> findDebtByHolderOrDebtor(@Valid @PathVariable int type){
+        return debtService.findDebtbyHolderOrDebtor(type);
     }
 
     @ApiOperation(value = "1.4 [User] New Debt Information By Debtor. ", response = List.class)

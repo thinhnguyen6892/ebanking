@@ -10,6 +10,8 @@ public class DebtDto implements Serializable {
     private Date createDate;
     private DebtStatus status;
     private Long holder;
+    private String firstName;
+    private String lastName;
     private String debtor;
     private String content;
     private Double amount;
@@ -60,5 +62,21 @@ public class DebtDto implements Serializable {
 
     public void setAmount(Double amount) {
         this.amount = amount;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

@@ -13,4 +13,6 @@ import java.util.List;
 public interface DebtRepository extends JpaRepository<Debt, Integer> {
     List<Debt> findDebtByHolderOrDebtor(User holder, Account debtor);
     List<Debt> findNewDebtByDebtorAndStatus(Account debtor_acc, DebtStatus status);
+    List<Debt> findDebtByHolder(User holder);
+    List<Debt> findDebtByDebtor(Account debtor);
 }

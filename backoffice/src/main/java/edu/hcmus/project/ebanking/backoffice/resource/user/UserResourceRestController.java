@@ -1,10 +1,8 @@
 package edu.hcmus.project.ebanking.backoffice.resource.user;
 
-import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ChangePasswordDto;
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.*;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ClassDto;
-import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
-import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ClassDto;
 import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
 import edu.hcmus.project.ebanking.backoffice.service.UserService;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;

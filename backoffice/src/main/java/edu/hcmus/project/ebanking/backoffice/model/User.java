@@ -58,10 +58,6 @@ public class User implements UserDetails {
     @Column(name = "recover_validity")
     private Long validity;
 
-    @Basic
-    @Column(name = "address")
-    private String address;
-
     @OneToMany(mappedBy = "owner")
     private List<Account> accounts = Lists.newArrayList();
 
@@ -191,11 +187,4 @@ public class User implements UserDetails {
         this.validity = validity;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
 }

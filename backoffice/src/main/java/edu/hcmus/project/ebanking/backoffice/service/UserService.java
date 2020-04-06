@@ -2,30 +2,24 @@ package edu.hcmus.project.ebanking.backoffice.service;
 
 import edu.hcmus.project.ebanking.backoffice.model.*;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.AccountType;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionStatus;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.RoleRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.CreateAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
-import edu.hcmus.project.ebanking.backoffice.resource.exception.ExceptionResponse;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ClassDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -261,15 +255,16 @@ public class UserService {
     }
 
     public UserDto findEmployeeByUsername(String username){
+        User user = userRepository.findByUsername(username);
         UserDto dto = new UserDto();
         Optional<Role> roleOp = roleRepository.findById("STAFF");
-        if(roleOp.isPresent()){
-            User user = userRepository.findByUsername(username);
+        if(user.getRole() == roleOp.get()){
+            dto.setId(user.getId().toString());
             dto.setFirstName(user.getFirstName());
             dto.setLastName(user.getLastName());
+            dto.setUsername(user.getUsername());
             dto.setEmail(user.getEmail());
             dto.setPhone(user.getPhone());
-            dto.setAddress(user.getAddress());
             return dto;
         }
         throw new BadRequestException("Employee not found in the system");
