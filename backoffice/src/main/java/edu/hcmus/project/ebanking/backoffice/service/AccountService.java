@@ -30,6 +30,7 @@ public class AccountService {
     @Autowired
     private TransactionService transactionService;
 
+
     public List<AccountDto> findUserAccounts(Long userId, boolean details) {
         Optional<User> userOp = userRepository.findById(userId);
         if (userOp.isPresent()) {

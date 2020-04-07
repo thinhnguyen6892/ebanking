@@ -8,6 +8,9 @@ import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
+import static edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType.RECEIVER;
+import static edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType.SENDER;
+
 public class TransactionDto implements Serializable {
 
     private String id;
@@ -19,7 +22,9 @@ public class TransactionDto implements Serializable {
     private Double amount;
     private TransactionType type;
     private TransactionFeeType feeType;
+    private Double fee;
 
+    private String amountInDetail;
     private String otpCode;
 
     public TransactionDto()  {
@@ -35,6 +40,13 @@ public class TransactionDto implements Serializable {
         this.type = transaction.getType();
         this.amount = transaction.getAmount();
         this.feeType = transaction.getFeeType();
+        this.setFee(transaction.getFee());
+        switch (type) {
+            case DEPOSIT:
+                this.amountInDetail = "+".concat(String.valueOf(RECEIVER.equals(feeType) ? (amount - getFee()) : amount));
+                break;
+            default: this.amountInDetail = "-".concat(String.valueOf(SENDER.equals(feeType) ? (amount + getFee()) : amount));
+        }
     }
 
     public String getSource() {
@@ -107,5 +119,21 @@ public class TransactionDto implements Serializable {
 
     public void setOtpCode(String otpCode) {
         this.otpCode = otpCode;
+    }
+
+    public String getAmountInDetail() {
+        return amountInDetail;
+    }
+
+    public void setAmountInDetail(String amountInDetail) {
+        this.amountInDetail = amountInDetail;
+    }
+
+    public Double getFee() {
+        return fee;
+    }
+
+    public void setFee(Double fee) {
+        this.fee = fee;
     }
 }

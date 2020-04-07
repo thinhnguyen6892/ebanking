@@ -1,8 +1,8 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt;
 
-import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.CreateDebtDto;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtDto;
+import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtPaymentDto;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtUserDto;
 import edu.hcmus.project.ebanking.backoffice.service.DebtService;
 import io.swagger.annotations.ApiOperation;
@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -93,5 +94,14 @@ public class DebtResourceRestController {
     public ResponseEntity<CreateDebtDto> updateStatus(@RequestBody CreateDebtDto dto, @PathVariable int id){
         boolean result = debtService.changeStatus(dto, id);
         return new ResponseEntity<CreateDebtDto>(dto, HttpStatus.OK);
+    }
+
+
+    @ApiOperation(value = "1.5.4 Thanh toan nhac no ", response = DebtPaymentDto.class)
+    @PreAuthorize("hasRole('USER')")
+    @PutMapping("/pay/{id}")
+    public ResponseEntity<DebtPaymentDto> pay(@PathVariable @NotNull Integer id){
+        DebtPaymentDto result = debtService.pay(id);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

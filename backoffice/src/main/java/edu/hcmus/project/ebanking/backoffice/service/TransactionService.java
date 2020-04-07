@@ -1,13 +1,8 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
 import edu.hcmus.project.ebanking.backoffice.model.*;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionStatus;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
-import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.BankRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.TransactionRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.*;
+import edu.hcmus.project.ebanking.backoffice.repository.*;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.DepositAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.InvalidTransactionException;
@@ -51,6 +46,9 @@ public class TransactionService {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired
+    private DebtRepository debtRepository;
 
     @Value("${app.transaction.validation.in.seconds}")
     private Long transactionExpiration;
@@ -147,7 +145,6 @@ public class TransactionService {
         transaction.setFee(fee);
 
         long expires = currentTime + transactionExpiration;
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
         String opt = tokenProvider.generateRandomSeries(DIGITS, 6);
         transaction.setOtpCode(opt);
         transaction.setValidity(expires);
@@ -162,7 +159,7 @@ public class TransactionService {
         return transactionDto;
     }
 
-
+    @Transactional
     public TransactionDto confirm(User owner, TransactionConfirmationDto dto) {
         Optional<Transaction> transactionOptional = transactionRepository.findById(dto.getId());
         if(!transactionOptional.isPresent()) {
@@ -182,7 +179,6 @@ public class TransactionService {
         return performTransaction(owner, transaction);
     }
 
-    @Transactional
     public TransactionDto performTransaction(User owner, Transaction transaction) {
         Optional<Account> sourceOpt = accountRepository.findByOwnerAndAccountId(owner, transaction.getSource());
         if(!sourceOpt.isPresent()) {
@@ -235,6 +231,18 @@ public class TransactionService {
         receive.setStatus(TransactionStatus.COMPLETED);
         receive.setType(TransactionType.DEPOSIT);
         transactionRepository.save(receive);
+
+        if(transaction.getType().equals(TransactionType.PAYMENT)) {
+            Optional<Debt> optionalDebt = debtRepository.findDebtByPaymentRef(transaction);
+            if(!optionalDebt.isPresent()) {
+                throw new RuntimeException("Cannot process debt payment for this transaction. Debt was not found!");
+            }
+            Debt debt = optionalDebt.get();
+            debt.setStatus(DebtStatus.COMPLETED);
+            debtRepository.save(debt);
+            mailService.sendDebtPaymentNotificationEmail(target.getOwner(), String.valueOf(debt.getId()), receive);
+        }
+
         TransactionDto transactionDto = new TransactionDto(transaction);
         return transactionDto;
     }
@@ -254,7 +262,7 @@ public class TransactionService {
             if(receiver == null) {
                 throw new BadRequestException("User is not exist");
             }
-            List<Account> receiverAccounts = accountRepository.findAccountsByOwnerAndType(receiver, "PAYMENT");
+            List<Account> receiverAccounts = accountRepository.findAccountsByOwnerAndType(receiver, AccountType.PAYMENT);
             if(receiverAccounts.isEmpty()) {
                 throw new BadRequestException("Receiver user doesn't have PAYMENT account.");
             }

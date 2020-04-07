@@ -1,5 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt.dto;
 
+import edu.hcmus.project.ebanking.backoffice.model.Debt;
+import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.DebtStatus;
 
 import java.io.Serializable;
@@ -15,6 +17,20 @@ public class DebtDto implements Serializable {
     private String debtor;
     private String content;
     private Double amount;
+
+    public DebtDto() {
+
+    }
+
+    public DebtDto(Debt debt) {
+        this.createDate = debt.getCreateDate();
+        this.status = debt.getStatus();
+        User holder =  debt.getHolder();
+        this.firstName = holder.getFirstName();
+        this.lastName = holder.getLastName();
+        this.content = debt.getContent();
+        this.amount = debt.getAmount();
+    }
 
     public Date getCreateDate() {
         return createDate;
