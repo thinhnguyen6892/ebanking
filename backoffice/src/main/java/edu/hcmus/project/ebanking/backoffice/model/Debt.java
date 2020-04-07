@@ -15,6 +15,7 @@ public class Debt {
     private Account debtor;
     private String content;
     private Double amount;
+    private Transaction paymentRef;
 
 
     @Id
@@ -69,6 +70,8 @@ public class Debt {
         this.debtor = debtor;
     }
 
+
+
     @Basic
     @Column(name = "content")
     public String getContent() {
@@ -108,4 +111,15 @@ public class Debt {
         return Objects.hash(id, createDate, status, holder, debtor, content, amount);
     }
 
+
+
+    @ManyToOne
+    @JoinColumn(name = "payment_ref", referencedColumnName = "id")
+    public Transaction getPaymentRef() {
+        return paymentRef;
+    }
+
+    public void setPaymentRef(Transaction paymentRef) {
+        this.paymentRef = paymentRef;
+    }
 }

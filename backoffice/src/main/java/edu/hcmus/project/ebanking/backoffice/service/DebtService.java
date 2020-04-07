@@ -2,16 +2,21 @@ package edu.hcmus.project.ebanking.backoffice.service;
 
 import edu.hcmus.project.ebanking.backoffice.model.Account;
 import edu.hcmus.project.ebanking.backoffice.model.Debt;
+import edu.hcmus.project.ebanking.backoffice.model.Transaction;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.AccountType;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.DebtStatus;
 import edu.hcmus.project.ebanking.backoffice.model.User;
-import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.DebtRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.SavedAccountRepository;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType;
+import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
+import edu.hcmus.project.ebanking.backoffice.repository.*;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.CreateDebtDto;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtDto;
+import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtPaymentDto;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtUserDto;
+import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
+import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.CreateTransactionRequestDto;
+import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionDto;
 import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +40,12 @@ public class DebtService {
 
     @Autowired
     private SavedAccountRepository savedAccountRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private TransactionService transactionService;
 
     public List<DebtDto> GetAllDebt(){
         return debtRepository.findAll().stream().map(debt -> {
@@ -247,5 +258,38 @@ public class DebtService {
             return true;
         }
         return false;
+    }
+
+    public DebtPaymentDto pay(Integer id) {
+        Optional<Debt> debtOpt = debtRepository.findDebtByIdAndStatus(id, DebtStatus.NEW);
+        if(!debtOpt.isPresent()) {
+            throw new BadRequestException("Debt not found in the system!");
+        }
+        Debt debt = debtOpt.get();
+        if(!debt.getDebtor().getOwner().getId().equals(JwtTokenUtil.getLoggedUser().getId())) {
+            throw new BadRequestException("Debt not found in the system!");
+        }
+        CreateTransactionRequestDto transactionRequestDto = new CreateTransactionRequestDto();
+        transactionRequestDto.setType(TransactionType.PAYMENT);
+        transactionRequestDto.setAmount(debt.getAmount());
+        transactionRequestDto.setContent(debt.getContent());
+        transactionRequestDto.setFeeType(TransactionFeeType.SENDER);
+        transactionRequestDto.setSource(debt.getDebtor().getAccountId());
+        List<Account> receiverAccounts = accountRepository.findAccountsByOwnerAndType(debt.getHolder(), AccountType.PAYMENT);
+        if(receiverAccounts.isEmpty()) {
+            throw new BadRequestException("Receiver user doesn't have PAYMENT account.");
+        }
+        Account receiverAccount = receiverAccounts.get(0);
+        transactionRequestDto.setTarget(receiverAccount.getAccountId());
+        TransactionDto transactionDto = transactionService.requestTransaction(JwtTokenUtil.getLoggedUser(), transactionRequestDto);
+        Optional<Transaction> transactionOptional = transactionRepository.findById(transactionDto.getId());
+        if(!transactionOptional.isPresent()) {
+            throw new RuntimeException("Cannot create transaction for this action!");
+        }
+        debt.setPaymentRef(transactionOptional.get());
+        debtRepository.save(debt);
+        DebtPaymentDto debtPaymentDto = new DebtPaymentDto(debt);
+        debtPaymentDto.setTransactionInfo(transactionDto);
+        return debtPaymentDto;
     }
 }

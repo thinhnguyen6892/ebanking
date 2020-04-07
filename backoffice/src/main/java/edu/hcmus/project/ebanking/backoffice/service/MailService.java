@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
+import edu.hcmus.project.ebanking.backoffice.model.Transaction;
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,8 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import javax.mail.internet.MimeMessage;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 @Service
@@ -88,6 +91,19 @@ public class MailService {
         context.setVariable("redirect_url", baseUrl);
         String content = templateEngine.process("password_recovery", context);
         String subject = "Password assistance";
+        sendEmail(user.getEmail(), subject, content, false, true);
+    }
+
+    public void sendDebtPaymentNotificationEmail(User user, String debtId, Transaction transaction){
+        log.debug("Sending debt payment notification e-mail to '{}'", user.getEmail());
+        Context context = new Context(Locale.ENGLISH);
+        context.setVariable("name", String.format("%s %s", user.getFirstName(), user.getLastName()));
+        context.setVariable("date", transaction.getDate().format(DateTimeFormatter.ISO_TIME));
+        context.setVariable("amount", transaction.getAmount());
+        context.setVariable("debt", debtId);
+        context.setVariable("account", transaction.getSource());
+        String content = templateEngine.process("debt_payment", context);
+        String subject = "Payment Acknowledgment";
         sendEmail(user.getEmail(), subject, content, false, true);
     }
 }
