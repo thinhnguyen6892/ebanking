@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
+import edu.hcmus.project.ebanking.backoffice.model.Debt;
 import edu.hcmus.project.ebanking.backoffice.model.Transaction;
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import org.slf4j.Logger;
@@ -102,6 +103,18 @@ public class MailService {
         context.setVariable("amount", transaction.getAmount());
         context.setVariable("debt", debtId);
         context.setVariable("account", transaction.getSource());
+        String content = templateEngine.process("debt_payment", context);
+        String subject = "Payment Acknowledgment";
+        sendEmail(user.getEmail(), subject, content, false, true);
+    }
+
+    public void sendCancelDebtNotificationEmail(User user, int debtId, Debt debt){
+        log.debug("Sending cancel debt notification e-mail to '{}'", user.getEmail());
+        Context context = new Context(Locale.ENGLISH);
+        context.setVariable("name", String.format("%s %s", user.getFirstName(), user.getLastName()));
+        context.setVariable("date", debt.getCreateDate());
+        context.setVariable("amount", debt.getAmount());
+        context.setVariable("debt", debtId);
         String content = templateEngine.process("debt_payment", context);
         String subject = "Payment Acknowledgment";
         sendEmail(user.getEmail(), subject, content, false, true);

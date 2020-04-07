@@ -1,9 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt;
 
-import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.CreateDebtDto;
-import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtDto;
-import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtPaymentDto;
-import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtUserDto;
+import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.*;
 import edu.hcmus.project.ebanking.backoffice.service.DebtService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.*;
@@ -72,12 +69,12 @@ public class DebtResourceRestController {
         return new ResponseEntity<CreateDebtDto>(dto, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "1.7 [User] Cancel Debt Information. ", response = List.class)
+    @ApiOperation(value = "1.7 [User] Cancel Debt Information with write reason in note. ", response = List.class)
     @PreAuthorize("hasRole('USER')")
-    @PutMapping("/Cancel/{id}")
-    public ResponseEntity<CreateDebtDto> CancelDebt(@RequestBody CreateDebtDto dto, @PathVariable int id){
+    @PutMapping("/cancel/{id}")
+    public ResponseEntity<CancelDto> CancelDebt(@RequestBody CancelDto dto, @Valid @PathVariable int id){
         boolean result = debtService.CancelDebt(dto, id);
-        return new ResponseEntity<CreateDebtDto>(dto, HttpStatus.OK);
+        return new ResponseEntity<CancelDto>(dto, HttpStatus.OK);
     }
 
     @ApiOperation(value = "1.8 [User] Delete Debt. ", response = List.class)

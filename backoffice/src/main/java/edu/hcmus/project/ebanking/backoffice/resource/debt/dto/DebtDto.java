@@ -28,8 +28,8 @@ public class DebtDto implements Serializable {
         this.createDate = debt.getCreateDate();
         this.status = debt.getStatus();
         User holder =  debt.getHolder();
-        this.firstName = holder.getFirstName();
-        this.lastName = holder.getLastName();
+        this.holderFirstName = holder.getFirstName();
+        this.holderLastName = holder.getLastName();
         this.content = debt.getContent();
         this.amount = debt.getAmount();
     }

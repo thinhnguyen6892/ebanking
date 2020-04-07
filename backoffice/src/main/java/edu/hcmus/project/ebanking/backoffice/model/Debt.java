@@ -15,6 +15,7 @@ public class Debt {
     private Account debtor;
     private String content;
     private Double amount;
+    private String note;
     private Transaction paymentRef;
 
 
@@ -103,12 +104,14 @@ public class Debt {
                 Objects.equals(holder, debt.holder) &&
                 Objects.equals(debtor, debt.debtor) &&
                 Objects.equals(content, debt.content) &&
-                Objects.equals(amount, debt.amount);
+                Objects.equals(amount, debt.amount) &&
+                Objects.equals(note, debt.note) &&
+                Objects.equals(paymentRef, debt.paymentRef);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createDate, status, holder, debtor, content, amount);
+        return Objects.hash(id, createDate, status, holder, debtor, content, amount, note, paymentRef);
     }
 
 
@@ -121,5 +124,15 @@ public class Debt {
 
     public void setPaymentRef(Transaction paymentRef) {
         this.paymentRef = paymentRef;
+    }
+
+    @Basic
+    @Column(name = "note")
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }

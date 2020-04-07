@@ -9,10 +9,7 @@ import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
 import edu.hcmus.project.ebanking.backoffice.repository.*;
-import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.CreateDebtDto;
-import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtDto;
-import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtPaymentDto;
-import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.DebtUserDto;
+import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.*;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.CreateTransactionRequestDto;
@@ -39,7 +36,7 @@ public class DebtService {
     private AccountRepository accountRepository;
 
     @Autowired
-    private SavedAccountRepository savedAccountRepository;
+    private MailService mailService;
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -99,6 +96,7 @@ public class DebtService {
                             dto.setDebtorFirstName(userop.get().getFirstName());
                             dto.setDebtorLastName(userop.get().getLastName());
                         }
+                        dto.setCreateDate(debt.getCreateDate());
                         dto.setContent(debt.getContent());
                         dto.setAmount(debt.getAmount());
                         return dto;
@@ -119,6 +117,7 @@ public class DebtService {
                         dto.setDebtorFirstName(userop.get().getFirstName());
                         dto.setDebtorLastName(userop.get().getLastName());
                     }
+                    dto.setCreateDate(debt.getCreateDate());
                     dto.setContent(debt.getContent());
                     dto.setAmount(debt.getAmount());
                     return dto;
@@ -139,6 +138,7 @@ public class DebtService {
                             dto.setDebtorFirstName(userop.get().getFirstName());
                             dto.setDebtorLastName(userop.get().getLastName());
                         }
+                        dto.setCreateDate(debt.getCreateDate());
                         dto.setContent(debt.getContent());
                         dto.setAmount(debt.getAmount());
                         return dto;
@@ -165,6 +165,7 @@ public class DebtService {
                     dto.setDebtorFirstName(userop.get().getFirstName());
                     dto.setDebtorLastName(userop.get().getLastName());
                 }
+                dto.setCreateDate(debt.getCreateDate());
                 dto.setContent(debt.getContent());
                 dto.setAmount(debt.getAmount());
                 return dto;
@@ -213,7 +214,7 @@ public class DebtService {
         Optional<Account> accop = accountRepository.findById(dto.getDebtor());
         if(DebtOp.isPresent()) {
             if(accop.isPresent()){
-                Debt upDebt = new Debt();
+                Debt upDebt = DebtOp.get();
                 upDebt.setCreateDate(new Date());
                 upDebt.setStatus(dto.getStatus());
                 upDebt.setHolder(JwtTokenUtil.getLoggedUser());
@@ -241,18 +242,32 @@ public class DebtService {
         if(DebtOp.isPresent()) {
             Debt upDebt = new Debt();
             upDebt.setStatus(dto.getStatus());
-
             debtRepository.save(upDebt);
             return true;
         }
         return false;
     }
 
-    public boolean CancelDebt(CreateDebtDto dto, int id){
+    @Transactional
+    public boolean CancelDebt(CancelDto dto, int id){
         Optional<Debt> debtOp = debtRepository.findById(id);
         if(debtOp.isPresent()){
-            Debt debt = new Debt();
-            debt.setContent(dto.getContent());
+            Debt debt = debtOp.get();
+            if(!debt.getHolder().getId().equals(JwtTokenUtil.getLoggedUser().getId())){
+                Optional<Account> accountop = accountRepository.findById(debt.getDebtor().getAccountId());
+                Optional<User> userop = userRepository.findById(accountop.get().getOwner().getId());
+                if(userop.isPresent()){
+                    mailService.sendCancelDebtNotificationEmail(userop.get(), id, debt);
+                }
+            }
+            else{
+                Optional<Account> accountop = accountRepository.findById(debt.getDebtor().getAccountId());
+                Optional<User> userop = userRepository.findById(accountop.get().getOwner().getId());
+                if(!userop.get().getId().equals(JwtTokenUtil.getLoggedUser().getId())){
+                    mailService.sendCancelDebtNotificationEmail(debt.getHolder(), id, debt);
+                }
+            }
+            debt.setNote(dto.getNote());
             debt.setStatus(DebtStatus.CANCEL);
             debtRepository.save(debt);
             return true;
