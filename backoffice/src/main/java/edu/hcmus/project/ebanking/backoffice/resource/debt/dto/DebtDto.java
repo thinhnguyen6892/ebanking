@@ -1,9 +1,11 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt.dto;
 
+import edu.hcmus.project.ebanking.backoffice.model.Account;
 import edu.hcmus.project.ebanking.backoffice.model.Debt;
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.DebtStatus;
 
+import javax.jws.soap.SOAPBinding;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -12,11 +14,9 @@ public class DebtDto implements Serializable {
     private Date createDate;
     private DebtStatus status;
     private Long holder;
-    private String holderFirstName;
-    private String holderLastName;
+    private DebtUserDto userHolder;
     private String debtor;
-    private String debtorFirstName;
-    private String debtorLastName;
+    private DebtUserDto userDebtor;
     private String content;
     private Double amount;
 
@@ -28,8 +28,7 @@ public class DebtDto implements Serializable {
         this.createDate = debt.getCreateDate();
         this.status = debt.getStatus();
         User holder =  debt.getHolder();
-        this.holderFirstName = holder.getFirstName();
-        this.holderLastName = holder.getLastName();
+        Account debtor = debt.getDebtor();
         this.content = debt.getContent();
         this.amount = debt.getAmount();
     }
@@ -82,35 +81,19 @@ public class DebtDto implements Serializable {
         this.amount = amount;
     }
 
-    public String getHolderFirstName() {
-        return holderFirstName;
+    public DebtUserDto getUserDebtor() {
+        return userDebtor;
     }
 
-    public void setHolderFirstName(String holderFirstName) {
-        this.holderFirstName = holderFirstName;
+    public void setUserDebtor(DebtUserDto userDebtor) {
+        this.userDebtor = userDebtor;
     }
 
-    public String getHolderLastName() {
-        return holderLastName;
+    public DebtUserDto getUserHolder() {
+        return userHolder;
     }
 
-    public void setHolderLastName(String holderLastName) {
-        this.holderLastName = holderLastName;
-    }
-
-    public String getDebtorFirstName() {
-        return debtorFirstName;
-    }
-
-    public void setDebtorFirstName(String debtorFirstName) {
-        this.debtorFirstName = debtorFirstName;
-    }
-
-    public String getDebtorLastName() {
-        return debtorLastName;
-    }
-
-    public void setDebtorLastName(String debtorLastName) {
-        this.debtorLastName = debtorLastName;
+    public void setUserHolder(DebtUserDto userHolder) {
+        this.userHolder = userHolder;
     }
 }
