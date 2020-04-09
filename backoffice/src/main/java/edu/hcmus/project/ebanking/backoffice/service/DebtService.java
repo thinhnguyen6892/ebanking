@@ -87,25 +87,32 @@ public class DebtService {
                 for (Account account : accountOp){
                     return debtRepository.findDebtByHolderOrDebtor(userOp.get(), account).stream().map(debt -> {
                         DebtDto dto = new DebtDto();
+                        dto.setId(debt.getId());
                         dto.setStatus(debt.getStatus());
                         dto.setHolder(debt.getHolder().getId());
                         Optional<User> userOpHolder = userRepository.findById(dto.getHolder());
                         if(userOpHolder.isPresent()){
                             User userholder = userOpHolder.get();
-                            DebtUserDto userHolder = new DebtUserDto();
-                            userHolder.setFirstName(userholder.getFirstName());
-                            userHolder.setLastName(userholder.getLastName());
-                            dto.setUserHolder(userHolder);
+                            UserDto userHolder = new UserDto();
+                            if(userHolder != null){
+                                userHolder.setId(userholder.getId().toString());
+                                userHolder.setFirstName(userholder.getFirstName());
+                                userHolder.setLastName(userholder.getLastName());
+                                dto.setUserHolder(userHolder);
+                            }
                         }
                         dto.setDebtor(debt.getDebtor().getAccountId());
                         Optional<Account> accountop = accountRepository.findById(dto.getDebtor());
                         Optional<User> userop = userRepository.findById(accountop.get().getOwner().getId());
                         if(userop.isPresent()){
                             User userdebtor = userop.get();
-                            DebtUserDto userDebtor = new DebtUserDto();
-                            userDebtor.setFirstName(userdebtor.getFirstName());
-                            userDebtor.setLastName(userdebtor.getLastName());
-                            dto.setUserDebtor(userDebtor);
+                            UserDto userDebtor = new UserDto();
+                            if(userDebtor != null){
+                                userDebtor.setId(userdebtor.getId().toString());
+                                userDebtor.setFirstName(userdebtor.getFirstName());
+                                userDebtor.setLastName(userdebtor.getLastName());
+                                dto.setUserDebtor(userDebtor);
+                            }
                         }
                         dto.setCreateDate(debt.getCreateDate());
                         dto.setContent(debt.getContent());
@@ -117,25 +124,32 @@ public class DebtService {
             else if (type == 1){
                 return debtRepository.findDebtByHolder(userOp.get()).stream().map(debt -> {
                     DebtDto dto = new DebtDto();
+                    dto.setId(debt.getId());
                     dto.setStatus(debt.getStatus());
                     dto.setHolder(debt.getHolder().getId());
                     Optional<User> userOpHolder = userRepository.findById(dto.getHolder());
                     if(userOpHolder.isPresent()){
                         User userholder = userOpHolder.get();
-                        DebtUserDto userHolder = new DebtUserDto();
-                        userHolder.setFirstName(userholder.getFirstName());
-                        userHolder.setLastName(userholder.getLastName());
-                        dto.setUserHolder(userHolder);
+                        UserDto userHolder = new UserDto();
+                        if(userHolder != null){
+                            userHolder.setId(userholder.getId().toString());
+                            userHolder.setFirstName(userholder.getFirstName());
+                            userHolder.setLastName(userholder.getLastName());
+                            dto.setUserHolder(userHolder);
+                        }
                     }
                     dto.setDebtor(debt.getDebtor().getAccountId());
                     Optional<Account> accountop = accountRepository.findById(dto.getDebtor());
                     Optional<User> userop = userRepository.findById(accountop.get().getOwner().getId());
                     if(userop.isPresent()){
                         User userdebtor = userop.get();
-                        DebtUserDto userDebtor = new DebtUserDto();
-                        userDebtor.setFirstName(userdebtor.getFirstName());
-                        userDebtor.setLastName(userdebtor.getLastName());
-                        dto.setUserDebtor(userDebtor);
+                        UserDto userDebtor = new UserDto();
+                        if(userDebtor != null){
+                            userDebtor.setId(userdebtor.getId().toString());
+                            userDebtor.setFirstName(userdebtor.getFirstName());
+                            userDebtor.setLastName(userdebtor.getLastName());
+                            dto.setUserDebtor(userDebtor);
+                        }
                     }
                     dto.setCreateDate(debt.getCreateDate());
                     dto.setContent(debt.getContent());
@@ -147,25 +161,32 @@ public class DebtService {
                 for (Account account : accountOp){
                     return debtRepository.findDebtByDebtor(account).stream().map(debt -> {
                         DebtDto dto = new DebtDto();
+                        dto.setId(debt.getId());
                         dto.setStatus(debt.getStatus());
                         dto.setHolder(debt.getHolder().getId());
                         Optional<User> userOpHolder = userRepository.findById(dto.getHolder());
                         if(userOpHolder.isPresent()){
                             User userholder = userOpHolder.get();
-                            DebtUserDto userHolder = new DebtUserDto();
-                            userHolder.setFirstName(userholder.getFirstName());
-                            userHolder.setLastName(userholder.getLastName());
-                            dto.setUserHolder(userHolder);
+                            UserDto userHolder = new UserDto();
+                            if(userHolder != null){
+                                userHolder.setId(userholder.getId().toString());
+                                userHolder.setFirstName(userholder.getFirstName());
+                                userHolder.setLastName(userholder.getLastName());
+                                dto.setUserHolder(userHolder);
+                            }
                         }
                         dto.setDebtor(debt.getDebtor().getAccountId());
                         Optional<Account> accountop = accountRepository.findById(dto.getDebtor());
                         Optional<User> userop = userRepository.findById(accountop.get().getOwner().getId());
                         if(userop.isPresent()){
                             User userdebtor = userop.get();
-                            DebtUserDto userDebtor = new DebtUserDto();
-                            userDebtor.setFirstName(userdebtor.getFirstName());
-                            userDebtor.setLastName(userdebtor.getLastName());
-                            dto.setUserDebtor(userDebtor);
+                            UserDto userDebtor = new UserDto();
+                            if(userDebtor != null){
+                                userDebtor.setId(userdebtor.getId().toString());
+                                userDebtor.setFirstName(userdebtor.getFirstName());
+                                userDebtor.setLastName(userdebtor.getLastName());
+                                dto.setUserDebtor(userDebtor);
+                            }
                         }
                         dto.setCreateDate(debt.getCreateDate());
                         dto.setContent(debt.getContent());
@@ -183,25 +204,32 @@ public class DebtService {
         if(accountOp.isPresent()){
             return debtRepository.findNewDebtByDebtorAndStatus(accountOp.get(), DebtStatus.NEW).stream().map(debt -> {
                 DebtDto dto = new DebtDto();
+                dto.setId(debt.getId());
                 dto.setStatus(debt.getStatus());
                 dto.setHolder(debt.getHolder().getId());
                 Optional<User> userOpHolder = userRepository.findById(dto.getHolder());
                 if(userOpHolder.isPresent()){
                     User userholder = userOpHolder.get();
-                    DebtUserDto userHolder = new DebtUserDto();
-                    userHolder.setFirstName(userholder.getFirstName());
-                    userHolder.setLastName(userholder.getLastName());
-                    dto.setUserHolder(userHolder);
+                    UserDto userHolder = new UserDto();
+                    if(userHolder != null){
+                        userHolder.setId(userholder.getId().toString());
+                        userHolder.setFirstName(userholder.getFirstName());
+                        userHolder.setLastName(userholder.getLastName());
+                        dto.setUserHolder(userHolder);
+                    }
                 }
                 dto.setDebtor(debt.getDebtor().getAccountId());
                 Optional<Account> accountop = accountRepository.findById(dto.getDebtor());
                 Optional<User> userop = userRepository.findById(accountop.get().getOwner().getId());
                 if(userop.isPresent()){
                     User userdebtor = userop.get();
-                    DebtUserDto userDebtor = new DebtUserDto();
-                    userDebtor.setFirstName(userdebtor.getFirstName());
-                    userDebtor.setLastName(userdebtor.getLastName());
-                    dto.setUserDebtor(userDebtor);
+                    UserDto userDebtor = new UserDto();
+                    if(userDebtor != null){
+                        userDebtor.setId(userdebtor.getId().toString());
+                        userDebtor.setFirstName(userdebtor.getFirstName());
+                        userDebtor.setLastName(userdebtor.getLastName());
+                        dto.setUserDebtor(userDebtor);
+                    }
                 }
                 dto.setCreateDate(debt.getCreateDate());
                 dto.setContent(debt.getContent());

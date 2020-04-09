@@ -4,6 +4,7 @@ import edu.hcmus.project.ebanking.backoffice.model.Account;
 import edu.hcmus.project.ebanking.backoffice.model.Debt;
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.DebtStatus;
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 
 import javax.jws.soap.SOAPBinding;
 import java.io.Serializable;
@@ -11,12 +12,13 @@ import java.util.Date;
 
 
 public class DebtDto implements Serializable {
+    private int id;
     private Date createDate;
     private DebtStatus status;
     private Long holder;
-    private DebtUserDto userHolder;
+    private UserDto userHolder;
     private String debtor;
-    private DebtUserDto userDebtor;
+    private UserDto userDebtor;
     private String content;
     private Double amount;
 
@@ -81,19 +83,27 @@ public class DebtDto implements Serializable {
         this.amount = amount;
     }
 
-    public DebtUserDto getUserDebtor() {
+    public UserDto getUserDebtor() {
         return userDebtor;
     }
 
-    public void setUserDebtor(DebtUserDto userDebtor) {
+    public void setUserDebtor(UserDto userDebtor) {
         this.userDebtor = userDebtor;
     }
 
-    public DebtUserDto getUserHolder() {
+    public UserDto getUserHolder() {
         return userHolder;
     }
 
-    public void setUserHolder(DebtUserDto userHolder) {
+    public void setUserHolder(UserDto userHolder) {
         this.userHolder = userHolder;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
