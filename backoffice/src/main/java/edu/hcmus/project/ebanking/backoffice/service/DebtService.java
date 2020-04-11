@@ -371,6 +371,7 @@ public class DebtService {
             throw new RuntimeException("Cannot create transaction for this action!");
         }
         debt.setPaymentRef(transactionOptional.get());
+        debt.setStatus(DebtStatus.COMPLETED);
         debtRepository.save(debt);
         DebtPaymentDto debtPaymentDto = new DebtPaymentDto(debt);
         debtPaymentDto.setTransactionInfo(transactionDto);
