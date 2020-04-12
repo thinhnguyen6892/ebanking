@@ -33,6 +33,12 @@ public class AccountResourceRestController {
     @Autowired
     private AccountService accountService;
 
+    @ApiOperation(value = "[Employee] Find account by accountId")
+    @GetMapping
+    public AccountDto findAccountByAccountId(@RequestParam String accountId, @RequestParam String bankId) {
+        return accountService.findAccountByAccountId(accountId);
+    }
+
     @ApiOperation(value = "1.2 [USER] View a list of available account of current log-on user", response = List.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved list"),
@@ -75,11 +81,6 @@ public class AccountResourceRestController {
         return ResponseEntity.created(location).build();
     }
 
-    @ApiOperation(value = "[Employee] Find account by acountId")
-    @GetMapping("/account/{accountId}")
-    public AccountDto findAccountByAccountId(@PathVariable String accountId) {
-        return accountService.findAccountByAccountId(accountId);
-    }
 
     @ApiOperation(value = "[Employee] Find accounts by userName")
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")

@@ -16,7 +16,7 @@ import java.util.Optional;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
     Page<Transaction> findTransactionsByDateBetweenAndReferenceAndStatus(ZonedDateTime startDate, ZonedDateTime endDate, Bank bank, TransactionStatus status, Pageable pageable);
-    Page<Transaction> findTransactionsByDateBetweenAndStatus(ZonedDateTime startDate, ZonedDateTime endDate, TransactionStatus status, Pageable pageable);
+    Page<Transaction> findTransactionsByDateBetweenAndStatusAndReferenceNotNull(ZonedDateTime startDate, ZonedDateTime endDate, TransactionStatus status, Pageable pageable);
     Page<Transaction> findTransactionsBySourceAndTypeAndStatus(String source, TransactionType type, TransactionStatus status, Pageable pageable);
     Page<Transaction> findTransactionsBySourceAndStatusOrderByDateDesc(String source, TransactionStatus status,  Pageable pageable);
 }

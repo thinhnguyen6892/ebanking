@@ -66,7 +66,7 @@ public class TransactionService {
             }
             transactions = transactionRepository.findTransactionsByDateBetweenAndReferenceAndStatus(request.getStartDate(), request.getEndDate(), bankOpt.get(), TransactionStatus.COMPLETED, pageable);
         } else {
-            transactions = transactionRepository.findTransactionsByDateBetweenAndStatus(request.getStartDate(), request.getEndDate(), TransactionStatus.COMPLETED, pageable);
+            transactions = transactionRepository.findTransactionsByDateBetweenAndStatusAndReferenceNotNull(request.getStartDate(), request.getEndDate(), TransactionStatus.COMPLETED, pageable);
         }
         return transactions.map(transaction -> {
             TransactionDto dto = new TransactionDto();
