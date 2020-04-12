@@ -73,11 +73,6 @@ public class DebtService {
         throw new ResourceNotFoundException("Debt not found");
     }
 
-    public Account findAccountByOwner(User user){
-        Optional<Account> accountOp = accountRepository.findAccountByOwner(user);
-        return accountOp.get();
-    }
-
     public List<DebtDto> findDebtbyHolderOrDebtor(int type) {
         Optional<User> userOp = userRepository.findById(JwtTokenUtil.getLoggedUser().getId());
         List<Account> accountOp = accountRepository.findAccountsByOwner(userOp.get());
@@ -297,51 +292,29 @@ public class DebtService {
         return false;
     }
 
-    public boolean deleteDebt(int id){
-        Optional<Debt> deDebt = debtRepository.findById(id);
-        if(deDebt.isPresent()) {
-            debtRepository.deleteById(id);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean changeStatus(CreateDebtDto dto, int id){
-        Optional<Debt> DebtOp = debtRepository.findById(id);
-        if(DebtOp.isPresent()) {
-            Debt upDebt = new Debt();
-            upDebt.setStatus(dto.getStatus());
-            debtRepository.save(upDebt);
-            return true;
-        }
-        return false;
-    }
-
     @Transactional
-    public CancelDto CancelDebt(CancelDto dto, int id){
+    public boolean CancelDebt(CancelDto dto, int id){
         Optional<Debt> debtOp = debtRepository.findById(id);
         Debt debt = debtOp.get();
         if(debtOp.isPresent()){
-            if(!debt.getHolder().getId().equals(JwtTokenUtil.getLoggedUser().getId())){
+            if(debt.getHolder().getId().equals(JwtTokenUtil.getLoggedUser().getId())){
                 Optional<Account> accountop = accountRepository.findById(debt.getDebtor().getAccountId());
                 Optional<User> userop = userRepository.findById(accountop.get().getOwner().getId());
                 if(userop.isPresent()){
-                    mailService.sendCancelDebtNotificationEmail(userop.get(), id, debt);
+                    mailService.sendCancelDebtNotificationEmail(userop.get(), id, debt, dto.getContent());
                 }
             }
             else{
                 Optional<Account> accountop = accountRepository.findById(debt.getDebtor().getAccountId());
                 Optional<User> userop = userRepository.findById(accountop.get().getOwner().getId());
-                if(!userop.get().getId().equals(JwtTokenUtil.getLoggedUser().getId())){
-                    mailService.sendCancelDebtNotificationEmail(debt.getHolder(), id, debt);
+                if(userop.get().getId().equals(JwtTokenUtil.getLoggedUser().getId())){
+                    mailService.sendCancelDebtNotificationEmail(debt.getHolder(), id, debt, dto.getContent());
                 }
             }
-            debt.setNote(dto.getNote());
-            debt.setStatus(DebtStatus.CANCEL);
-
+            debtRepository.deleteById(id);
+            return true;
         }
-        debtRepository.save(debt);
-        return dto;
+        return false;
     }
 
     public DebtPaymentDto pay(Integer id) {

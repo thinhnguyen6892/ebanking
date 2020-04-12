@@ -108,15 +108,16 @@ public class MailService {
         sendEmail(user.getEmail(), subject, content, false, true);
     }
 
-    public void sendCancelDebtNotificationEmail(User user, int debtId, Debt debt){
+    public void sendCancelDebtNotificationEmail(User user, int debtId, Debt debt, String contents){
         log.debug("Sending cancel debt notification e-mail to '{}'", user.getEmail());
         Context context = new Context(Locale.ENGLISH);
         context.setVariable("name", String.format("%s %s", user.getFirstName(), user.getLastName()));
         context.setVariable("date", debt.getCreateDate());
         context.setVariable("amount", debt.getAmount());
         context.setVariable("debt", debtId);
-        String content = templateEngine.process("debt_payment", context);
-        String subject = "Payment Acknowledgment";
+        context.setVariable("contentcancel", contents);
+        String content = templateEngine.process("debt_cancel", context);
+        String subject = "Cancel Debt Information";
         sendEmail(user.getEmail(), subject, content, false, true);
     }
 }

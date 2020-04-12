@@ -5,22 +5,13 @@ import edu.hcmus.project.ebanking.backoffice.model.contranst.DebtStatus;
 import java.io.Serializable;
 
 public class CancelDto implements Serializable {
-    private DebtStatus status;
-    private String note;
+    private String content;
 
-    public DebtStatus getStatus() {
-        return status;
+    public String getContent() {
+        return content;
     }
 
-    public void setStatus(DebtStatus status) {
-        this.status = status;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
+    public void setContent(String content) {
+        this.content = content;
     }
 }

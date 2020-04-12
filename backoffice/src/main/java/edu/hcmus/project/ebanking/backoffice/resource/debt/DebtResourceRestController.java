@@ -20,40 +20,34 @@ public class DebtResourceRestController {
     @Autowired
     private DebtService debtService;
 
-    @ApiOperation(value = "1.1 [User] Debt All Information. ", response = List.class)
-    @GetMapping
-    public List<DebtDto> getAllDebt() {
-        return debtService.GetAllDebt();
-    }
-
-    @ApiOperation(value = "1.2 [User] Debt Information By ID. ", response = List.class)
+    @ApiOperation(value = "1.2 [User] Debt Information By ID. ", response = DebtDto.class)
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/{id}")
     public DebtDto findDebt(@Valid @PathVariable int id){
         return debtService.findDebt(id);
     }
 
-    @ApiOperation(value = "1.3 [User] Debt Information By Holder or Debtor, 0: All; 1: Holder; 2: Debtor. ", response = List.class)
+    @ApiOperation(value = "1.5.2 [User] Debt Information By Holder or Debtor, 0: All; 1: Holder; 2: Debtor. ", response = List.class)
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/holderanddebtor/{type}")
     public List<DebtDto> findDebtByHolderOrDebtor(@Valid @PathVariable int type){
         return debtService.findDebtbyHolderOrDebtor(type);
     }
 
-    @ApiOperation(value = "1.4 [User] New Debt Information By Debtor. ", response = List.class)
+    @ApiOperation(value = "1.5.1 [User] New Debt Information By Debtor. ", response = List.class)
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/debtor")
     public List<DebtDto> findNewDebtByDebtor(){
         return debtService.findNewDebtByDebtor();
     }
 
-    @ApiOperation(value = "1.5 [User] Search Debtor Information By Account ID. ", response = List.class)
+    @ApiOperation(value = "1.5.1 [User] Search Debtor Information By Account ID. ", response = List.class)
     @GetMapping("/search/{account}")
     public List<DebtUserDto> search(@PathVariable String account) {
         return debtService.search(account);
     }
 
-    @ApiOperation(value = "1.6 [User] Create Debt Information. ", response = CreateDebtDto.class)
+    @ApiOperation(value = "1.5.1 [User] Create Debt Information. ", response = CreateDebtDto.class)
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/create")
     public ResponseEntity<CreateDebtDto> createDebt(@RequestBody CreateDebtDto dto) {
@@ -69,30 +63,13 @@ public class DebtResourceRestController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "1.7 [User] Cancel Debt Information with write reason in note. ", response = CancelDto.class)
+    @ApiOperation(value = "1.5.3 [User] Cancel Debt Information with write reason in content. ")
     @PreAuthorize("hasRole('USER')")
-    @PutMapping("/cancel/{id}")
-    public ResponseEntity<CancelDto> CancelDebt(@RequestBody CancelDto dto, @Valid @PathVariable int id){
+    @DeleteMapping("/cancel/{id}")
+    public ResponseEntity<Void> CancelDebt(@RequestBody CancelDto dto, @Valid @PathVariable int id){
         debtService.CancelDebt(dto, id);
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
-
-    @ApiOperation(value = "1.8 [User] Delete Debt. ")
-    @PreAuthorize("hasRole('USER')")
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteDebt(@PathVariable int id) {
-        boolean result = debtService.deleteDebt(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @ApiOperation(value = "1.9 [User] Update Status Debt. ", response = CreateDebtDto.class)
-    @PreAuthorize("hasRole('USER')")
-    @PutMapping("/updatestatus/{id}")
-    public ResponseEntity<CreateDebtDto> updateStatus(@RequestBody CreateDebtDto dto, @PathVariable int id){
-        boolean result = debtService.changeStatus(dto, id);
-        return new ResponseEntity<>(dto, HttpStatus.OK);
-    }
-
 
     @ApiOperation(value = "1.5.4 Thanh toan nhac no ", response = DebtPaymentDto.class)
     @PreAuthorize("hasRole('USER')")
