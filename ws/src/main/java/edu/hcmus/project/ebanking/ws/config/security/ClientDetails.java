@@ -14,14 +14,16 @@ public class ClientDetails implements UserDetails {
     private final String clientId;
     private final String password;
     private final String secret;
+    private final String key;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public ClientDetails(String clientId, String password, String secret) {
+    public ClientDetails(String clientId, String password, String secret, String key) {
         this.clientId = clientId;
         this.password = password;
         this.secret = secret;
         List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
         this.authorities = authorities;
+        this.key = key;
     }
 
     @Override
@@ -65,5 +67,9 @@ public class ClientDetails implements UserDetails {
 
     public String getSecret() {
         return secret;
+    }
+
+    public String getKey() {
+        return key;
     }
 }

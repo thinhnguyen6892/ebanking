@@ -34,11 +34,6 @@ public class SwaggerConfig {
 	@Bean
 	public Docket api() {
 		return new Docket(DocumentationType.SWAGGER_2)
-				.groupName("person-api-1.0")
-				.select()
-				.apis(RequestHandlerSelectors.basePackage("edu.hcmus.project.ebanking.ws.resource"))
-				.paths(regex("/accounts/v1.0.*"))
-				.build()
 				.apiInfo(DEFAULT_API_INFO)
 				.produces(DEFAULT_PRODUCES_AND_CONSUMES)
 				.consumes(DEFAULT_PRODUCES_AND_CONSUMES);

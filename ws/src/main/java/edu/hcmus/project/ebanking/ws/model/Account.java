@@ -14,7 +14,6 @@ public class Account {
     private Double balance = new Double(0);
     private Date createDate = new Date();
     private Date expired;
-    private Boolean status;
     private User owner;
 
 
@@ -22,11 +21,6 @@ public class Account {
 //    @GeneratedValue(generator = "uuid")
 //    @GenericGenerator(name = "uuid", strategy = "uuid")
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_seq")
-    @GenericGenerator(
-            name = "account_seq",
-            strategy = "edu.hcmus.project.ebanking.backoffice.generator.TimestampGenerator"
-    )
     @Column(name = "account_id")
     public String getAccountId() {
         return accountId;
@@ -88,16 +82,6 @@ public class Account {
         this.expired = expired;
     }
 
-    @Basic
-    @Column(name = "status")
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -107,12 +91,11 @@ public class Account {
                 Objects.equals(type, account.type) &&
                 Objects.equals(balance, account.balance) &&
                 Objects.equals(createDate, account.createDate) &&
-                Objects.equals(expired, account.expired) &&
-                Objects.equals(status, account.status);
+                Objects.equals(expired, account.expired);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountId, type, balance, createDate, expired, status);
+        return Objects.hash(accountId, type, balance, createDate, expired);
     }
 }

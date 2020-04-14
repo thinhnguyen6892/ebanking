@@ -1,18 +1,26 @@
 package edu.hcmus.project.ebanking.ws.resource.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import edu.hcmus.project.ebanking.ws.model.TransactionFeeType;
 import edu.hcmus.project.ebanking.ws.model.TransactionType;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 public class TransactionRequestDto extends AccountRequestDto {
+
+
     @NotNull
     private TransactionType transType;
     @NotNull
+    private TransactionFeeType feeType;
+    private Double fee;
+    @NotNull
+    @Positive
     private Double amount;
     private String note;
 
-    private String sign;
+
 
     public TransactionType getTransType() {
         return transType;
@@ -38,17 +46,25 @@ public class TransactionRequestDto extends AccountRequestDto {
         this.note = note;
     }
 
-    public String getSign() {
-        return sign;
-    }
-
-    public void setSign(String sign) {
-        this.sign = sign;
-    }
-
     @JsonIgnore
     @Override
     public String toString() {
-        return transType.toString() + amount + note + getAcd();
+        return transType.toString() + amount + note + getAccId();
+    }
+
+    public TransactionFeeType getFeeType() {
+        return feeType;
+    }
+
+    public void setFeeType(TransactionFeeType feeType) {
+        this.feeType = feeType;
+    }
+
+    public Double getFee() {
+        return fee;
+    }
+
+    public void setFee(Double fee) {
+        this.fee = fee;
     }
 }

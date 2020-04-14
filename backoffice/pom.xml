@@ -10,12 +10,15 @@
 	</parent>
 	<groupId>edu.hcmus.project.ebanking</groupId>
 	<artifactId>backoffice</artifactId>
-	<version>0.0.9</version>
+	<version>0.0.13</version>
 	<name>backoffice</name>
 	<description>E-banking with Spring Boot</description>
 
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<com.squareup.retrofit2.version>2.1.0</com.squareup.retrofit2.version>
 	</properties>
 
 	<dependencies>
@@ -78,6 +81,16 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>com.squareup.retrofit2</groupId>
+			<artifactId>retrofit</artifactId>
+			<version>${com.squareup.retrofit2.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.retrofit2</groupId>
+			<artifactId>converter-jackson</artifactId>
+			<version>${com.squareup.retrofit2.version}</version>
+		</dependency>
 
 
 		<dependency>

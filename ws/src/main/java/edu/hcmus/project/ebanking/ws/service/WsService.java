@@ -1,14 +1,18 @@
 package edu.hcmus.project.ebanking.ws.service;
 
 import edu.hcmus.project.ebanking.ws.config.exception.BadRequestException;
-import edu.hcmus.project.ebanking.ws.model.Account;
-import edu.hcmus.project.ebanking.ws.model.User;
+import edu.hcmus.project.ebanking.ws.model.*;
 import edu.hcmus.project.ebanking.ws.repository.AccountRepository;
+import edu.hcmus.project.ebanking.ws.repository.BankRepository;
+import edu.hcmus.project.ebanking.ws.repository.TransactionRepository;
 import edu.hcmus.project.ebanking.ws.resource.dto.CustomerDto;
+import edu.hcmus.project.ebanking.ws.resource.dto.TransactionDto;
+import edu.hcmus.project.ebanking.ws.resource.dto.TransactionRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 @Service
@@ -16,6 +20,12 @@ public class WsService {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private BankRepository bankRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     public CustomerDto findAccountInfo(String accountId) {
         Optional<Account> accountOpt = accountRepository.findById(accountId);
@@ -29,6 +39,97 @@ public class WsService {
         customerDto.setFirstName(receiver.getFirstName());
         customerDto.setLastName(receiver.getLastName());
         return customerDto;
+    }
+
+    @Transactional
+    public TransactionDto depositTransaction(String bankId, TransactionRequestDto requestDto) {
+        Optional<Account> accountOpt = accountRepository.findById(requestDto.getAccId());
+        if(!accountOpt.isPresent()) {
+            throw new BadRequestException("Account is not exist!");
+        }
+
+        Optional<Bank> bankOpt = bankRepository.findById(bankId);
+        if(!bankOpt.isPresent()) {
+            throw new BadRequestException("Cannot retrieve bank information!");
+        }
+        Bank bank = bankOpt.get();
+        Account account = accountOpt.get();
+        User receiver = account.getOwner();
+        if(receiver == null || receiver.getStatus() == false) {
+            throw new BadRequestException("Account is not exist!");
+        }
+
+
+        Double targetBalance = account.getBalance();
+        account.setBalance(targetBalance + requestDto.getAmount());
+        accountRepository.save(account);
+
+        ZonedDateTime now = ZonedDateTime.now();
+        Transaction transaction = new Transaction();
+        transaction.setAmount(requestDto.getAmount());
+        transaction.setContent(requestDto.getNote());
+        transaction.setDate(now);
+        transaction.setSource(account.getAccountId());
+        transaction.setReference(bank);
+        transaction.setType(TransactionType.DEPOSIT);
+        transaction.setFeeType(requestDto.getFeeType());
+        transaction.setFee(requestDto.getFee());
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        return new TransactionDto(transactionRepository.save(transaction));
+    }
+
+    @Transactional
+    public TransactionDto withDrawTransaction(String bankId, TransactionRequestDto requestDto) {
+        Optional<Account> accountOpt = accountRepository.findById(requestDto.getAccId());
+        if(!accountOpt.isPresent()) {
+            throw new BadRequestException("Account is not exist!");
+        }
+        Account account = accountOpt.get();
+        User receiver = account.getOwner();
+        if(receiver == null || receiver.getStatus() == false) {
+            throw new BadRequestException("Account is not exist!");
+        }
+
+        Optional<Bank> bankOpt = bankRepository.findById(bankId);
+        if(!bankOpt.isPresent()) {
+            throw new BadRequestException("Cannot retrieve bank information!");
+        }
+        Bank bank = bankOpt.get();
+
+        Double sourceBalance = account.getBalance();
+        Double fee = 7000d;
+        Double transactionAmount = requestDto.getAmount();
+        switch (requestDto.getFeeType()){
+            case SENDER:
+                transactionAmount += fee;
+                break;
+            case RECEIVER:
+                transactionAmount -= fee;
+                if(transactionAmount <= 0) {
+                    throw new BadRequestException("The transaction amount should greater than transaction fee (" + fee +")!");
+                }
+                break;
+        }
+
+        if(sourceBalance < transactionAmount) {
+            throw new BadRequestException("Insufficient balance. Cannot execute this transaction!");
+        }
+
+        account.setBalance(sourceBalance - (TransactionFeeType.SENDER.equals(requestDto.getFeeType()) ? transactionAmount : requestDto.getAmount()));
+        accountRepository.save(account);
+
+        ZonedDateTime now = ZonedDateTime.now();
+        Transaction transaction = new Transaction();
+        transaction.setAmount(requestDto.getAmount());
+        transaction.setContent(requestDto.getNote());
+        transaction.setDate(now);
+        transaction.setSource(account.getAccountId());
+        transaction.setReference(bank);
+        transaction.setType(TransactionType.WITHDRAW);
+        transaction.setFeeType(requestDto.getFeeType());
+        transaction.setFee(requestDto.getFee());
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        return new TransactionDto(transactionRepository.save(transaction));
     }
 
 }

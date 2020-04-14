@@ -24,13 +24,12 @@ public class SignatureService {
     @Autowired
     private ResourceLoader resourceLoader;
     private File privateKey;
-    private File publicKey;
     private Cipher cipher;
 
-    @Value(value = "app.signature.private-key")
+    @Value(value = "${app.signature.private-key}")
     private String privateKeyPath;
 
-    @Value(value = "app.signature.public_key.der")
+    @Value(value = "${app.signature.public-key}")
     private String publicKeyPath;
 
 
@@ -40,7 +39,10 @@ public class SignatureService {
         this.privateKey = privateKeyResource.getFile();
 
         Resource publicKeyResource = resourceLoader.getResource(publicKeyPath);
-        this.publicKey = publicKeyResource.getFile();
+    }
+
+    public File getSamplePrivateKey() throws IOException {
+        return privateKey;
     }
 
     public String signWithPrivateKey(String content) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, InvalidKeyException, SignatureException {
@@ -57,17 +59,17 @@ public class SignatureService {
         return new String(Base64Utils.encode(rsa.sign()));
     }
 
-    public boolean verifyWithPublicKey(String content, byte[] signature) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, IOException, SignatureException {
+    public void verifyWithPublicKey(String content, byte[] signature, String key) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, IOException, SignatureException {
         Signature sig = Signature.getInstance("SHA256withRSA");
-        byte[] keyBytes = Files.readAllBytes(publicKey.toPath());
+        byte[] keyBytes = Files.readAllBytes(resourceLoader.getResource(key).getFile().toPath());
         X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
         PublicKey publicKey = kf.generatePublic(spec);
-//        this.cipher.init(Cipher.DECRYPT_MODE, publicKey)
-//        cipher.doFinal(content.getBytes())
         sig.initVerify(publicKey);
         sig.update(content.getBytes());
-        return sig.verify(signature);
+        if(!sig.verify(signature)) {
+            throw new SignatureException();
+        }
     }
 
 

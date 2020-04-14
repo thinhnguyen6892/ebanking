@@ -14,13 +14,14 @@ public class Transaction {
     private String source;
     private String target;
     private String content;
-    private double amount;
+    private Double amount;
     private TransactionStatus status;
 
     private String otpCode;
     private Long validity;
 
     private TransactionFeeType feeType;
+    private Double fee;
 
     private Bank reference;
 
@@ -170,4 +171,13 @@ public class Transaction {
         return Objects.hash(id, date, type, source, target, content, amount, status);
     }
 
+    @Basic
+    @Column(name = "fee")
+    public Double getFee() {
+        return fee;
+    }
+
+    public void setFee(Double fee) {
+        this.fee = fee;
+    }
 }
