@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-public class BaseRequestDto implements Serializable {
+public class BaseRequestDto implements Serializable, Cloneable  {
     private String clientKey;
 
     @NotNull

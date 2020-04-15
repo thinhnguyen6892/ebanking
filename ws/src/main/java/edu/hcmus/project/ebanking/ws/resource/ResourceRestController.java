@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.hcmus.project.ebanking.ws.config.exception.BadRequestException;
 import edu.hcmus.project.ebanking.ws.config.security.ClientDetails;
+import edu.hcmus.project.ebanking.ws.model.Bank;
 import edu.hcmus.project.ebanking.ws.resource.dto.*;
+import edu.hcmus.project.ebanking.ws.service.TokenProvider;
 import edu.hcmus.project.ebanking.ws.service.WsService;
 import edu.hcmus.project.ebanking.ws.service.SignatureService;
 import io.swagger.annotations.Api;
@@ -18,12 +20,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.xml.ws.Response;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,6 +49,9 @@ public class ResourceRestController {
 
     @Autowired
     private ObjectMapper mapper;
+
+    @Autowired
+    private TokenProvider tokenProvider;
 
 
     @ApiOperation(value = "Retrieve account information", response = CustomerDto.class)
@@ -81,18 +85,44 @@ public class ResourceRestController {
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
     })
     @PostMapping("/transaction")
-    public TransactionDto requestTransaction(@Valid @RequestBody SignatureDto<TransactionRequestDto> dto, HttpServletRequest request, ZoneId clientZoneId) {
+    public SignatureDto<TransactionDto> requestTransaction(@Valid @RequestBody SignatureDto<TransactionRequestDto> dto, HttpServletRequest request, ZoneId clientZoneId) {
         ClientDetails clientDetails = getLoggedClient();
         hashVerify(dto, request, clientZoneId);
         byte[] signature = Base64Utils.decode(dto.getSign().getBytes());
         try {
             signatureService.verifyWithPublicKey(dto.getHash(), signature, clientDetails.getKey());
+            TransactionDto content = null;
             switch (dto.getContent().getTransType()) {
-                case DEPOSIT: return wsService.depositTransaction(clientDetails.getUsername(), dto.getContent());
+                case DEPOSIT: content = wsService.depositTransaction(clientDetails.getUsername(), dto.getContent()); break;
                 default:
-                    return wsService.withDrawTransaction(clientDetails.getUsername(), dto.getContent());
+                    content = wsService.withDrawTransaction(clientDetails.getUsername(), dto.getContent()); break;
             }
+            TransactionDto hashContent = content.clone();
+            hashContent.setClientKey(tokenProvider.computeSignature(clientDetails));
+            SignatureDto<TransactionDto> result = new SignatureDto<>();
+            result.setContent(content);
+            String hash = bCryptPasswordEncoder.encode(mapper.writeValueAsString(hashContent));
+            result.setHash(hash);
+            result.setSign(signatureService.signWithPrivateKey(hash));
+            return result;
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid sign");
+        }
+    }
 
+    @GetMapping("/transaction/request/sample")
+    public SignatureDto<TransactionRequestDto> requestTransactionSAmple(@Valid @RequestBody TransactionRequestDto content) {
+        ClientDetails clientDetails = getLoggedClient();
+        SignatureDto<TransactionRequestDto> result = new SignatureDto<>();
+        content.setClientKey(clientDetails.getSecret());
+        content.setValidity(10000l);
+        result.setContent(content);
+        String hash = null;
+        try {
+            hash = bCryptPasswordEncoder.encode(mapper.writeValueAsString(content));
+            result.setHash(hash);
+            result.setSign(signatureService.signWithPrivateKey(hash));
+            return result;
         } catch (Exception e) {
             throw new BadRequestException("Invalid sign");
         }
@@ -107,6 +137,19 @@ public class ResourceRestController {
 
         return new HttpEntity<byte[]>(Files.readAllBytes(file), headers);
     }
+
+    @PostMapping("/register")
+    public BankDto registerNewClient(@ModelAttribute ClientRegisterDto dto) {
+        try {
+            Bank bank = wsService.createNewRefBank(dto);
+            return new BankDto(bank.getId(), tokenProvider.computeSignature(bank.getId(), bank.getSecret()));
+        } catch (IOException e) {
+            throw new BadRequestException("Cannot load the public key.");
+        }
+    }
+
+
+
     private ClientDetails getLoggedClient() {
         return (ClientDetails) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();

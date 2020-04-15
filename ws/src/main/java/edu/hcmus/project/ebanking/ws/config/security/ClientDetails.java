@@ -14,10 +14,10 @@ public class ClientDetails implements UserDetails {
     private final String clientId;
     private final String password;
     private final String secret;
-    private final String key;
+    private final byte[] key;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public ClientDetails(String clientId, String password, String secret, String key) {
+    public ClientDetails(String clientId, String password, String secret, byte[] key) {
         this.clientId = clientId;
         this.password = password;
         this.secret = secret;
@@ -69,7 +69,7 @@ public class ClientDetails implements UserDetails {
         return secret;
     }
 
-    public String getKey() {
+    public byte[] getKey() {
         return key;
     }
 }

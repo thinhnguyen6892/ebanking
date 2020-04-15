@@ -59,6 +59,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                         "/webjars/**",
                         "/v1.0/transaction/sample/privatekey",
                         "/csrf",
+                        "/v1.0/register",
                         "/actuator"
                 );
     }

@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.ws;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.SpringApplication;
@@ -25,12 +26,5 @@ public class WsApplication {
                 registry.addMapping("/**").allowedMethods("*").allowedOrigins("*");
             }
         };
-    }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return  Jackson2ObjectMapperBuilder.json()
-                .modules(new JavaTimeModule())
-                .build();
     }
 }

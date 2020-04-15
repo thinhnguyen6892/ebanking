@@ -5,13 +5,12 @@ import edu.hcmus.project.ebanking.ws.model.*;
 import edu.hcmus.project.ebanking.ws.repository.AccountRepository;
 import edu.hcmus.project.ebanking.ws.repository.BankRepository;
 import edu.hcmus.project.ebanking.ws.repository.TransactionRepository;
-import edu.hcmus.project.ebanking.ws.resource.dto.CustomerDto;
-import edu.hcmus.project.ebanking.ws.resource.dto.TransactionDto;
-import edu.hcmus.project.ebanking.ws.resource.dto.TransactionRequestDto;
+import edu.hcmus.project.ebanking.ws.resource.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -39,6 +38,18 @@ public class WsService {
         customerDto.setFirstName(receiver.getFirstName());
         customerDto.setLastName(receiver.getLastName());
         return customerDto;
+    }
+
+    public Bank createNewRefBank(ClientRegisterDto dto) throws IOException {
+        Bank bank = new Bank();
+        bank.setBankName(dto.getName());
+        bank.setAddress(dto.getAddress());
+        bank.setEmail(dto.getEmail());
+        bank.setPhone(dto.getPhone());
+        bank.setSecret(dto.getSecret());
+        bank.setSignType(dto.getSignType());
+        bank.setKey(dto.getPublicKey().getBytes());
+        return bankRepository.save(bank);
     }
 
     @Transactional
