@@ -9,6 +9,7 @@ import edu.hcmus.project.ebanking.ws.resource.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -49,6 +50,16 @@ public class WsService {
         bank.setSecret(dto.getSecret());
         bank.setSignType(dto.getSignType());
         bank.setKey(dto.getPublicKey().getBytes());
+        return bankRepository.save(bank);
+    }
+
+    public Bank updateRefBankKey(String id, MultipartFile key) throws IOException {
+        Optional<Bank> bankOpt = bankRepository.findById(id);
+        if(!bankOpt.isPresent()) {
+            throw new BadRequestException("Cannot retrieve bank information!");
+        }
+        Bank bank = bankOpt.get();
+        bank.setKey(key.getBytes());
         return bankRepository.save(bank);
     }
 

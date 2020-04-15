@@ -15,7 +15,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.Base64Utils;
@@ -28,6 +27,8 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -128,14 +129,13 @@ public class ResourceRestController {
         }
     }
 
-    @GetMapping(value = "/transaction/sample/privatekey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public HttpEntity<byte[]> getSamplePrivateKey(HttpServletResponse response) throws IOException {
-        Path file = signatureService.getSamplePrivateKey().toPath();
+    @GetMapping(value = "/publicKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public HttpEntity<byte[]> getSamplePrivateKey(HttpServletResponse response) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        response.setHeader("Content-Disposition", "attachment; filename=" + file.getFileName());
+        response.setHeader("Content-Disposition", "attachment; filename=" + "publicKey.der");
 
-        return new HttpEntity<byte[]>(Files.readAllBytes(file), headers);
+        return new HttpEntity<byte[]>(signatureService.getPublicKey(), headers);
     }
 
     @PostMapping("/register")
@@ -143,6 +143,17 @@ public class ResourceRestController {
         try {
             Bank bank = wsService.createNewRefBank(dto);
             return new BankDto(bank.getId(), tokenProvider.computeSignature(bank.getId(), bank.getSecret()));
+        } catch (IOException e) {
+            throw new BadRequestException("Cannot load the public key.");
+        }
+    }
+
+    @PostMapping("/client/update")
+    public ResponseEntity updatePublicKey(@RequestParam MultipartFile key) {
+        try {
+            ClientDetails details = getLoggedClient();
+            wsService.updateRefBankKey(details.getUsername(), key);
+            return ResponseEntity.ok().body("Updated");
         } catch (IOException e) {
             throw new BadRequestException("Cannot load the public key.");
         }

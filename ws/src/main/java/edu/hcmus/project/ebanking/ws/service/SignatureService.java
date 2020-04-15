@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import sun.security.rsa.RSAPrivateCrtKeyImpl;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
@@ -20,6 +21,7 @@ import java.nio.file.StandardCopyOption;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,8 +60,14 @@ public class SignatureService {
     }*/
 
 
-    public File getSamplePrivateKey() throws IOException {
-        return privateKey;
+    public byte[] getPublicKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] keyBytes = Files.readAllBytes(privateKey.toPath());
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        PrivateKey prKey = kf.generatePrivate(spec);
+        RSAPrivateCrtKeyImpl rsaPrivateKey = (RSAPrivateCrtKeyImpl) prKey;
+
+        return kf.generatePublic(new RSAPublicKeySpec(rsaPrivateKey.getModulus(), rsaPrivateKey.getPublicExponent())).getEncoded();
     }
 
     public String signWithPrivateKey(String content) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, InvalidKeyException, SignatureException {
@@ -77,6 +85,10 @@ public class SignatureService {
     }
 
     public void verifyWithPublicKey(String content, byte[] signature, byte[] keyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, IOException, SignatureException {
+        verifyWithRSAPublicKey(content, signature, keyBytes);
+    }
+
+    private void verifyWithRSAPublicKey(String content, byte[] signature, byte[] keyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, IOException, SignatureException {
         Signature sig = Signature.getInstance("SHA256withRSA");
         X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
