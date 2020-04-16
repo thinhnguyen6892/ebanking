@@ -1,6 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt;
 
 import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.*;
+import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ClassDto;
 import edu.hcmus.project.ebanking.backoffice.service.DebtService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.*;
@@ -66,9 +67,8 @@ public class DebtResourceRestController {
     @ApiOperation(value = "1.5.3 [User] Cancel Debt Information with write reason in content. ")
     @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/cancel/{id}")
-    public ResponseEntity<Void> CancelDebt(@RequestBody CancelDto dto, @Valid @PathVariable int id){
-        debtService.CancelDebt(dto, id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> CancelDebt(@RequestBody CancelDto dto, @Valid @PathVariable int id){
+        return new ResponseEntity<>(debtService.CancelDebt(dto, id), HttpStatus.OK);
     }
 
     @ApiOperation(value = "1.5.4 Thanh toan nhac no ", response = DebtPaymentDto.class)
@@ -77,5 +77,21 @@ public class DebtResourceRestController {
     public ResponseEntity<DebtPaymentDto> pay(@PathVariable @NotNull Integer id){
         DebtPaymentDto result = debtService.pay(id);
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/checkcontent")
+    public ResponseEntity<String> checkContent(@RequestBody DebtDto dto){
+        boolean result = debtService.checkContent(dto.getContent());
+        return new ResponseEntity(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/checkamount")
+    public ResponseEntity<String> checkAmount(@RequestBody DebtDto dto){
+        return new ResponseEntity(debtService.checkAmount(dto.getAmount().toString()), HttpStatus.OK);
+    }
+
+    @GetMapping("/checkdebtor")
+    public ResponseEntity<String> checkDebtor(@RequestBody DebtDto dto){
+        return new ResponseEntity(debtService.checkDebtor(dto.getDebtor()), HttpStatus.OK);
     }
 }

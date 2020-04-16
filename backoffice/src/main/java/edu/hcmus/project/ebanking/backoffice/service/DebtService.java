@@ -252,7 +252,34 @@ public class DebtService {
                 return  dto;
             }).collect(Collectors.toList());
         }
-        return null;
+        throw new BadRequestException("Account not found in the system!");
+    }
+
+    public boolean checkContent (String content){
+        if(content.isEmpty()){
+            return false;
+        }
+        return true;
+    }
+
+    public boolean checkAmount(String number){
+        if(number.isEmpty()){
+            return false;
+        }
+        try{
+            Double.parseDouble(number);
+            return true;
+        }
+        catch (NumberFormatException e){
+            return false;
+        }
+    }
+
+    public boolean checkDebtor (String debtor){
+        if(debtor.isEmpty()){
+            return false;
+        }
+        return true;
     }
 
     @Transactional
@@ -293,8 +320,11 @@ public class DebtService {
     }
 
     @Transactional
-    public boolean CancelDebt(CancelDto dto, int id){
+    public String CancelDebt(CancelDto dto, int id){
         Optional<Debt> debtOp = debtRepository.findById(id);
+        if(dto.getContent().isEmpty()){
+            return "Content is empty";
+        }
         Debt debt = debtOp.get();
         if(debtOp.isPresent()){
             if(debt.getHolder().getId().equals(JwtTokenUtil.getLoggedUser().getId())){
@@ -312,9 +342,9 @@ public class DebtService {
                 }
             }
             debtRepository.deleteById(id);
-            return true;
+            return "Successful";
         }
-        return false;
+        return "Unsuccessful";
     }
 
     public DebtPaymentDto pay(Integer id) {

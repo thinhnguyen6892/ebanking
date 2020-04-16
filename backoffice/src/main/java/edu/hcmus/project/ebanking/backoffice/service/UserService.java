@@ -102,7 +102,7 @@ public class UserService {
     }
 
     public UserDto createEmployee(CreateUserDto dto) {
-        return createUser(dto, "EMPLOYEE", generatePassword(16), true);
+        return createUser(dto, "STAFF", generatePassword(16), true);
     }
 
     public UserDto createCustomer(CreateUserDto dto) {
@@ -121,6 +121,9 @@ public class UserService {
                 newUser.setRole(roleOp.get());
                 newUser.setStatus(Boolean.TRUE);
                 newUser.setEmail(dto.getEmail());
+                newUser.setFirstName(dto.getFirstName());
+                newUser.setLastName(dto.getLastName());
+                newUser.setPhone(dto.getPhone());
                 newUser = userRepository.save(newUser);
 
                 CreateAccount accountDto = new CreateAccount();
@@ -143,7 +146,7 @@ public class UserService {
     }
 
     public UserDto updateEmployee(UserDto dto, long id){
-        return updateUser(dto, id, "EMPLOYEE");
+        return updateUser(dto, id, "STAFF");
     }
 
     @Transactional
@@ -153,13 +156,12 @@ public class UserService {
             Optional<User> upUser = userRepository.findById(id);
             if(upUser.isPresent()) {
                 User user = upUser.get();
-//                if(!StringUtils.isEmpty(dto.getPassword())) {
-//                    user.setPassword(passwordEncoder.encode(dto.getPassword()));
-//                }
+                user.setFirstName(dto.getFirstName());
+                user.setLastName(dto.getLastName());
                 if(!StringUtils.isEmpty(dto.getEmail())) {
                     user.setEmail(dto.getEmail());
                 }
-
+                user.setPhone(dto.getPhone());
                 if(dto.getStatus() != null) {
                     user.setStatus(dto.getStatus());
                 }
@@ -231,7 +233,7 @@ public class UserService {
     }
 
     public boolean deleteEmployee(long id){
-        Optional<Role> roleOp = roleRepository.findById("EMPLOYEE");
+        Optional<Role> roleOp = roleRepository.findById("STAFF");
         if(roleOp.isPresent()) {
             Optional<User> deUser = userRepository.findById(id);
             if(deUser.isPresent()){
