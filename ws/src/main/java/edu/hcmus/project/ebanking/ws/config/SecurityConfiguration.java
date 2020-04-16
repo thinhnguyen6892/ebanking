@@ -57,9 +57,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                         "/configuration/security",
                         "/swagger-ui.html",
                         "/webjars/**",
+                        "/v1.0/transaction/sample/privatekey",
                         "/csrf",
-                        "/accounts/v1.0/test",
-                        "/accounts/v1.0/transaction/test",
+                        "/v1.0/register",
                         "/actuator"
                 );
     }

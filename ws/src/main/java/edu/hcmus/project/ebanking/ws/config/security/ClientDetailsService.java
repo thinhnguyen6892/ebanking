@@ -27,7 +27,7 @@ public class ClientDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException(String.format("CLIENT_NOT_FOUND '%s'.", clientId));
         } else {
             Bank bank = bankOpt.get();
-            return new ClientDetails(bank.getId(), passwordEncoder.encode(String.format("%s.%s",bank.getId(), bank.getSecret())), bank.getSecret());
+            return new ClientDetails(bank.getId(), passwordEncoder.encode(String.format("%s.%s",bank.getId(), bank.getSecret())), bank.getSecret(), bank.getKey());
         }
     }
 }

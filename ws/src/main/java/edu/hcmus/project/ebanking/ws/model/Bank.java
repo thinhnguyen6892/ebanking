@@ -14,8 +14,9 @@ public class Bank {
     private String email;
     private String phone;
     private Boolean status;
-    private String key;
+    private byte[] key;
     private String secret;
+    private SignType signType;
 
     @Id
     @Column(name = "id")
@@ -79,13 +80,13 @@ public class Bank {
         this.status = status;
     }
 
-    @Basic
+    @Lob
     @Column(name = "api_key")
-    public String getKey() {
+    public byte[] getKey() {
         return key;
     }
 
-    public void setKey(String key) {
+    public void setKey(byte[] key) {
         this.key = key;
     }
 
@@ -97,6 +98,17 @@ public class Bank {
 
     public void setSecret(String secret) {
         this.secret = secret;
+    }
+
+    @Basic
+    @Column(name = "sign_type")
+    @Enumerated(EnumType.ORDINAL)
+    public SignType getSignType() {
+        return signType;
+    }
+
+    public void setSignType(SignType signType) {
+        this.signType = signType;
     }
 
     @Override
@@ -117,5 +129,6 @@ public class Bank {
     public int hashCode() {
         return Objects.hash(id, bankName, address, email, phone, status, key);
     }
+
 
 }

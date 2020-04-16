@@ -1,11 +1,12 @@
 package edu.hcmus.project.ebanking.ws.resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.hcmus.project.ebanking.ws.config.exception.BadRequestException;
 import edu.hcmus.project.ebanking.ws.config.security.ClientDetails;
 import edu.hcmus.project.ebanking.ws.model.Bank;
-import edu.hcmus.project.ebanking.ws.repository.BankRepository;
-import edu.hcmus.project.ebanking.ws.resource.dto.CustomerDto;
-import edu.hcmus.project.ebanking.ws.resource.dto.AccountRequestDto;
-import edu.hcmus.project.ebanking.ws.resource.dto.TransactionRequestDto;
+import edu.hcmus.project.ebanking.ws.resource.dto.*;
+import edu.hcmus.project.ebanking.ws.service.TokenProvider;
 import edu.hcmus.project.ebanking.ws.service.WsService;
 import edu.hcmus.project.ebanking.ws.service.SignatureService;
 import io.swagger.annotations.Api;
@@ -13,19 +14,25 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.security.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-
-import static edu.hcmus.project.ebanking.ws.model.TransactionType.DEPOSIT;
 
 @Api(value="Account Management Resource")
 @RestController
@@ -39,10 +46,13 @@ public class ResourceRestController {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
-    private BankRepository bankRepository;
+    private SignatureService signatureService;
 
     @Autowired
-    private SignatureService signatureService;
+    private ObjectMapper mapper;
+
+    @Autowired
+    private TokenProvider tokenProvider;
 
 
     @ApiOperation(value = "Retrieve account information", response = CustomerDto.class)
@@ -52,23 +62,20 @@ public class ResourceRestController {
             @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
     })
-    @PostMapping
-    public ResponseEntity<CustomerDto> queryAccountInformation(@Valid @RequestBody AccountRequestDto request) {
+    @PostMapping("/account")
+    public ResponseEntity<CustomerDto> queryAccountInformation(@Valid @RequestBody HashableDto<AccountRequestDto> dto, HttpServletRequest request, ZoneId clientZoneId) throws JsonProcessingException {
+        hashVerify(dto, request, clientZoneId);
+        return ResponseEntity.ok(wsService.findAccountInfo(dto.getContent().getAccId()));
+    }
+    @GetMapping("/account/request/sample")
+    public HashableDto<AccountRequestDto> queryAccountInformation(@RequestBody AccountRequestDto content) throws JsonProcessingException {
+        HashableDto<AccountRequestDto> dto = new HashableDto<>();
         ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
-        long requestTime = request.getSubmittedDate().toInstant().toEpochMilli();
-        String rawFormula = String.format("%s.%s-%s-%s", requestTime, request.getValidity(), clientDetails.getSecret(), request.getAcd());
-        long expires = requestTime + 1000L * (request.getValidity());
-        long now = ZonedDateTime.now().toInstant().toEpochMilli();
-        if(bCryptPasswordEncoder.matches(rawFormula, request.getHash()) && now > expires) {
-            return ResponseEntity.ok(wsService.findAccountInfo(request.getAcd()));
-        }
-        return ResponseEntity.badRequest().build();
-    }
-    @GetMapping("/test")
-    public String queryAccountInformation() {
-        Bank bank = bankRepository.getOne("VITI");
-        return bCryptPasswordEncoder.encode(String.format("%s.%s",bank.getId(), bank.getSecret()));
+        content.setClientKey(clientDetails.getSecret());
+        dto.setHash(bCryptPasswordEncoder.encode(mapper.writeValueAsString(content)));
+        dto.setContent(content);
+        return dto;
     }
 
     @ApiOperation(value = "Perform transaction processing", response = CustomerDto.class)
@@ -79,35 +86,102 @@ public class ResourceRestController {
             @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
     })
     @PostMapping("/transaction")
-    public CustomerDto requestTransaction(@Valid @RequestBody TransactionRequestDto request) {
-        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-        long requestTime = request.getSubmittedDate().toInstant().toEpochMilli();
-        String rawFormula = String.format("%s.%s.%s-%s-%s.%s.%s.%s", requestTime, request.getValidity(), request.getAcd(), clientDetails.getSecret(),
-                request.getTransType(), request.getAmount(), request.getNote(), request.getSign());
-        long expires = requestTime + 1000L * (request.getValidity());
-        long now = ZonedDateTime.now().toInstant().toEpochMilli();
-
-        if(bCryptPasswordEncoder.matches(rawFormula, request.getHash()) && now > expires) {
-//            signatureService.verifyWithPublicKey()
-            return null;
+    public SignatureDto<TransactionDto> requestTransaction(@Valid @RequestBody SignatureDto<TransactionRequestDto> dto, HttpServletRequest request, ZoneId clientZoneId) {
+        ClientDetails clientDetails = getLoggedClient();
+        hashVerify(dto, request, clientZoneId);
+        byte[] signature = Base64Utils.decode(dto.getSign().getBytes());
+        try {
+            signatureService.verifyWithPublicKey(dto.getHash(), signature, clientDetails.getKey());
+            TransactionDto content = null;
+            switch (dto.getContent().getTransType()) {
+                case DEPOSIT: content = wsService.depositTransaction(clientDetails.getUsername(), dto.getContent()); break;
+                default:
+                    content = wsService.withDrawTransaction(clientDetails.getUsername(), dto.getContent()); break;
+            }
+            TransactionDto hashContent = content.clone();
+            hashContent.setClientKey(tokenProvider.computeSignature(clientDetails));
+            SignatureDto<TransactionDto> result = new SignatureDto<>();
+            result.setContent(content);
+            String hash = bCryptPasswordEncoder.encode(mapper.writeValueAsString(hashContent));
+            result.setHash(hash);
+            result.setSign(signatureService.signWithPrivateKey(hash));
+            return result;
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid sign");
         }
-        return null;
     }
 
-    @GetMapping("/transaction/test")
-    public TransactionRequestDto requestTransaction() throws InvalidKeySpecException, SignatureException, NoSuchAlgorithmException, InvalidKeyException, IOException {
-        TransactionRequestDto request = new TransactionRequestDto();
-        request.setAmount(Double.valueOf(10000));
-        request.setNote("Test");
-        request.setTransType(DEPOSIT);
-        request.setAcd("0001582797115906");
-        request.setSubmittedDate(ZonedDateTime.now());
-        request.setValidity(Long.valueOf(60*5));
-        request.setSign(signatureService.signWithPrivateKey(request.toString()));
-        request.setHash(bCryptPasswordEncoder.encode(String.format("%s.%s.%s-%s-%s.%s.%s.%s", request.getSubmittedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")), request.getValidity(), request.getAcd(), "mysecret",
-                request.getTransType(), request.getAmount(), request.getNote(), request.getSign())));
-        return request;
+    @GetMapping("/transaction/request/sample")
+    public SignatureDto<TransactionRequestDto> requestTransactionSAmple(@Valid @RequestBody TransactionRequestDto content) {
+        ClientDetails clientDetails = getLoggedClient();
+        SignatureDto<TransactionRequestDto> result = new SignatureDto<>();
+        content.setClientKey(clientDetails.getSecret());
+        content.setValidity(10000l);
+        result.setContent(content);
+        String hash = null;
+        try {
+            hash = bCryptPasswordEncoder.encode(mapper.writeValueAsString(content));
+            result.setHash(hash);
+            result.setSign(signatureService.signWithPrivateKey(hash));
+            return result;
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid sign");
+        }
+    }
+
+    @GetMapping(value = "/publicKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public HttpEntity<byte[]> getSamplePrivateKey(HttpServletResponse response) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        response.setHeader("Content-Disposition", "attachment; filename=" + "publicKey.der");
+
+        return new HttpEntity<byte[]>(signatureService.getPublicKey(), headers);
+    }
+
+    @PostMapping("/register")
+    public BankDto registerNewClient(@ModelAttribute ClientRegisterDto dto) {
+        try {
+            Bank bank = wsService.createNewRefBank(dto);
+            return new BankDto(bank.getId(), tokenProvider.computeSignature(bank.getId(), bank.getSecret()));
+        } catch (IOException e) {
+            throw new BadRequestException("Cannot load the public key.");
+        }
+    }
+
+    @PostMapping("/client/update")
+    public ResponseEntity updatePublicKey(@RequestParam MultipartFile key) {
+        try {
+            ClientDetails details = getLoggedClient();
+            wsService.updateRefBankKey(details.getUsername(), key);
+            return ResponseEntity.ok().body("Updated");
+        } catch (IOException e) {
+            throw new BadRequestException("Cannot load the public key.");
+        }
+    }
+
+
+
+    private ClientDetails getLoggedClient() {
+        return (ClientDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+    }
+
+    private void hashVerify(HashableDto<?> dto, HttpServletRequest request, ZoneId clientZoneId) {
+        ClientDetails clientDetails = getLoggedClient();
+        LocalDateTime requestLdt = LocalDateTime.ofInstant(Instant.ofEpochMilli(request.getSession().getLastAccessedTime()), clientZoneId);
+        long requestTime = requestLdt.atZone(clientZoneId).toInstant().toEpochMilli();
+        long expires = requestTime + 1000L * (dto.getContent().getValidity());
+        long now = ZonedDateTime.now().toInstant().toEpochMilli();
+        BaseRequestDto contentDto = dto.getContent();
+        contentDto.setClientKey(clientDetails.getSecret());
+        try {
+            String rawContent = mapper.writeValueAsString(contentDto);
+            if(!bCryptPasswordEncoder.matches(rawContent, dto.getHash()) || now > expires) {
+                throw new BadRequestException("Request is invalid or expired!");
+            }
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException("Invalid json content.");
+        }
     }
 
 }

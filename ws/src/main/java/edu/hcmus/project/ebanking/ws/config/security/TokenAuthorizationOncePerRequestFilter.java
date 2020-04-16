@@ -8,6 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -30,6 +31,9 @@ public class TokenAuthorizationOncePerRequestFilter extends OncePerRequestFilter
     @Value("${http.request.header}")
     private String tokenHeader;
 
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         logger.debug("Authentication Request For '{}'", request.getRequestURL());
@@ -38,25 +42,29 @@ public class TokenAuthorizationOncePerRequestFilter extends OncePerRequestFilter
 
         String clientId = null;
         String token = null;
+        String tokenPart = null;
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             token = requestTokenHeader.substring(7);
-            String[] tokenPart = token.split("\\.");
-            if(tokenPart.length == 2) {
-                clientId = tokenPart[0];
-            } else {
+            Integer clientIndex = token.indexOf('.');
+            if(clientIndex < 0) {
                 logger.warn("TOKEN_DOES_NOT_VALID");
+            } else {
+                clientId = token.substring(0, clientIndex);
+                tokenPart = token.substring(clientIndex+1);
             }
         } else {
             logger.warn("TOKEN_DOES_NOT_START_WITH_BEARER_STRING");
         }
 
         logger.debug("TOKEN_APP_ID_VALUE '{}'", clientId);
-        if (clientId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (clientId != null && tokenPart != null &&SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails = this.clientDetailsService.loadUserByUsername(clientId);
-            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+            ClientDetails userDetails = (ClientDetails) this.clientDetailsService.loadUserByUsername(clientId);
+            if(bCryptPasswordEncoder.matches(String.format("%s.%s", clientId, userDetails.getSecret()), tokenPart)){
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+            }
         }
 
         chain.doFilter(request, response);
