@@ -232,11 +232,17 @@ public class UserService {
         return user;
     }
 
-    public boolean deleteEmployee(long id){
+    public boolean deleteUser(long id){
         Optional<Role> roleOp = roleRepository.findById("STAFF");
         if(roleOp.isPresent()) {
             Optional<User> deUser = userRepository.findById(id);
             if(deUser.isPresent()){
+                List<Account> accounts = accountRepository.findAccountsByOwner(deUser.get());
+                if (!accounts.isEmpty()){
+                    for (Account account : accounts){
+                        accountRepository.deleteById(account.getAccountId());
+                    }
+                }
                 userRepository.deleteById(id);
                 return true;
             }

@@ -64,8 +64,8 @@ public class UserResourceRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable long id) {
-        userRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+        boolean result = userService.deleteUser(id);
+        return ResponseEntity.ok().build();
     }
 
     @ApiOperation(value = "[Employee] View a list of available user on the system. ", response = List.class)
