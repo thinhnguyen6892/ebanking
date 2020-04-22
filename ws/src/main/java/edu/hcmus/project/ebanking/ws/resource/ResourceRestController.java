@@ -25,8 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.Instant;
@@ -91,7 +89,7 @@ public class ResourceRestController {
         hashVerify(dto, request, clientZoneId);
         byte[] signature = Base64Utils.decode(dto.getSign().getBytes());
         try {
-            signatureService.verifyWithPublicKey(dto.getHash(), signature, clientDetails.getKey());
+            signatureService.verifyWithPublicKey(clientDetails.getSignType(), dto.getHash(), signature, clientDetails.getKey());
             TransactionDto content = null;
             switch (dto.getContent().getTransType()) {
                 case DEPOSIT: content = wsService.depositTransaction(clientDetails.getUsername(), dto.getContent()); break;

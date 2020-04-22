@@ -50,6 +50,9 @@ public class WsService {
         bank.setSecret(dto.getSecret());
         bank.setSignType(dto.getSignType());
         bank.setKey(dto.getPublicKey().getBytes());
+        bank.setApiKey(dto.getApiKey());
+        bank.setAccountEndpoint(dto.getAccountEndpoint());
+        bank.setTransactionEndpoint(dto.getTransactionEndpoint());
         return bankRepository.save(bank);
     }
 

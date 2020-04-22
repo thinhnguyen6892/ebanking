@@ -1,6 +1,7 @@
 package edu.hcmus.project.ebanking.ws.config.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import edu.hcmus.project.ebanking.ws.model.SignType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,14 +16,16 @@ public class ClientDetails implements UserDetails {
     private final String password;
     private final String secret;
     private final byte[] key;
+    private final SignType signType;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public ClientDetails(String clientId, String password, String secret, byte[] key) {
+    public ClientDetails(String clientId, String password, String secret, SignType signType, byte[] key) {
         this.clientId = clientId;
         this.password = password;
         this.secret = secret;
         List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
         this.authorities = authorities;
+        this.signType = signType;
         this.key = key;
     }
 
@@ -71,5 +74,9 @@ public class ClientDetails implements UserDetails {
 
     public byte[] getKey() {
         return key;
+    }
+
+    public SignType getSignType() {
+        return signType;
     }
 }

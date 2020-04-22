@@ -13,4 +13,9 @@ public class BaseRequestDto implements Serializable, Cloneable  {
 
     @NotNull
     private Long validity;
+
+    @Override
+    public BaseRequestDto clone() throws CloneNotSupportedException {
+        return (BaseRequestDto) super.clone();
+    }
 }

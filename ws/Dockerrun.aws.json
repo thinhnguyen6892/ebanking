@@ -1,0 +1,17 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "T2TrC-Bank",
+      "image": "aktv4pro/ws:v1",
+      "essential": true,
+      "memory": 256,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        }
+      ]
+    }
+  ]
+}
