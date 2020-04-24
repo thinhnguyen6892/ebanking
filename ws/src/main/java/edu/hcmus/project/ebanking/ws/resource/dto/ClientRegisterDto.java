@@ -15,6 +15,9 @@ public class ClientRegisterDto implements Serializable {
     private String email;
     private String address;
     private String secret;
+    private String apiKey;
+    private String accountEndpoint;
+    private String transactionEndpoint;
     private SignType signType;
     private MultipartFile publicKey;
 }

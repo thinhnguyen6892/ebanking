@@ -17,6 +17,9 @@ public class Bank {
     private byte[] key;
     private String secret;
     private SignType signType;
+    private String apiKey;
+    private String accountEndpoint;
+    private String transactionEndpoint;
 
     @Id
     @Column(name = "id")
@@ -81,7 +84,7 @@ public class Bank {
     }
 
     @Lob
-    @Column(name = "api_key")
+    @Column(name = "public_key")
     public byte[] getKey() {
         return key;
     }
@@ -111,6 +114,36 @@ public class Bank {
         this.signType = signType;
     }
 
+    @Basic
+    @Column(name = "api_key")
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    @Basic
+    @Column(name = "accountEndpoint")
+    public String getAccountEndpoint() {
+        return accountEndpoint;
+    }
+
+    public void setAccountEndpoint(String accountEndpoint) {
+        this.accountEndpoint = accountEndpoint;
+    }
+
+    @Basic
+    @Column(name = "transactionEndpoint")
+    public String getTransactionEndpoint() {
+        return transactionEndpoint;
+    }
+
+    public void setTransactionEndpoint(String transactionEndpoint) {
+        this.transactionEndpoint = transactionEndpoint;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -129,6 +162,7 @@ public class Bank {
     public int hashCode() {
         return Objects.hash(id, bankName, address, email, phone, status, key);
     }
+
 
 
 }

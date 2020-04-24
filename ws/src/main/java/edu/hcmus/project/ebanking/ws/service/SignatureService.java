@@ -1,5 +1,12 @@
 package edu.hcmus.project.ebanking.ws.service;
 
+import com.google.common.io.ByteSource;
+import edu.hcmus.project.ebanking.ws.model.SignType;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openpgp.*;
+import org.bouncycastle.openpgp.bc.BcPGPObjectFactory;
+import org.bouncycastle.openpgp.bc.BcPGPPublicKeyRing;
+import org.bouncycastle.openpgp.operator.bc.BcPGPContentVerifierBuilderProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -12,6 +19,7 @@ import sun.security.rsa.RSAPrivateCrtKeyImpl;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -84,8 +92,17 @@ public class SignatureService {
         return new String(Base64Utils.encode(rsa.sign()));
     }
 
-    public void verifyWithPublicKey(String content, byte[] signature, byte[] keyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, IOException, SignatureException {
-        verifyWithRSAPublicKey(content, signature, keyBytes);
+    public void verifyWithPublicKey(SignType signType, String content, byte[] signature, byte[] keyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, IOException, SignatureException {
+        switch (signType) {
+            case RSA:
+                verifyWithRSAPublicKey(content, signature, keyBytes);
+                break;
+            case PGP:
+                verifyWithPGPPublicKey(content, signature, keyBytes);
+                break;
+            default:
+                throw new SignatureException("Invalid signature type");
+        }
     }
 
     private void verifyWithRSAPublicKey(String content, byte[] signature, byte[] keyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, IOException, SignatureException {
@@ -96,10 +113,57 @@ public class SignatureService {
         sig.initVerify(publicKey);
         sig.update(content.getBytes());
         if(!sig.verify(signature)) {
-            throw new SignatureException();
+            throw new SignatureException("RSA signature verification failed.");
         }
     }
 
+    public void verifyWithPGPPublicKey(String content, byte[] signature, byte[] keyBytes) throws SignatureException {
+        try {
+            byte[] data = content.getBytes();
+            PGPPublicKey publicKey = loadPublicKey(keyBytes);
+            Security.addProvider(new BouncyCastleProvider());
+            PGPSignature sig = pgpExtractSignature(signature);
+            sig.init(new BcPGPContentVerifierBuilderProvider(), publicKey);
+            sig.update(data);
+            if (!sig.verify()) {
+                throw new SignatureException("PGP signature verification failed.");
+            }
+        } catch (PGPException e) {
+            throw new SignatureException("PGP signature verification failed.");
+        }
+
+    }
+
+    private PGPPublicKey loadPublicKey(byte[] keyBytes) {
+        try (InputStream input = ByteSource.wrap(keyBytes).openStream();
+             InputStream decoder = PGPUtil.getDecoderStream(input)) {
+            return new BcPGPPublicKeyRing(decoder).getPublicKey();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private PGPSignature pgpExtractSignature(byte[] signature)
+            throws SignatureException {
+        try {
+            ByteArrayInputStream input = new ByteArrayInputStream(signature);
+            PGPObjectFactory decoder = new BcPGPObjectFactory(PGPUtil.getDecoderStream(input));
+            Object object = decoder.nextObject();
+            if (object == null) {
+                throw new SignatureException("No OpenPGP packets found in signature.");
+            }
+            if (!(object instanceof PGPSignatureList)) {
+                throw new SignatureException("Expected PGPSignatureList packet but got");
+            }
+            PGPSignatureList sigs = (PGPSignatureList) object;
+            if (sigs.isEmpty()) {
+                throw new SignatureException("PGPSignatureList doesn't have a PGPSignature.");
+            }
+            return sigs.get(0);
+        } catch (IOException e) {
+            throw new SignatureException("Failed to extract PGPSignature object from .sig blob.", e);
+        }
+    }
 
 
 
