@@ -10,6 +10,7 @@ import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.CreateTran
 import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionConfirmationDto;
 import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionDto;
 import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionQueryDto;
+import edu.hcmus.project.ebanking.backoffice.service.restclient.RestClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -55,6 +56,9 @@ public class TransactionService {
 
     @Value("${app.dev.mode}")
     private Boolean devMode;
+
+    @Autowired
+    private RestClientService clientService;
 
 
     public Page<TransactionDto> findAllTransaction(TransactionQueryDto request, Pageable pageable) {
@@ -103,20 +107,14 @@ public class TransactionService {
     }
 
     public TransactionDto requestTransaction(User owner, CreateTransactionRequestDto dto) {
+        Double fee = 7000d;
         Optional<Account> sourceOpt = accountRepository.findByOwnerAndAccountId(owner, dto.getSource());
         if(!sourceOpt.isPresent()) {
             throw new BadRequestException("Source account is not exist!");
         }
         Account source = sourceOpt.get();
-        Optional<Account> targetOpt = accountRepository.findById(dto.getTarget());
-        if(!targetOpt.isPresent()) {
-            throw new BadRequestException("Target account is not exist!");
-        }
-
-        Account target = targetOpt.get();
         Double sourceBalance = source.getBalance();
         Double transactionAmount = dto.getAmount();
-        Double fee = 7000d;
         switch (dto.getFeeType()){
             case SENDER:
                 transactionAmount += fee;
@@ -131,6 +129,23 @@ public class TransactionService {
         if(sourceBalance < transactionAmount) {
             throw new InvalidTransactionException("Insufficient balance. Cannot execute this transaction!");
         }
+
+        Bank refBank = null;
+        if(!StringUtils.isEmpty(dto.getBankId())) {
+            Optional<Bank> bankOpt = bankRepository.findById(dto.getBankId());
+            if(!bankOpt.isPresent()) {
+                throw new BadRequestException("Invalid bank id.");
+            }
+            Bank bank = bankOpt.get();
+            refBank = bank;
+        } else {
+            Optional<Account> targetOpt = accountRepository.findById(dto.getTarget());
+            if(!targetOpt.isPresent()) {
+                throw new BadRequestException("Target account is not exist!");
+            }
+        }
+
+
         ZonedDateTime now = ZonedDateTime.now();
         long currentTime =  now.toInstant().toEpochMilli();
         Transaction transaction = new Transaction();
@@ -138,11 +153,12 @@ public class TransactionService {
         transaction.setContent(dto.getContent());
         transaction.setDate(now);
         transaction.setSource(source.getAccountId());
-        transaction.setTarget(target.getAccountId());
+        transaction.setTarget(dto.getTarget());
         transaction.setStatus(TransactionStatus.NEW);
         transaction.setType(dto.getType());
         transaction.setFeeType(dto.getFeeType());
         transaction.setFee(fee);
+        transaction.setReference(refBank);
 
         long expires = currentTime + transactionExpiration;
         String opt = tokenProvider.generateRandomSeries(DIGITS, 6);
@@ -189,8 +205,6 @@ public class TransactionService {
         if(!targetOpt.isPresent()) {
             throw new BadRequestException("Target account is not exist!");
         }
-
-        Account target = targetOpt.get();
         Double sourceBalance = source.getBalance();
         Double transactionAmount = transaction.getAmount();
         Double fee = transaction.getFee();
@@ -210,9 +224,21 @@ public class TransactionService {
             throw new InvalidTransactionException("Insufficient balance. Cannot execute this transaction!");
         }
 
+        if(transaction.getReference() != null) {
+            //call api
+            //if not success throw exception
+            clientService.makeRsaClientTransaction(transaction.getReference(), transaction.getTarget(), Integer.valueOf(transaction.getAmount().intValue()), transaction.getContent());
+            source.setBalance(sourceBalance - (TransactionFeeType.SENDER.equals(feeType) ? transactionAmount : transaction.getAmount()));
+            accountRepository.save(source);
+            transaction.setStatus(TransactionStatus.COMPLETED);
+            transactionRepository.save(transaction);
+            return new TransactionDto(transaction);
+        }
         source.setBalance(sourceBalance - (TransactionFeeType.SENDER.equals(feeType) ? transactionAmount : transaction.getAmount()));
         accountRepository.save(source);
 
+
+        Account target = targetOpt.get();
         Double targetBalance = target.getBalance();
         target.setBalance(targetBalance + (TransactionFeeType.RECEIVER.equals(feeType) ? transactionAmount : transaction.getAmount()));
         accountRepository.save(target);

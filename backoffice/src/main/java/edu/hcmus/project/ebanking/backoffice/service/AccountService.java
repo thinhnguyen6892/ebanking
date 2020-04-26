@@ -1,21 +1,31 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.hcmus.project.ebanking.backoffice.model.Account;
+import edu.hcmus.project.ebanking.backoffice.model.Bank;
 import edu.hcmus.project.ebanking.backoffice.model.contranst.AccountType;
 import edu.hcmus.project.ebanking.backoffice.model.User;
 import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
+import edu.hcmus.project.ebanking.backoffice.repository.BankRepository;
 import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.CreateAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.DepositAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
+import edu.hcmus.project.ebanking.backoffice.service.restclient.RSAServiceRest;
+import edu.hcmus.project.ebanking.backoffice.service.restclient.RestClientService;
+import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +39,12 @@ public class AccountService {
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private BankRepository bankRepository;
+
+    @Autowired
+    private RestClientService clientService;
 
 
     public List<AccountDto> findUserAccounts(Long userId, boolean details) {
@@ -74,6 +90,19 @@ public class AccountService {
             throw new BadRequestException("User not found in the system");
         }
     }
+
+    public AccountDto findBankAccount(String accountId, String bankId) {
+        Optional<Bank> bankOpt = bankRepository.findById(bankId);
+        if(!bankOpt.isPresent()) {
+            throw new BadRequestException("Invalid Bank Id");
+        }
+        Bank bank = bankOpt.get();
+        switch (bank.getSignType()) {
+            case RSA: return clientService.getRsaClientAccountInfo(bank,accountId);
+            default: PGP: return null;
+        }
+    }
+
 
     public AccountDto findAccountByAccountId(String accountId) {
         AccountDto result = new AccountDto();

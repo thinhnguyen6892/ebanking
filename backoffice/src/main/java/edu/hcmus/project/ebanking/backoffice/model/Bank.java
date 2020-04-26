@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.model;
 
+import edu.hcmus.project.ebanking.backoffice.model.contranst.SignType;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -14,7 +15,13 @@ public class Bank {
     private String email;
     private String phone;
     private Boolean status;
-    private String key;
+    private byte[] key;
+    private String secret;
+    private SignType signType;
+    private String apiKey;
+    private String clientHost;
+    private String accountEndpoint;
+    private String transactionEndpoint;
 
     @Id
     @Column(name = "id")
@@ -78,14 +85,75 @@ public class Bank {
         this.status = status;
     }
 
-    @Basic
-    @Column(name = "api_key")
-    public String getKey() {
+    @Lob
+    @Column(name = "public_key")
+    public byte[] getKey() {
         return key;
     }
 
-    public void setKey(String key) {
+    public void setKey(byte[] key) {
         this.key = key;
+    }
+
+    @Basic
+    @Column(name = "secret")
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    @Basic
+    @Column(name = "sign_type")
+    @Enumerated(EnumType.ORDINAL)
+    public SignType getSignType() {
+        return signType;
+    }
+
+    public void setSignType(SignType signType) {
+        this.signType = signType;
+    }
+
+    @Basic
+    @Column(name = "api_key")
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    @Basic
+    @Column(name = "client_host")
+    public String getClientHost() {
+        return clientHost;
+    }
+
+    public void setClientHost(String clientHost) {
+        this.clientHost = clientHost;
+    }
+
+    @Basic
+    @Column(name = "accountEndpoint")
+    public String getAccountEndpoint() {
+        return accountEndpoint;
+    }
+
+    public void setAccountEndpoint(String accountEndpoint) {
+        this.accountEndpoint = accountEndpoint;
+    }
+
+    @Basic
+    @Column(name = "transactionEndpoint")
+    public String getTransactionEndpoint() {
+        return transactionEndpoint;
+    }
+
+    public void setTransactionEndpoint(String transactionEndpoint) {
+        this.transactionEndpoint = transactionEndpoint;
     }
 
     @Override

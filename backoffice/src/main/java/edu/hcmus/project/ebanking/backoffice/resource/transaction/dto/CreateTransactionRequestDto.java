@@ -12,10 +12,10 @@ public class CreateTransactionRequestDto implements Serializable {
     private String target;
     private String content;
     private Double amount;
+    private String bankId;
     private TransactionType type;
     @NotNull
     private TransactionFeeType feeType;
-    private String otpCode;
 
     public String getSource() {
         return source;
@@ -65,11 +65,11 @@ public class CreateTransactionRequestDto implements Serializable {
         this.feeType = feeType;
     }
 
-    public String getOtpCode() {
-        return otpCode;
+    public String getBankId() {
+        return bankId;
     }
 
-    public void setOtpCode(String otpCode) {
-        this.otpCode = otpCode;
+    public void setBankId(String bankId) {
+        this.bankId = bankId;
     }
 }
