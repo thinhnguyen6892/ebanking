@@ -17,7 +17,7 @@ public class Transaction {
     private String source;
     private String target;
     private String content;
-    private double amount;
+    private Double amount;
     private TransactionStatus status;
 
     private String otpCode;
@@ -94,11 +94,11 @@ public class Transaction {
 
     @Basic
     @Column(name = "amount")
-    public double getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 

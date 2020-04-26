@@ -8,7 +8,6 @@ import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.CreateAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
-import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.ClassDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
@@ -182,7 +181,7 @@ public class UserService {
             ZonedDateTime now = ZonedDateTime.now();
             long currentTime =  now.toInstant().toEpochMilli();
             if(!token.equals(user.getOtpCode()) || user.getValidity() < currentTime) {
-                throw new TokenException("Invalid OTP or expired!");
+                throw new BadRequestException("Invalid OTP or expired!");
             }
             if(StringUtils.isEmpty(password)) {
                 throw new BadRequestException("Password cannot be blank");

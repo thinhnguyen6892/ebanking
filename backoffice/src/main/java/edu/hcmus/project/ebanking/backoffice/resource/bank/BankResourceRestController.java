@@ -37,7 +37,7 @@ public class BankResourceRestController {
             dto.setEmail(bank.getEmail());
             dto.setPhone(bank.getPhone());
             dto.setStatus(bank.getStatus());
-            dto.setKey(bank.getKey());
+            dto.setKey(bank.getSecret());
             return dto;
         }
         throw new ResourceNotFoundException("Bank not found");
@@ -52,7 +52,7 @@ public class BankResourceRestController {
         newBank.setEmail(dto.getEmail());
         newBank.setPhone(dto.getPhone());
         newBank.setStatus(dto.getStatus());
-        newBank.setKey(dto.getKey());
+        newBank.setSecret(dto.getKey());
         newBank = bankRepository.save(newBank);
         return new ResponseEntity<BankDto>(dto, HttpStatus.OK);
     }
@@ -67,7 +67,7 @@ public class BankResourceRestController {
             upBank.setEmail(dto.getEmail());
             upBank.setPhone(dto.getPhone());
             upBank.setStatus(dto.getStatus());
-            upBank.setKey(dto.getKey());
+            upBank.setSecret(dto.getKey());
             upBank = bankRepository.save(upBank);
             return new ResponseEntity<BankDto>(dto, HttpStatus.OK);
         }

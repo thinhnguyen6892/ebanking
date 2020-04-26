@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -36,7 +37,11 @@ public class AccountResourceRestController {
     @ApiOperation(value = "[Employee] Find account by accountId")
     @GetMapping
     public AccountDto findAccountByAccountId(@RequestParam String accountId, @RequestParam String bankId) {
-        return accountService.findAccountByAccountId(accountId);
+        if(StringUtils.isEmpty(bankId)) {
+            return accountService.findAccountByAccountId(accountId);
+        }
+        return accountService.findBankAccount(accountId, bankId);
+
     }
 
     @ApiOperation(value = "1.2 [USER] View a list of available account of current log-on user", response = List.class)

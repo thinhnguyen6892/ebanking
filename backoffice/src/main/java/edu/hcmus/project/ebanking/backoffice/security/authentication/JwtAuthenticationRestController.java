@@ -1,7 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.security.authentication;
 
 import edu.hcmus.project.ebanking.backoffice.model.User;
-import edu.hcmus.project.ebanking.backoffice.resource.exception.TokenException;
+import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
 import edu.hcmus.project.ebanking.backoffice.service.CaptchaValidator;
@@ -47,7 +47,7 @@ public class JwtAuthenticationRestController {
     public ResponseEntity<?> createAuthenticationToken(JwtTokenRequest authenticationRequest)
             throws JwtAuthenticationException {
         if(!captchaValidator.validateCaptcha(authenticationRequest.getReCAPTCHA()) && !devMode){
-            throw new TokenException("Captcha is not valid");
+            throw new BadRequestException("Captcha is not valid");
         }
 
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
@@ -63,24 +63,18 @@ public class JwtAuthenticationRestController {
     public ResponseEntity<?> refreshAndGetAuthenticationToken(HttpServletRequest request) {
         String authToken = request.getHeader(tokenHeader);
         final String token = authToken.substring(7);
-        String username = jwtTokenUtil.getUsernameFromToken(token);
+        String username = jwtTokenUtil.getUsernameFromTokenIgnoreExpired(token, true);
 
         final User userDetails = (User)jwtUserDetailsService.loadUserByUsername(username);
 
         if (jwtTokenUtil.canTokenBeRefreshed(token)) {
-            String refreshedToken = jwtTokenUtil.refreshToken(token);
+            String refreshedToken = jwtTokenUtil.refreshToken(token, username);
             final String role = Base64.getEncoder().encodeToString(userDetails.getRole().getRoleId().getBytes());
             return ResponseEntity.ok(new JwtTokenResponse(refreshedToken, role, new UserDto(userDetails)));
         } else {
-            return ResponseEntity.badRequest().body(null);
+            throw new JwtAuthenticationException("Invalid token", null);
         }
     }
-
-    @ExceptionHandler({JwtAuthenticationException.class})
-    public ResponseEntity<String> handleAuthenticationException(JwtAuthenticationException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-    }
-
     private void authenticate(String username, String password) {
         Objects.requireNonNull(username);
         Objects.requireNonNull(password);

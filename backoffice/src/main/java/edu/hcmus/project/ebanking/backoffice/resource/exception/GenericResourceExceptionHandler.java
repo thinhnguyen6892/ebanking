@@ -29,6 +29,13 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
         return new ResponseEntity(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(ConnectException.class)
+    public final ResponseEntity<Object> handleEntityNotExistException(ConnectException ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
+                request.getDescription(false), devMode);
+        return new ResponseEntity(exceptionResponse, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
     @ExceptionHandler(InvalidTransactionException.class)
     public final ResponseEntity<Object> handleInvalidTransactionException(InvalidTransactionException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
@@ -65,7 +72,7 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
         return new ResponseEntity(exceptionResponse, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler({BadRequestException.class, TokenException.class})
+    @ExceptionHandler(BadRequestException.class)
     public final ResponseEntity<Object> handleEntityNotExistException(BadRequestException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(),
                 request.getDescription(false), devMode);

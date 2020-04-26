@@ -1,17 +1,16 @@
 package edu.hcmus.project.ebanking.backoffice.security.jwt;
 
 import edu.hcmus.project.ebanking.backoffice.model.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Clock;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.DefaultClock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.util.DateUtils;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +30,21 @@ public class JwtTokenUtil implements Serializable {
     @Value("${jwt.token.expiration.in.seconds}")
     private Long expiration;
 
+    @Value("${jwt.token.refresh.expiration.in.minutes}")
+    private Long refreshExpiration;
+
     public String getUsernameFromToken(String token) {
+        return getClaimFromToken(token, Claims::getSubject);
+    }
+
+    public String getUsernameFromTokenIgnoreExpired(String token, boolean ignored) {
+        if(ignored) {
+            try {
+                return getClaimFromToken(token, Claims::getSubject);
+            } catch (ExpiredJwtException e) {
+                return e.getClaims().getSubject();
+            }
+        }
         return getClaimFromToken(token, Claims::getSubject);
     }
 
@@ -39,7 +52,14 @@ public class JwtTokenUtil implements Serializable {
         return getClaimFromToken(token, Claims::getIssuedAt);
     }
 
-    public Date getExpirationDateFromToken(String token) {
+    public Date getExpirationDateFromToken(String token, boolean ignored) {
+        if(ignored) {
+            try {
+                return getClaimFromToken(token, Claims::getExpiration);
+            } catch (ExpiredJwtException e) {
+                return e.getClaims().getExpiration();
+            }
+        }
         return getClaimFromToken(token, Claims::getExpiration);
     }
 
@@ -53,13 +73,21 @@ public class JwtTokenUtil implements Serializable {
     }
 
     private Boolean isTokenExpired(String token) {
-        final Date expiration = getExpirationDateFromToken(token);
-        return expiration.before(clock.now());
+        try {
+            final Date expiration = getExpirationDateFromToken(token, false);
+            return expiration.before(clock.now());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
     private Boolean ignoreTokenExpiration(String token) {
         // here you specify tokens, for that the expiration is ignored
-        return false;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(getExpirationDateFromToken(token, true));
+        calendar.add(Calendar.MINUTE, refreshExpiration.intValue());
+        final Date expiration = calendar.getTime();
+        return !expiration.before(clock.now());
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -79,21 +107,16 @@ public class JwtTokenUtil implements Serializable {
         return (!isTokenExpired(token) || ignoreTokenExpiration(token));
     }
 
-    public String refreshToken(String token) {
+    public String refreshToken(String token, String subject) {
         final Date createdDate = clock.now();
         final Date expirationDate = calculateExpirationDate(createdDate);
-
-        final Claims claims = getAllClaimsFromToken(token);
-        claims.setIssuedAt(createdDate);
-        claims.setExpiration(expirationDate);
-
-        return Jwts.builder().setClaims(claims).signWith(SignatureAlgorithm.HS512, secret).compact();
+        return Jwts.builder().setClaims(new HashMap<>()).setSubject(subject).setIssuedAt(createdDate)
+                .setExpiration(expirationDate).signWith(SignatureAlgorithm.HS512, secret).compact();
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public Boolean validateToken(String token, UserDetails userDetails, String subject, boolean ignoreExpired) {
         User user = (User) userDetails;
-        final String username = getUsernameFromToken(token);
-        return (username.equals(user.getUsername()) && !isTokenExpired(token));
+        return (subject.equals(user.getUsername()) && (ignoreExpired || !isTokenExpired(token)));
     }
 
     private Date calculateExpirationDate(Date createdDate) {
