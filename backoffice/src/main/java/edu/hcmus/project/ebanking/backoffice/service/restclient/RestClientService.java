@@ -2,10 +2,9 @@ package edu.hcmus.project.ebanking.backoffice.service.restclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.hcmus.project.ebanking.backoffice.model.Bank;
-import edu.hcmus.project.ebanking.backoffice.model.Transaction;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ConnectException;
-import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.CreateTransactionRequestDto;
+import edu.hcmus.project.ebanking.backoffice.service.SignatureService;
 import edu.hcmus.project.ebanking.backoffice.service.restclient.dto.RSAAccountInfoDto;
 import edu.hcmus.project.ebanking.backoffice.service.restclient.dto.RSARequestDto;
 import edu.hcmus.project.ebanking.backoffice.service.restclient.dto.RSATransactionDto;
@@ -14,6 +13,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -21,9 +21,10 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class RestClientService {
@@ -34,12 +35,32 @@ public class RestClientService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private SignatureService signatureService;
+
 
     public AccountDto getRsaClientAccountInfo(Bank bank, String accountId) {
-        RSAServiceRest serviceRest = buildRestService(bank, RSAServiceRest.header(bank), RSAServiceRest.class);
-        RSAAccountInfoDto accountInfoDto = new RSAAccountInfoDto();
-        accountInfoDto.setAccount(accountId);
-        RSAAccountInfoDto response = handleResponse(serviceRest.postAccounts(new RSARequestDto<>(accountInfoDto)));
+        Map header = RSAServiceRest.header(bank);
+        //creating service
+        RSAServiceRest serviceRest = buildRestService(bank, header, RSAServiceRest.class);
+        //creating request dto
+        RSAAccountInfoDto requestContent = new RSAAccountInfoDto();
+        requestContent.setAccount(accountId);
+        RSARequestDto<RSAAccountInfoDto> rsaRequestDto = new RSARequestDto<>(requestContent);
+        //create hash by formula api key + expired time
+        String headerValueString = header.values().stream().map(Object::toString).collect(Collectors.joining()).toString();
+        rsaRequestDto.setHash(passwordEncoder.encode(headerValueString));
+
+        //sending and parsing the response
+        RSAAccountInfoDto response = handleResponse(serviceRest.postAccounts(rsaRequestDto), resp -> {
+            String hash = resp.getHash();
+            RSAAccountInfoDto responseAccount = resp.getResponseContent();
+            //Check hash???
+            return true;
+        });
         AccountDto dto = new AccountDto();
         dto.setAccountId(response.getAccount());
         dto.setOwnerName(response.getName());
@@ -47,20 +68,49 @@ public class RestClientService {
     }
 
     public RSATransactionDto makeRsaClientTransaction(Bank bank, String account, Integer amount, String content) {
-        RSAServiceRest serviceRest = buildRestService(bank, RSAServiceRest.header(bank), RSAServiceRest.class);
-        RSATransactionDto transactionDto = new RSATransactionDto();
-        transactionDto.setAccount(account);
-        transactionDto.setAmount(amount);
-        transactionDto.setContent(content);
-        RSATransactionDto response = handleResponse(serviceRest.postTransactions(new RSARequestDto<>(transactionDto)));
+        Map header = RSAServiceRest.header(bank);
+
+        RSAServiceRest serviceRest = buildRestService(bank, header, RSAServiceRest.class);
+        RSATransactionDto requestContent = new RSATransactionDto();
+        requestContent.setAccount(account);
+        requestContent.setAmount(amount);
+        requestContent.setContent(content);
+        RSARequestDto<RSATransactionDto> rsaRequestDto = new RSARequestDto(requestContent);
+
+        String headerValueString = header.values().stream().map(Object::toString).collect(Collectors.joining()).toString();
+        rsaRequestDto.setHash(passwordEncoder.encode(headerValueString));
+        try {
+            rsaRequestDto.setSign(signatureService.signWithPrivateKey(objectMapper.writeValueAsString(requestContent)));
+        } catch (Exception e) {
+            throw new ConnectException(e);
+        }
+        //check hash and sign
+        RSATransactionDto response = handleResponse(serviceRest.postTransactions(rsaRequestDto), resp -> {
+            String hash = resp.getHash();
+            RSATransactionDto responseTransaction = resp.getResponseContent();
+            if(!passwordEncoder.matches(headerValueString, hash)) {
+                return false;
+            }
+            try {
+                String contentAsString = objectMapper.writeValueAsString(requestContent);
+                String sign = resp.getSign();
+                signatureService.verifyWithPublicKey(bank.getSignType(), contentAsString, sign.getBytes(), bank.getKey());
+            } catch (Exception e) {
+                return false;
+            }
+            return true;
+        });
         return response;
     }
 
-    private <T extends ResponseDto<E>, E> E handleResponse(Call<T> call) {
+    private <T extends ResponseDto<E>, E> E handleResponse(Call<T> call, Predicate<T> validator) {
         try {
             Response<T> response = call.execute();
             if (!response.isSuccessful()) {
                 throw new ConnectException(response.errorBody().string());
+            }
+            if(!validator.test(response.body())){
+                throw new ConnectException("Invalid hash or sign");
             }
             return response.body().getResponseContent();
         } catch (IOException e) {

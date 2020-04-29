@@ -36,7 +36,7 @@ public class AccountResourceRestController {
 
     @ApiOperation(value = "[Employee] Find account by accountId")
     @GetMapping
-    public AccountDto findAccountByAccountId(@RequestParam String accountId, @RequestParam String bankId) {
+    public AccountDto findAccountByAccountId(@RequestParam String accountId, @RequestParam(required = false) String bankId) {
         if(StringUtils.isEmpty(bankId)) {
             return accountService.findAccountByAccountId(accountId);
         }

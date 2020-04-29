@@ -12,6 +12,7 @@ public class RSARequestDto <T> {
 
     private T content;
     private String hash;
+    private String sign;
 
     public String getHash() {
         return hash;
@@ -27,5 +28,13 @@ public class RSARequestDto <T> {
 
     public void setContent(T content) {
         this.content = content;
+    }
+
+    public String getSign() {
+        return sign;
+    }
+
+    public void setSign(String sign) {
+        this.sign = sign;
     }
 }

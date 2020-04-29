@@ -40,7 +40,6 @@ public class SignatureService {
     @Autowired
     private ResourceLoader resourceLoader;
     private File privateKey;
-    private Path keyDir;
 
     @Value(value = "${app.signature.private-key}")
     private String privateKeyPath;
@@ -56,7 +55,6 @@ public class SignatureService {
     public void init() throws IOException {
         Resource privateKeyResource = resourceLoader.getResource(privateKeyPath);
         this.privateKey = privateKeyResource.getFile();
-        this.keyDir = resourceLoader.getResource(keyDirPath).getFile().toPath();
     }
 
 /*    public String uploadKey(MultipartFile key) throws IOException {

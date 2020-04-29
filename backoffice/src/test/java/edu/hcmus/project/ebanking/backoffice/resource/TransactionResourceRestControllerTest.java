@@ -57,8 +57,7 @@ public class TransactionResourceRestControllerTest {
 
         assertThat(pageable).hasPageNumber(5);
         assertThat(pageable).hasPageSize(10);
-        assertThat(pageable).hasSort("name", Sort.Direction.ASC);
-        assertThat(pageable).hasSort("id", Sort.Direction.DESC);
+        assertThat(pageable).hasSort("date", Sort.Direction.DESC);
     }
 
 }

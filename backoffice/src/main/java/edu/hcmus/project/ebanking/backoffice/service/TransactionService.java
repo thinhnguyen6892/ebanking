@@ -201,10 +201,6 @@ public class TransactionService {
             throw new BadRequestException("Source account is not exist!");
         }
         Account source = sourceOpt.get();
-        Optional<Account> targetOpt = accountRepository.findById(transaction.getTarget());
-        if(!targetOpt.isPresent()) {
-            throw new BadRequestException("Target account is not exist!");
-        }
         Double sourceBalance = source.getBalance();
         Double transactionAmount = transaction.getAmount();
         Double fee = transaction.getFee();
@@ -237,7 +233,10 @@ public class TransactionService {
         source.setBalance(sourceBalance - (TransactionFeeType.SENDER.equals(feeType) ? transactionAmount : transaction.getAmount()));
         accountRepository.save(source);
 
-
+        Optional<Account> targetOpt = accountRepository.findById(transaction.getTarget());
+        if(!targetOpt.isPresent()) {
+            throw new BadRequestException("Target account is not exist!");
+        }
         Account target = targetOpt.get();
         Double targetBalance = target.getBalance();
         target.setBalance(targetBalance + (TransactionFeeType.RECEIVER.equals(feeType) ? transactionAmount : transaction.getAmount()));
