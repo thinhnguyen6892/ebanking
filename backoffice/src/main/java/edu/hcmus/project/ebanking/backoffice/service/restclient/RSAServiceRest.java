@@ -14,6 +14,9 @@ import java.util.Map;
 
 public interface RSAServiceRest {
 
+    static final String HEADER_EXPIRED_TIME = "x-time-code";
+    static final String HEADER_API_KEY = "x-api-key";
+
     @POST("api/v1/accounts")
     Call<RSAResponseDto<RSAAccountInfoDto>> postAccounts(@Body RSARequestDto<RSAAccountInfoDto> accountInfoDto);
 
@@ -22,8 +25,8 @@ public interface RSAServiceRest {
 
     static Map header(Bank bank){
         Map<String, String> header = new HashMap<>();
-        header.put("x-api-key", bank.getApiKey());
-        header.put("x-time-code", "9999999999");
+        header.put(HEADER_API_KEY, bank.getApiKey());
+        header.put(HEADER_EXPIRED_TIME, "9999999999");
         return header;
     }
 }
