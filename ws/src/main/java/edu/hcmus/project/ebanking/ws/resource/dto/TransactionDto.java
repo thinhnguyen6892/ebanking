@@ -1,12 +1,11 @@
 package edu.hcmus.project.ebanking.ws.resource.dto;
 
-import edu.hcmus.project.ebanking.ws.model.Transaction;
-import edu.hcmus.project.ebanking.ws.model.TransactionFeeType;
-import edu.hcmus.project.ebanking.ws.model.TransactionStatus;
+import edu.hcmus.project.ebanking.data.model.Transaction;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionStatus;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.time.ZonedDateTime;
 
 @Getter

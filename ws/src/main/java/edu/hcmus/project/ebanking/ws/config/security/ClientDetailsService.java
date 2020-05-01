@@ -1,7 +1,7 @@
 package edu.hcmus.project.ebanking.ws.config.security;
 
-import edu.hcmus.project.ebanking.ws.model.Bank;
-import edu.hcmus.project.ebanking.ws.repository.BankRepository;
+import edu.hcmus.project.ebanking.data.model.Bank;
+import edu.hcmus.project.ebanking.data.repository.BankRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

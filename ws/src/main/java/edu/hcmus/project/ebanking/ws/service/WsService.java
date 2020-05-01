@@ -1,10 +1,13 @@
 package edu.hcmus.project.ebanking.ws.service;
 
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionStatus;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionType;
 import edu.hcmus.project.ebanking.ws.config.exception.BadRequestException;
-import edu.hcmus.project.ebanking.ws.model.*;
-import edu.hcmus.project.ebanking.ws.repository.AccountRepository;
-import edu.hcmus.project.ebanking.ws.repository.BankRepository;
-import edu.hcmus.project.ebanking.ws.repository.TransactionRepository;
+import edu.hcmus.project.ebanking.data.model.*;
+import edu.hcmus.project.ebanking.data.repository.AccountRepository;
+import edu.hcmus.project.ebanking.data.repository.BankRepository;
+import edu.hcmus.project.ebanking.data.repository.TransactionRepository;
 import edu.hcmus.project.ebanking.ws.resource.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

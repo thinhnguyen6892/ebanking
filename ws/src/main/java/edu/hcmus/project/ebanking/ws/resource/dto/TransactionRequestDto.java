@@ -1,8 +1,7 @@
 package edu.hcmus.project.ebanking.ws.resource.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import edu.hcmus.project.ebanking.ws.model.TransactionFeeType;
-import edu.hcmus.project.ebanking.ws.model.TransactionType;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionType;
 import lombok.Getter;
 import lombok.Setter;
 

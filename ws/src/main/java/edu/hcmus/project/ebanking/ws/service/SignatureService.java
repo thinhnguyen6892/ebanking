@@ -1,7 +1,7 @@
 package edu.hcmus.project.ebanking.ws.service;
 
 import com.google.common.io.ByteSource;
-import edu.hcmus.project.ebanking.ws.model.SignType;
+import edu.hcmus.project.ebanking.data.model.contranst.SignType;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.bc.BcPGPObjectFactory;
