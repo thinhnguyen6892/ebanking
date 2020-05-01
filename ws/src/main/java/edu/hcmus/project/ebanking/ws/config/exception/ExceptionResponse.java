@@ -10,6 +10,12 @@ public class ExceptionResponse {
 	private ZonedDateTime timestamp;
 	private String message;
 
+	public ExceptionResponse(ZonedDateTime timestamp) {
+		super();
+		this.timestamp = timestamp;
+		this.message = "Please contact administrator for more information";
+	}
+
 	public ExceptionResponse(ZonedDateTime timestamp, String message) {
 		super();
 		this.timestamp = timestamp;

@@ -1,6 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.account;
 
-import edu.hcmus.project.ebanking.backoffice.model.User;
+import edu.hcmus.project.ebanking.data.model.User;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.CreateAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.DepositAccount;

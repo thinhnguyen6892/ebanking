@@ -1,6 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.user.dto;
 
-import edu.hcmus.project.ebanking.backoffice.model.User;
+import edu.hcmus.project.ebanking.data.model.User;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

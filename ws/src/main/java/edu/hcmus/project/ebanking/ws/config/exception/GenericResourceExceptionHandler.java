@@ -20,7 +20,7 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
 
     @ExceptionHandler(Exception.class)
     public final ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(ZonedDateTime.now(), ex.getMessage());
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ZonedDateTime.now());
         return new ResponseEntity(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

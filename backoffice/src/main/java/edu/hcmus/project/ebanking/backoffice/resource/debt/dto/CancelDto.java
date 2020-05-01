@@ -1,6 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt.dto;
 
-import edu.hcmus.project.ebanking.backoffice.model.contranst.DebtStatus;
+import edu.hcmus.project.ebanking.data.model.contranst.DebtStatus;
 
 import java.io.Serializable;
 

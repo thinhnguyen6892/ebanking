@@ -1,8 +1,8 @@
 package edu.hcmus.project.ebanking.backoffice.resource.transaction.dto;
 
-import edu.hcmus.project.ebanking.backoffice.model.Debt;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
+import edu.hcmus.project.ebanking.data.model.Debt;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionType;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;

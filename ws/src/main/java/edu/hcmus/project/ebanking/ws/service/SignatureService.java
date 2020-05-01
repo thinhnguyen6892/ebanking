@@ -13,25 +13,17 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-import sun.security.rsa.RSAPrivateCrtKeyImpl;
 
 import javax.annotation.PostConstruct;
-import javax.crypto.Cipher;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
@@ -66,7 +58,7 @@ public class SignatureService {
     }*/
 
 
-    public byte[] getPublicKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+/*    public byte[] getPublicKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] keyBytes = Files.readAllBytes(privateKey.toPath());
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -74,7 +66,7 @@ public class SignatureService {
         RSAPrivateCrtKeyImpl rsaPrivateKey = (RSAPrivateCrtKeyImpl) prKey;
 
         return kf.generatePublic(new RSAPublicKeySpec(rsaPrivateKey.getModulus(), rsaPrivateKey.getPublicExponent())).getEncoded();
-    }
+    }*/
 
     public String signWithPrivateKey(String content) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, InvalidKeyException, SignatureException {
 

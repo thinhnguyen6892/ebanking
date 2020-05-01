@@ -127,14 +127,14 @@ public class ResourceRestController {
         }
     }
 
-    @GetMapping(value = "/publicKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+/*    @GetMapping(value = "/publicKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public HttpEntity<byte[]> getSamplePrivateKey(HttpServletResponse response) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         response.setHeader("Content-Disposition", "attachment; filename=" + "publicKey.der");
 
         return new HttpEntity<byte[]>(signatureService.getPublicKey(), headers);
-    }
+    }*/
 
     @PostMapping("/register")
     public BankDto registerNewClient(@ModelAttribute ClientRegisterDto dto) {

@@ -1,7 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.resource.bank;
 
-import edu.hcmus.project.ebanking.backoffice.model.Bank;
-import edu.hcmus.project.ebanking.backoffice.repository.BankRepository;
+import edu.hcmus.project.ebanking.data.model.Bank;
+import edu.hcmus.project.ebanking.data.repository.BankRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.bank.dto.BankDto;
 import edu.hcmus.project.ebanking.backoffice.resource.bank.dto.BankSimpleDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;

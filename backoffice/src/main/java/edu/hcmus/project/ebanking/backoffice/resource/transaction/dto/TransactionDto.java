@@ -1,15 +1,15 @@
 package edu.hcmus.project.ebanking.backoffice.resource.transaction.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import edu.hcmus.project.ebanking.backoffice.model.Transaction;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
+import edu.hcmus.project.ebanking.data.model.Transaction;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionType;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
-import static edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType.RECEIVER;
-import static edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType.SENDER;
+import static edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType.RECEIVER;
+import static edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType.SENDER;
 
 public class TransactionDto implements Serializable {
 

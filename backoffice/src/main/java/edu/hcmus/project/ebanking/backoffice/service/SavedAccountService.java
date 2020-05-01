@@ -1,10 +1,10 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
-import edu.hcmus.project.ebanking.backoffice.model.Account;
-import edu.hcmus.project.ebanking.backoffice.model.SavedAccount;
-import edu.hcmus.project.ebanking.backoffice.model.User;
-import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.SavedAccountRepository;
+import edu.hcmus.project.ebanking.data.model.Account;
+import edu.hcmus.project.ebanking.data.model.SavedAccount;
+import edu.hcmus.project.ebanking.data.model.User;
+import edu.hcmus.project.ebanking.data.repository.AccountRepository;
+import edu.hcmus.project.ebanking.data.repository.SavedAccountRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
 import edu.hcmus.project.ebanking.backoffice.resource.receiver.dto.CreateReceiverDto;
 import edu.hcmus.project.ebanking.backoffice.resource.receiver.dto.ReceiverDto;

@@ -1,8 +1,8 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
-import edu.hcmus.project.ebanking.backoffice.model.Debt;
-import edu.hcmus.project.ebanking.backoffice.model.Transaction;
-import edu.hcmus.project.ebanking.backoffice.model.User;
+import edu.hcmus.project.ebanking.data.model.Debt;
+import edu.hcmus.project.ebanking.data.model.Transaction;
+import edu.hcmus.project.ebanking.data.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
