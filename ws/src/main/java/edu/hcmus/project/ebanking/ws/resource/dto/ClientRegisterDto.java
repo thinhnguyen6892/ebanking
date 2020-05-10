@@ -1,6 +1,6 @@
 package edu.hcmus.project.ebanking.ws.resource.dto;
 
-import edu.hcmus.project.ebanking.ws.model.SignType;
+import edu.hcmus.project.ebanking.data.model.contranst.SignType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;

@@ -2,7 +2,7 @@ package edu.hcmus.project.ebanking.backoffice.resource.transaction.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionType;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;

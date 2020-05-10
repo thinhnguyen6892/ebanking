@@ -1,8 +1,8 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
-import edu.hcmus.project.ebanking.backoffice.model.*;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.*;
-import edu.hcmus.project.ebanking.backoffice.repository.*;
+import edu.hcmus.project.ebanking.data.model.*;
+import edu.hcmus.project.ebanking.data.model.contranst.*;
+import edu.hcmus.project.ebanking.data.repository.*;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.DepositAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.InvalidTransactionException;

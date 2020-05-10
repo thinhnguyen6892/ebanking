@@ -1,7 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.service.restclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.hcmus.project.ebanking.backoffice.model.Bank;
+import edu.hcmus.project.ebanking.data.model.Bank;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ConnectException;
 import edu.hcmus.project.ebanking.backoffice.service.SignatureService;

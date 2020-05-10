@@ -1,6 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
-import edu.hcmus.project.ebanking.backoffice.model.contranst.SignType;
+import edu.hcmus.project.ebanking.data.model.contranst.SignType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;

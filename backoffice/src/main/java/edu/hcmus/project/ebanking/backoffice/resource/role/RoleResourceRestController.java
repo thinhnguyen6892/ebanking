@@ -1,7 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.resource.role;
 
-import edu.hcmus.project.ebanking.backoffice.model.Role;
-import edu.hcmus.project.ebanking.backoffice.repository.RoleRepository;
+import edu.hcmus.project.ebanking.data.model.Role;
+import edu.hcmus.project.ebanking.data.repository.RoleRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.role.RoleDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;

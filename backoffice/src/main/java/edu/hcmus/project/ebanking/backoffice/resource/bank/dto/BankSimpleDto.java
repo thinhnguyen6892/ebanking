@@ -1,7 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.bank.dto;
 
-import com.sun.mail.imap.AppendUID;
-import edu.hcmus.project.ebanking.backoffice.model.Bank;
+import edu.hcmus.project.ebanking.data.model.Bank;
 
 import java.io.Serializable;
 

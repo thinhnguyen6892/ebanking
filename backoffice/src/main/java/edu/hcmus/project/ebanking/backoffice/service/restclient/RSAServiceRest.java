@@ -1,6 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.service.restclient;
 
-import edu.hcmus.project.ebanking.backoffice.model.Bank;
+import edu.hcmus.project.ebanking.data.model.Bank;
 import edu.hcmus.project.ebanking.backoffice.service.restclient.dto.RSAAccountInfoDto;
 import edu.hcmus.project.ebanking.backoffice.service.restclient.dto.RSARequestDto;
 import edu.hcmus.project.ebanking.backoffice.service.restclient.dto.RSAResponseDto;

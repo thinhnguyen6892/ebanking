@@ -1,10 +1,10 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
-import edu.hcmus.project.ebanking.backoffice.model.*;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.AccountType;
-import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.RoleRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
+import edu.hcmus.project.ebanking.data.model.*;
+import edu.hcmus.project.ebanking.data.model.contranst.AccountType;
+import edu.hcmus.project.ebanking.data.repository.AccountRepository;
+import edu.hcmus.project.ebanking.data.repository.RoleRepository;
+import edu.hcmus.project.ebanking.data.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.CreateAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;

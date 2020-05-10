@@ -1,14 +1,14 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
-import edu.hcmus.project.ebanking.backoffice.model.Account;
-import edu.hcmus.project.ebanking.backoffice.model.Debt;
-import edu.hcmus.project.ebanking.backoffice.model.Transaction;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.AccountType;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.DebtStatus;
-import edu.hcmus.project.ebanking.backoffice.model.User;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionType;
-import edu.hcmus.project.ebanking.backoffice.repository.*;
+import edu.hcmus.project.ebanking.data.model.Account;
+import edu.hcmus.project.ebanking.data.model.Debt;
+import edu.hcmus.project.ebanking.data.model.Transaction;
+import edu.hcmus.project.ebanking.data.model.contranst.AccountType;
+import edu.hcmus.project.ebanking.data.model.contranst.DebtStatus;
+import edu.hcmus.project.ebanking.data.model.User;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionType;
+import edu.hcmus.project.ebanking.data.repository.*;
 import edu.hcmus.project.ebanking.backoffice.resource.debt.dto.*;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;

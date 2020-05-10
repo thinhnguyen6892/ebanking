@@ -61,25 +61,7 @@ public class InstantTest {
     private static final String tonkey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmvc+zzrqg9OYPThf35GIsMLracOrw1HiMbvnzEyL7kglSY4MmPyFBALHI7evYCplBWQonQ/0Zv7WXTsNquuOjK1KufEm8R8kn9c6Q+/Udh3vKrBmshEuq0j8+lAUzUBcZxS2nNf0p3CjgqNX4I6gKfQjP+SgI04CIASQmw5hDYOa4scNbDn+jHyFlaBId+B5BD1qUdl9igESibjFwZJW/ldL8sHd4UmexWt65ywIdaL08PcExu/rQMbOGtXM8X76SriODp2VNXh5kheGle1kecOBOCM0+VmtY4xmJjRFDy12y7yCH0SsBFjTT+RuGFg9SVQNYnUB0t3dd2i/GbEXjQIDAQAB";
 
     public static void main(String[] args) throws SignatureException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
-//        verifyWithPGPPublicKey(content, sign.getBytes(), keyFile.getBytes());
-        Signature sig = Signature.getInstance("SHA256withRSA");
-
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.decode(tonkey.getBytes()));
-        byte[] bytes = Base64.decode(tonkey.getBytes());
-        File file = new File("c:\\Users\\hungt\\Desktop\\tonkey.pem");
-        try {
-
-            OutputStream os = new FileOutputStream(file);
-            os.write(bytes);
-            System.out.println("Write bytes to file.");
-            os.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        PublicKey publicKey = kf.generatePublic(spec);
-        sig.initVerify(publicKey);
+        verifyWithPGPPublicKey(content, sign.getBytes(), keyFile.getBytes());
     }
 
 

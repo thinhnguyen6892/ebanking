@@ -1,6 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.debt.dto;
 
-import edu.hcmus.project.ebanking.backoffice.model.Debt;
+import edu.hcmus.project.ebanking.data.model.Debt;
 import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionDto;
 
 public class DebtPaymentDto extends DebtDto {

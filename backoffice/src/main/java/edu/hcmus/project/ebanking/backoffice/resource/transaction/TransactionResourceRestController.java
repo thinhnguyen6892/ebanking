@@ -1,6 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.transaction;
 
-import edu.hcmus.project.ebanking.backoffice.model.User;
+import edu.hcmus.project.ebanking.data.model.User;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.InvalidTransactionException;
 import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.CreateTransactionRequestDto;
 import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionConfirmationDto;

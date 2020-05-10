@@ -1,6 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.security.jwt;
 
-import edu.hcmus.project.ebanking.backoffice.model.User;
+import edu.hcmus.project.ebanking.data.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.DefaultClock;
 import org.springframework.beans.factory.annotation.Value;

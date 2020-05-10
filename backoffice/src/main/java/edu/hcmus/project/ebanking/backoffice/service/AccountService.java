@@ -1,31 +1,23 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.hcmus.project.ebanking.backoffice.model.Account;
-import edu.hcmus.project.ebanking.backoffice.model.Bank;
-import edu.hcmus.project.ebanking.backoffice.model.contranst.AccountType;
-import edu.hcmus.project.ebanking.backoffice.model.User;
-import edu.hcmus.project.ebanking.backoffice.repository.AccountRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.BankRepository;
-import edu.hcmus.project.ebanking.backoffice.repository.UserRepository;
+import edu.hcmus.project.ebanking.data.model.Account;
+import edu.hcmus.project.ebanking.data.model.Bank;
+import edu.hcmus.project.ebanking.data.model.contranst.AccountType;
+import edu.hcmus.project.ebanking.data.model.User;
+import edu.hcmus.project.ebanking.data.repository.AccountRepository;
+import edu.hcmus.project.ebanking.data.repository.BankRepository;
+import edu.hcmus.project.ebanking.data.repository.UserRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.CreateAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.DepositAccount;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
-import edu.hcmus.project.ebanking.backoffice.service.restclient.RSAServiceRest;
 import edu.hcmus.project.ebanking.backoffice.service.restclient.RestClientService;
-import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service

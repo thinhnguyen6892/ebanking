@@ -1,6 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.account.dto;
 
-import edu.hcmus.project.ebanking.backoffice.model.contranst.TransactionFeeType;
+import edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;

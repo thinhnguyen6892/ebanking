@@ -1,7 +1,7 @@
 package edu.hcmus.project.ebanking.ws.config.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import edu.hcmus.project.ebanking.ws.model.SignType;
+import edu.hcmus.project.ebanking.data.model.contranst.SignType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

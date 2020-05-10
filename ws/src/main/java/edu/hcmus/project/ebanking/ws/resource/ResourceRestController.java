@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.hcmus.project.ebanking.ws.config.exception.BadRequestException;
 import edu.hcmus.project.ebanking.ws.config.security.ClientDetails;
-import edu.hcmus.project.ebanking.ws.model.Bank;
+import edu.hcmus.project.ebanking.data.model.Bank;
 import edu.hcmus.project.ebanking.ws.resource.dto.*;
 import edu.hcmus.project.ebanking.ws.service.TokenProvider;
 import edu.hcmus.project.ebanking.ws.service.WsService;
@@ -22,11 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -127,14 +124,14 @@ public class ResourceRestController {
         }
     }
 
-    @GetMapping(value = "/publicKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+/*    @GetMapping(value = "/publicKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public HttpEntity<byte[]> getSamplePrivateKey(HttpServletResponse response) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         response.setHeader("Content-Disposition", "attachment; filename=" + "publicKey.der");
 
         return new HttpEntity<byte[]>(signatureService.getPublicKey(), headers);
-    }
+    }*/
 
     @PostMapping("/register")
     public BankDto registerNewClient(@ModelAttribute ClientRegisterDto dto) {
