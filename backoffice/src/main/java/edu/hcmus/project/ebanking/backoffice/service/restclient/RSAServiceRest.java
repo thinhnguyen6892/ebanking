@@ -26,7 +26,7 @@ public interface RSAServiceRest {
     static Map header(Bank bank){
         Map<String, String> header = new HashMap<>();
         header.put(HEADER_API_KEY, bank.getApiKey());
-        header.put(HEADER_EXPIRED_TIME, "9999999999");
+        header.put(HEADER_EXPIRED_TIME, "9999999999999");
         return header;
     }
 }
