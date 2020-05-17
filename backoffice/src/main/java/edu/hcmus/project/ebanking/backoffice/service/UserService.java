@@ -129,9 +129,9 @@ public class UserService {
                 accountDto.setStatus(true);
                 accountDto.setBalance(0.0);
                 if(!isEmployee) {
-                    accountService.createAccount(newUser, accountDto, AccountType.SYSTEM);
-                } else {
                     accountService.createAccount(newUser, accountDto, AccountType.PAYMENT);
+                } else {
+                    accountService.createAccount(newUser, accountDto, AccountType.SYSTEM);
                 }
                 mailService.sendUserPasswordEmail(newUser, rawPassword);
                 return new UserDto(newUser);
@@ -249,21 +249,31 @@ public class UserService {
         return false;
     }
 
-    public boolean checkUsername(ClassDto dto){
-        String msg;
-        User user = userRepository.findByUsername(dto.getUsername());
-        if(user != null){
-            return false;
+    public int checkUsernameAndEmail(ClassDto dto){
+        int flag = 0;
+        User username = userRepository.findByUsername(dto.getUsername());
+        User email = userRepository.findByEmail(dto.getEmail());
+        if(username == null && email == null){
+            flag = 0;
         }
-        return true;
-    }
-
-    public boolean checkEmail(ClassDto dto){
-        User user = userRepository.findByEmail(dto.getEmail());
-        if(user != null){
-            return false;
+        else
+        {
+            if(username != null && email == null){
+                flag = 1;
+            }
+            else
+            {
+                if(username == null && email != null){
+                    flag = 2;
+                }
+                else {
+                    if(username != null && email != null){
+                        flag = 3;
+                    }
+                }
+            }
         }
-        return true;
+        return flag;
     }
 
     public UserDto findEmployeeByUsername(String username){

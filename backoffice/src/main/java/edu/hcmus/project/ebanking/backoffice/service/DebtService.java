@@ -294,6 +294,14 @@ public class DebtService {
             newDebt.setContent(dto.getContent());
             newDebt.setAmount(dto.getAmount());
             debtRepository.save(newDebt);
+            if(newDebt.getHolder().getId().equals(JwtTokenUtil.getLoggedUser().getId())){
+                Optional<Account> accountDebt = accountRepository.findById(newDebt.getDebtor().getAccountId());
+                Optional<User> userDebt = userRepository.findById(accountDebt.get().getOwner().getId());
+                Optional<User> userHolder = userRepository.findById(newDebt.getHolder().getId());
+                if(userHolder.isPresent()){
+                    mailService.sendDebtInformationNotificationEmail(userHolder.get(), userDebt.get(), newDebt.getId(), newDebt, newDebt.getContent());
+                }
+            }
             return true;
         }
         return false;

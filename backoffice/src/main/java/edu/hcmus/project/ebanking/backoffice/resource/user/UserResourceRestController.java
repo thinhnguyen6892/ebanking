@@ -121,13 +121,9 @@ public class UserResourceRestController {
         return new ResponseEntity<UserDto>(user, HttpStatus.OK);
     }
 
-    @GetMapping("/checkUsername")
-    public ResponseEntity<String> checkUsername(@Valid @RequestBody ClassDto dto){
-        return new ResponseEntity(userService.checkUsername(dto), HttpStatus.OK);
+    @GetMapping("/checkUsernameAnhEmail")
+    public ResponseEntity<Integer> checkUsernameAndEmail(@Valid @RequestBody ClassDto dto){
+        return new ResponseEntity(userService.checkUsernameAndEmail(dto), HttpStatus.OK);
     }
 
-    @GetMapping("/checkEmail")
-    public ResponseEntity<String> checkEmail(@Valid @RequestBody ClassDto dto){
-        return new ResponseEntity(userService.checkEmail(dto), HttpStatus.OK);
-    }
 }
