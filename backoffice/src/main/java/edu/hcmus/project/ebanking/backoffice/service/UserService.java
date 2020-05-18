@@ -249,25 +249,25 @@ public class UserService {
         return false;
     }
 
-    public int checkUsernameAndEmail(ClassDto dto){
+    public int checkUsernameAndEmail(String username, String email){
         int flag = 0;
-        User username = userRepository.findByUsername(dto.getUsername());
-        User email = userRepository.findByEmail(dto.getEmail());
-        if(username == null && email == null){
+        User userName = userRepository.findByUsername(username);
+        User userEmail = userRepository.findByEmail(email);
+        if(userName == null && userEmail == null){
             flag = 0;
         }
         else
         {
-            if(username != null && email == null){
+            if(userName != null && userEmail == null){
                 flag = 1;
             }
             else
             {
-                if(username == null && email != null){
+                if(userName == null && userEmail != null){
                     flag = 2;
                 }
                 else {
-                    if(username != null && email != null){
+                    if(userName != null && userEmail != null){
                         flag = 3;
                     }
                 }

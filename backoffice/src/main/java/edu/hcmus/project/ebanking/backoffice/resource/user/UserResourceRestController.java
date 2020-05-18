@@ -121,9 +121,9 @@ public class UserResourceRestController {
         return new ResponseEntity<UserDto>(user, HttpStatus.OK);
     }
 
-    @GetMapping("/checkUsernameAnhEmail")
-    public ResponseEntity<Integer> checkUsernameAndEmail(@Valid @RequestBody ClassDto dto){
-        return new ResponseEntity(userService.checkUsernameAndEmail(dto), HttpStatus.OK);
+    @RequestMapping(value = "/checkUsernameAndEmail", method = RequestMethod.GET)
+    public ResponseEntity<Integer> checkUsernameAndEmail(@RequestParam("username") String username, @RequestParam("email") String email){
+        return new ResponseEntity(userService.checkUsernameAndEmail(username, email), HttpStatus.OK);
     }
 
 }
