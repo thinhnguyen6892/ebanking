@@ -13,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -84,9 +85,12 @@ public class ResourceRestController {
     public SignatureDto<TransactionDto> requestTransaction(@Valid @RequestBody SignatureDto<TransactionRequestDto> dto, HttpServletRequest request, ZoneId clientZoneId) {
         ClientDetails clientDetails = getLoggedClient();
         hashVerify(dto, request, clientZoneId);
-        byte[] signature = Base64Utils.decode(dto.getSign().getBytes());
+
         try {
-            signatureService.verifyWithPublicKey(clientDetails.getSignType(), dto.getHash(), signature, clientDetails.getKey());
+            BaseRequestDto contentDto = dto.getContent();
+            String contentAsString = mapper.writeValueAsString(contentDto);
+            byte[] signature = Base64Utils.decode(dto.getSign().getBytes("UTF-8"));
+            signatureService.verifyWithPublicKey(clientDetails.getSignType(), contentAsString, signature, clientDetails.getKey());
             TransactionDto content = null;
             switch (dto.getContent().getTransType()) {
                 case DEPOSIT: content = wsService.depositTransaction(clientDetails.getUsername(), dto.getContent()); break;
@@ -94,7 +98,7 @@ public class ResourceRestController {
                     content = wsService.withDrawTransaction(clientDetails.getUsername(), dto.getContent()); break;
             }
             TransactionDto hashContent = content.clone();
-            hashContent.setClientKey(tokenProvider.computeSignature(clientDetails));
+            hashContent.setClientKey(clientDetails.getSecret());
             SignatureDto<TransactionDto> result = new SignatureDto<>();
             result.setContent(content);
             String hash = bCryptPasswordEncoder.encode(mapper.writeValueAsString(hashContent));
