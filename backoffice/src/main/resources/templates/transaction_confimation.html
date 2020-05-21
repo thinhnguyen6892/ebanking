@@ -28,23 +28,23 @@
 
                     <tr>
                         <td id="m_verificationMsg">
-                            <p>To process your transaction, please use the following One Time Password (OTP):</p>
-                            <p class="m_otp" th:text="${otp_code}"/>
+                            <p>Your transaction OTP below</p>
+                            <p class="m_otp"><strong th:text="${otp_code}"></strong></p>
+
                         </td>
                     </tr>
 
                     <tr>
                         <td id="m_accountSecurity">
-                            <p>Do not share this OTP with anyone. We takes your account security very seriously. Customer Service will never ask you to disclose or verify your Amazon password, OTP, credit card, or banking account number. If you receive a suspicious email with a link to update your account information, do not click on the link—instead, report the email for investigation.
-
-                            </p>
+                            <p>Code will be expire <strong>5 minutes</strong>.</p>
                         </td>
                     </tr>
 
                     <tr>
                         <td id="m_closing">
-                            <p>Best regards.
-                            </p>
+                            <div style="margin-top:30px;">
+                                <p style="font-style:italic;">Thank for using the services.</p>
+                            </div>
                         </td>
                     </tr>
                     </tbody>

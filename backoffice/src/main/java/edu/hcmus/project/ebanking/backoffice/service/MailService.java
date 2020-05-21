@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
+import edu.hcmus.project.ebanking.data.model.Account;
 import edu.hcmus.project.ebanking.data.model.Debt;
 import edu.hcmus.project.ebanking.data.model.Transaction;
 import edu.hcmus.project.ebanking.data.model.User;
@@ -121,7 +122,7 @@ public class MailService {
         sendEmail(user.getEmail(), subject, content, false, true);
     }
 
-    public void sendDebtInformationNotificationEmail(User userHolder, User userDebt, int debtId, Debt debt, String contents){
+    public void sendDebtInformationNotificationEmail(User userHolder, Account accountHolder, User userDebt, int debtId, Debt debt, String contents){
         log.debug("Sending debt information notification e-mail to '{}'", userDebt.getEmail());
         Context context = new Context(Locale.ENGLISH);
         context.setVariable("name", String.format("%s %s", userDebt.getFirstName(), userDebt.getLastName()));
@@ -130,6 +131,7 @@ public class MailService {
         context.setVariable("debt", debtId);
         context.setVariable("contentDebtInformation", contents);
         context.setVariable("holder", String.format("%s %s", userHolder.getFirstName(), userHolder.getLastName()));
+        context.setVariable("accountHolder", accountHolder.getAccountId());
         String content = templateEngine.process("debt_info", context);
         String subject = "Debt Information";
         sendEmail(userDebt.getEmail(), subject, content, false, true);

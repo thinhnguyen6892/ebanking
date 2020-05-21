@@ -298,8 +298,9 @@ public class DebtService {
                 Optional<Account> accountDebt = accountRepository.findById(newDebt.getDebtor().getAccountId());
                 Optional<User> userDebt = userRepository.findById(accountDebt.get().getOwner().getId());
                 Optional<User> userHolder = userRepository.findById(newDebt.getHolder().getId());
+                Optional<Account> accountHolder = accountRepository.findAccountByOwner(newDebt.getHolder());
                 if(userHolder.isPresent()){
-                    mailService.sendDebtInformationNotificationEmail(userHolder.get(), userDebt.get(), newDebt.getId(), newDebt, newDebt.getContent());
+                    mailService.sendDebtInformationNotificationEmail(userHolder.get(), accountHolder.get(), userDebt.get(), newDebt.getId(), newDebt, newDebt.getContent());
                 }
             }
             return true;
