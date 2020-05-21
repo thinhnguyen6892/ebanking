@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>edu.hcmus.project.ebanking</groupId>
 	<artifactId>backoffice</artifactId>
-	<version>v1</version>
+	<version>v2-release</version>
 	<name>backoffice</name>
 	<description>E-banking with Spring Boot</description>
 
@@ -26,7 +26,7 @@
 		<dependency>
 			<groupId>edu.hcmus.project.ebanking</groupId>
 			<artifactId>data</artifactId>
-			<version>${project.version}</version>
+			<version>v1</version>
 		</dependency>
 
 		<dependency>

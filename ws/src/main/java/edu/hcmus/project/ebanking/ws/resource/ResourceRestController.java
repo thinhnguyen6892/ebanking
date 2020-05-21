@@ -13,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.time.Instant;
@@ -84,9 +86,12 @@ public class ResourceRestController {
     public SignatureDto<TransactionDto> requestTransaction(@Valid @RequestBody SignatureDto<TransactionRequestDto> dto, HttpServletRequest request, ZoneId clientZoneId) {
         ClientDetails clientDetails = getLoggedClient();
         hashVerify(dto, request, clientZoneId);
-        byte[] signature = Base64Utils.decode(dto.getSign().getBytes());
+
         try {
-            signatureService.verifyWithPublicKey(clientDetails.getSignType(), dto.getHash(), signature, clientDetails.getKey());
+            BaseRequestDto contentDto = dto.getContent();
+            String contentAsString = mapper.writeValueAsString(contentDto);
+            byte[] signByte = Base64.decodeBase64(dto.getSign().getBytes("UTF-8"));
+            signatureService.verifyWithPublicKey(clientDetails.getSignType(), contentAsString, signByte, clientDetails.getKey());
             TransactionDto content = null;
             switch (dto.getContent().getTransType()) {
                 case DEPOSIT: content = wsService.depositTransaction(clientDetails.getUsername(), dto.getContent()); break;
@@ -94,7 +99,7 @@ public class ResourceRestController {
                     content = wsService.withDrawTransaction(clientDetails.getUsername(), dto.getContent()); break;
             }
             TransactionDto hashContent = content.clone();
-            hashContent.setClientKey(tokenProvider.computeSignature(clientDetails));
+            hashContent.setClientKey(clientDetails.getSecret());
             SignatureDto<TransactionDto> result = new SignatureDto<>();
             result.setContent(content);
             String hash = bCryptPasswordEncoder.encode(mapper.writeValueAsString(hashContent));
@@ -105,33 +110,6 @@ public class ResourceRestController {
             throw new BadRequestException("Invalid sign");
         }
     }
-
-    @GetMapping("/transaction/request/sample")
-    public SignatureDto<TransactionRequestDto> requestTransactionSAmple(@Valid @RequestBody TransactionRequestDto content) {
-        ClientDetails clientDetails = getLoggedClient();
-        SignatureDto<TransactionRequestDto> result = new SignatureDto<>();
-        content.setClientKey(clientDetails.getSecret());
-        content.setValidity(10000l);
-        result.setContent(content);
-        String hash = null;
-        try {
-            hash = bCryptPasswordEncoder.encode(mapper.writeValueAsString(content));
-            result.setHash(hash);
-            result.setSign(signatureService.signWithPrivateKey(hash));
-            return result;
-        } catch (Exception e) {
-            throw new BadRequestException("Invalid sign");
-        }
-    }
-
-/*    @GetMapping(value = "/publicKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public HttpEntity<byte[]> getSamplePrivateKey(HttpServletResponse response) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        response.setHeader("Content-Disposition", "attachment; filename=" + "publicKey.der");
-
-        return new HttpEntity<byte[]>(signatureService.getPublicKey(), headers);
-    }*/
 
     @PostMapping("/register")
     public BankDto registerNewClient(@ModelAttribute ClientRegisterDto dto) {
@@ -154,6 +132,15 @@ public class ResourceRestController {
         }
     }
 
+    @GetMapping(value = "/client/publicKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public HttpEntity<byte[]> getSamplePrivateKey(HttpServletResponse response) throws IOException {
+        ClientDetails details = getLoggedClient();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        response.setHeader("Content-Disposition", "attachment; filename=" + "publicKey.der");
+
+        return new HttpEntity<byte[]>(details.getKey(), headers);
+    }
 
 
     private ClientDetails getLoggedClient() {

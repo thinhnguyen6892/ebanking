@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.ws.service;
 
+import edu.hcmus.project.ebanking.data.model.contranst.SignType;
 import edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType;
 import edu.hcmus.project.ebanking.data.model.contranst.TransactionStatus;
 import edu.hcmus.project.ebanking.data.model.contranst.TransactionType;
@@ -9,14 +10,20 @@ import edu.hcmus.project.ebanking.data.repository.AccountRepository;
 import edu.hcmus.project.ebanking.data.repository.BankRepository;
 import edu.hcmus.project.ebanking.data.repository.TransactionRepository;
 import edu.hcmus.project.ebanking.ws.resource.dto.*;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Base64Utils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class WsService {
@@ -52,7 +59,14 @@ public class WsService {
         bank.setPhone(dto.getPhone());
         bank.setSecret(dto.getSecret());
         bank.setSignType(dto.getSignType());
-        bank.setKey(dto.getPublicKey().getBytes());
+        if(SignType.RSA.equals(dto.getSignType())) {
+            String fileContent = Arrays.stream(new String(dto.getPublicKey().getBytes()).split(System.lineSeparator()))
+                    .filter(line -> !line.startsWith("-----BEGIN") && !line.startsWith("-----END"))
+                    .collect(Collectors.joining(System.lineSeparator()));
+            bank.setKey(Base64Utils.decode(fileContent.getBytes("UTF-8")));
+        } else {
+            bank.setKey(dto.getPublicKey().getBytes());
+        }
         bank.setApiKey(dto.getApiKey());
         bank.setAccountEndpoint(dto.getAccountEndpoint());
         bank.setTransactionEndpoint(dto.getTransactionEndpoint());

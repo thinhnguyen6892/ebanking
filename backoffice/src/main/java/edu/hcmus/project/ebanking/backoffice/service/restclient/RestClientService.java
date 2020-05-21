@@ -11,6 +11,7 @@ import edu.hcmus.project.ebanking.backoffice.service.restclient.dto.RSATransacti
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -86,15 +87,15 @@ public class RestClientService {
         }
         //check hash and sign
         RSATransactionDto response = handleResponse(serviceRest.postTransactions(rsaRequestDto), resp -> {
-            String hash = resp.getHash();
+/*            String hash = resp.getHash();
             RSATransactionDto responseTransaction = resp.getResponseContent();
             if(!passwordEncoder.matches(headerValueString, hash)) {
                 return false;
-            }
+            }*/
             try {
                 String contentAsString = objectMapper.writeValueAsString(requestContent);
-                String sign = resp.getSign();
-                signatureService.verifyWithPublicKey(bank.getSignType(), contentAsString, sign.getBytes(), bank.getKey());
+                byte[] signByte = Base64.decodeBase64(resp.getSign().getBytes("UTF-8"));
+                signatureService.verifyWithPublicKey(bank.getSignType(), contentAsString, signByte, bank.getKey());
             } catch (Exception e) {
                 return false;
             }
