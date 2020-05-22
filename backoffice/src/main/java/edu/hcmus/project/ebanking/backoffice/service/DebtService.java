@@ -14,7 +14,6 @@ import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestExcept
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.CreateTransactionRequestDto;
 import edu.hcmus.project.ebanking.backoffice.resource.transaction.dto.TransactionDto;
-import edu.hcmus.project.ebanking.backoffice.resource.user.dto.CreateUserDto;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 import edu.hcmus.project.ebanking.backoffice.security.jwt.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -241,7 +240,7 @@ public class DebtService {
     public List<DebtUserDto> search (String id){
         Optional<Account> accountOp = accountRepository.findById(id);
         if(accountOp.isPresent()){
-            return accountRepository.findByAccountIdStartingWith(id).stream().map(account -> {
+            return accountRepository.findByAccountIdStartingWithAndTypeIsNot(id, AccountType.SYSTEM).stream().map(account -> {
                 DebtUserDto dto = new DebtUserDto();
                 dto.setAccountId(account.getAccountId());
                 Optional<User> user = userRepository.findById(account.getOwner().getId());

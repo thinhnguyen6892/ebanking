@@ -98,7 +98,7 @@ public class AccountService {
 
     public AccountDto findAccountByAccountId(String accountId) {
         AccountDto result = new AccountDto();
-        Optional<Account> accountOpt = accountRepository.findById(accountId);
+        Optional<Account> accountOpt = accountRepository.findByAccountIdAndTypeIsNot(accountId, AccountType.SYSTEM);
         if (accountOpt.isPresent()) {
             Account account = accountOpt.get();
             result.setAccountId(account.getAccountId());

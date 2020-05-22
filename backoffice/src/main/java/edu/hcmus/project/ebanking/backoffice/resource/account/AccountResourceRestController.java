@@ -34,7 +34,7 @@ public class AccountResourceRestController {
     @Autowired
     private AccountService accountService;
 
-    @ApiOperation(value = "[Employee] Find account by accountId")
+    @ApiOperation(value = "Find account by accountId")
     @GetMapping
     public AccountDto findAccountByAccountId(@RequestParam String accountId, @RequestParam(required = false) String bankId) {
         if(StringUtils.isEmpty(bankId)) {

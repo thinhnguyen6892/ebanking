@@ -3,6 +3,7 @@ package edu.hcmus.project.ebanking.backoffice.service;
 import edu.hcmus.project.ebanking.data.model.Account;
 import edu.hcmus.project.ebanking.data.model.SavedAccount;
 import edu.hcmus.project.ebanking.data.model.User;
+import edu.hcmus.project.ebanking.data.model.contranst.AccountType;
 import edu.hcmus.project.ebanking.data.repository.AccountRepository;
 import edu.hcmus.project.ebanking.data.repository.SavedAccountRepository;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.BadRequestException;
@@ -56,7 +57,7 @@ public class SavedAccountService {
 
     public CreateReceiverDto createReceiver(User owner, CreateReceiverDto dto) {
         if(StringUtils.isEmpty(dto.getBankId())) {
-            Optional<Account> accountOpt = accountRepository.findById(dto.getAccountId());
+            Optional<Account> accountOpt = accountRepository.findByAccountIdAndTypeIsNot(dto.getAccountId(), AccountType.SYSTEM);
             if(!accountOpt.isPresent()) {
                 throw new BadRequestException("Account is not exist!");
             }
@@ -84,7 +85,7 @@ public class SavedAccountService {
         }
         SavedAccount savedAccount = savedAccountOpt.get();
         if(StringUtils.isEmpty(dto.getBankId())) {
-            Optional<Account> accountOpt = accountRepository.findById(dto.getAccountId());
+            Optional<Account> accountOpt = accountRepository.findByAccountIdAndTypeIsNot(dto.getAccountId(), AccountType.SYSTEM);
             if(!accountOpt.isPresent()) {
                 throw new BadRequestException("Account is not exist!");
             }

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -63,14 +62,17 @@ public class TransactionService {
 
     public Page<TransactionDto> findAllTransaction(TransactionQueryDto request, Pageable pageable) {
         Page<Transaction> transactions;
+        TransactionType type = request.getType();
         if(request.getBankId() != null && request.getBankId() != "") {
             Optional<Bank> bankOpt = bankRepository.findById(request.getBankId());
             if(!bankOpt.isPresent()) {
                 throw new BadRequestException("Bank not found in the system");
             }
-            transactions = transactionRepository.findTransactionsByDateBetweenAndReferenceAndStatus(request.getStartDate(), request.getEndDate(), bankOpt.get(), TransactionStatus.COMPLETED, pageable);
+            transactions = type != null ? transactionRepository.findTransactionsByDateBetweenAndReferenceAndTypeAndStatus(request.getStartDate(), request.getEndDate(), bankOpt.get(), type, TransactionStatus.COMPLETED, pageable)
+                    : transactionRepository.findTransactionsByDateBetweenAndReferenceAndStatus(request.getStartDate(), request.getEndDate(), bankOpt.get(), TransactionStatus.COMPLETED, pageable);
         } else {
-            transactions = transactionRepository.findTransactionsByDateBetweenAndStatusAndReferenceNotNull(request.getStartDate(), request.getEndDate(), TransactionStatus.COMPLETED, pageable);
+            transactions = type != null ? transactionRepository.findTransactionsByDateBetweenAndTypeAndStatusAndReferenceNotNull(request.getStartDate(), request.getEndDate(), type, TransactionStatus.COMPLETED, pageable)
+            : transactionRepository.findTransactionsByDateBetweenAndStatusAndReferenceNotNull(request.getStartDate(), request.getEndDate(), TransactionStatus.COMPLETED, pageable);
         }
         return transactions.map(transaction -> {
             TransactionDto dto = new TransactionDto();
@@ -139,7 +141,7 @@ public class TransactionService {
             Bank bank = bankOpt.get();
             refBank = bank;
         } else {
-            Optional<Account> targetOpt = accountRepository.findById(dto.getTarget());
+            Optional<Account> targetOpt = accountRepository.findByAccountIdAndTypeIsNot(dto.getTarget(), AccountType.SYSTEM);
             if(!targetOpt.isPresent()) {
                 throw new BadRequestException("Target account is not exist!");
             }
@@ -233,7 +235,7 @@ public class TransactionService {
         source.setBalance(sourceBalance - (TransactionFeeType.SENDER.equals(feeType) ? transactionAmount : transaction.getAmount()));
         accountRepository.save(source);
 
-        Optional<Account> targetOpt = accountRepository.findById(transaction.getTarget());
+        Optional<Account> targetOpt = accountRepository.findByAccountIdAndTypeIsNot(transaction.getTarget(), AccountType.SYSTEM);
         if(!targetOpt.isPresent()) {
             throw new BadRequestException("Target account is not exist!");
         }
@@ -293,7 +295,7 @@ public class TransactionService {
             }
             receiverAccount = receiverAccounts.get(0);
         } else {
-            Optional<Account> receiverAccountOpt = accountRepository.findById(transactionDto.getAccountId());
+            Optional<Account> receiverAccountOpt = accountRepository.findByAccountIdAndTypeIsNot(transactionDto.getAccountId(), AccountType.SYSTEM);
             if(!receiverAccountOpt.isPresent()) {
                 throw new BadRequestException("Receiver's account doesn't exist.");
             }

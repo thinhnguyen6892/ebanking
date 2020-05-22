@@ -10,7 +10,7 @@
     </parent>
     <groupId>edu.hcmus.project.ebanking</groupId>
     <artifactId>ws</artifactId>
-    <version>v2</version>
+    <version>v2-release</version>
     <name>ws</name>
     <description>Demo project for Spring Boot</description>
 

@@ -1,9 +1,6 @@
 package edu.hcmus.project.ebanking.ws.service;
 
-import edu.hcmus.project.ebanking.data.model.contranst.SignType;
-import edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType;
-import edu.hcmus.project.ebanking.data.model.contranst.TransactionStatus;
-import edu.hcmus.project.ebanking.data.model.contranst.TransactionType;
+import edu.hcmus.project.ebanking.data.model.contranst.*;
 import edu.hcmus.project.ebanking.ws.config.exception.BadRequestException;
 import edu.hcmus.project.ebanking.data.model.*;
 import edu.hcmus.project.ebanking.data.repository.AccountRepository;
@@ -38,7 +35,7 @@ public class WsService {
     private TransactionRepository transactionRepository;
 
     public CustomerDto findAccountInfo(String accountId) {
-        Optional<Account> accountOpt = accountRepository.findById(accountId);
+        Optional<Account> accountOpt = accountRepository.findByAccountIdAndTypeIsNot(accountId, AccountType.SYSTEM);
         if(!accountOpt.isPresent()) {
             throw new BadRequestException("Account is not exist!");
         }
@@ -85,7 +82,7 @@ public class WsService {
 
     @Transactional
     public TransactionDto depositTransaction(String bankId, TransactionRequestDto requestDto) {
-        Optional<Account> accountOpt = accountRepository.findById(requestDto.getAccId());
+        Optional<Account> accountOpt = accountRepository.findByAccountIdAndTypeIsNot(requestDto.getAccId(), AccountType.SYSTEM);
         if(!accountOpt.isPresent()) {
             throw new BadRequestException("Account is not exist!");
         }
@@ -122,7 +119,7 @@ public class WsService {
 
     @Transactional
     public TransactionDto withDrawTransaction(String bankId, TransactionRequestDto requestDto) {
-        Optional<Account> accountOpt = accountRepository.findById(requestDto.getAccId());
+        Optional<Account> accountOpt = accountRepository.findByAccountIdAndTypeIsNot(requestDto.getAccId(), AccountType.SYSTEM);
         if(!accountOpt.isPresent()) {
             throw new BadRequestException("Account is not exist!");
         }

@@ -15,6 +15,8 @@ import java.time.ZonedDateTime;
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
     Page<Transaction> findTransactionsByDateBetweenAndReferenceAndStatus(ZonedDateTime startDate, ZonedDateTime endDate, Bank bank, TransactionStatus status, Pageable pageable);
     Page<Transaction> findTransactionsByDateBetweenAndStatusAndReferenceNotNull(ZonedDateTime startDate, ZonedDateTime endDate, TransactionStatus status, Pageable pageable);
+    Page<Transaction> findTransactionsByDateBetweenAndReferenceAndTypeAndStatus(ZonedDateTime startDate, ZonedDateTime endDate, Bank bank, TransactionType type, TransactionStatus status, Pageable pageable);
+    Page<Transaction> findTransactionsByDateBetweenAndTypeAndStatusAndReferenceNotNull(ZonedDateTime startDate, ZonedDateTime endDate, TransactionType type, TransactionStatus status, Pageable pageable);
     Page<Transaction> findTransactionsBySourceAndTypeAndStatus(String source, TransactionType type, TransactionStatus status, Pageable pageable);
     Page<Transaction> findTransactionsBySourceAndStatusOrderByDateDesc(String source, TransactionStatus status, Pageable pageable);
 }

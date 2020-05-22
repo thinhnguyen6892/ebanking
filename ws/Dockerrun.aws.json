@@ -3,7 +3,7 @@
   "containerDefinitions": [
     {
       "name": "T2TrC-Bank",
-      "image": "aktv4pro/ws:v2",
+      "image": "aktv4pro/ws:v2-release",
       "essential": true,
       "memory": 256,
       "portMappings": [
