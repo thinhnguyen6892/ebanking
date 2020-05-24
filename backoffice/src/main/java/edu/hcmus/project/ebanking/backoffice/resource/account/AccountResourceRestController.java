@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.resource.account;
 
+import edu.hcmus.project.ebanking.backoffice.resource.account.dto.StatusAccount;
 import edu.hcmus.project.ebanking.data.model.User;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.CreateAccount;
@@ -94,4 +95,11 @@ public class AccountResourceRestController {
         return accountService.findAccountByUserName(userName);
     }
 
+    @ApiOperation(value = "[User] Close account by user")
+    @PreAuthorize("hasAnyRole('USER')")
+    @PutMapping("/closeaccount/{AccountId}")
+    public ResponseEntity<StatusAccount> CloseAccount(@Valid @PathVariable String AccountId, @Valid @RequestBody StatusAccount dto){
+        accountService.closeAccount(AccountId, dto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
 }

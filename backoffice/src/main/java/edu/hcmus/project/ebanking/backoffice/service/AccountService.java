@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
+import edu.hcmus.project.ebanking.backoffice.resource.account.dto.StatusAccount;
 import edu.hcmus.project.ebanking.data.model.Account;
 import edu.hcmus.project.ebanking.data.model.Bank;
 import edu.hcmus.project.ebanking.data.model.contranst.AccountType;
@@ -53,6 +54,7 @@ public class AccountService {
                         }
                         dto.setOwnerName(account.getOwner().getUsername());
                         dto.setType(account.getType());
+                        dto.setStatus(account.getStatus());
                         return dto;
                     }).collect(Collectors.toList());
         }
@@ -119,5 +121,16 @@ public class AccountService {
                     }).collect(Collectors.toList());
         }
         return null;
+    }
+
+    public StatusAccount closeAccount (String accountId, StatusAccount dto){
+        Optional<Account> accountOp = accountRepository.findById(accountId);
+        if(accountOp.isPresent()){
+            Account account = accountOp.get();
+            account.setStatus(dto.getStatus());
+            accountRepository.save(account);
+            return dto;
+        }
+        throw new BadRequestException("Account not found exception");
     }
 }
