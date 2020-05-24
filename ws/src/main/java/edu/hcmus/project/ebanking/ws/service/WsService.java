@@ -7,7 +7,6 @@ import edu.hcmus.project.ebanking.data.repository.AccountRepository;
 import edu.hcmus.project.ebanking.data.repository.BankRepository;
 import edu.hcmus.project.ebanking.data.repository.TransactionRepository;
 import edu.hcmus.project.ebanking.ws.resource.dto.*;
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +14,6 @@ import org.springframework.util.Base64Utils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Optional;

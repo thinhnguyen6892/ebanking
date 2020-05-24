@@ -8,17 +8,16 @@ import edu.hcmus.project.ebanking.backoffice.service.CaptchaValidator;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Base64;
 import java.util.Objects;
 
 @RestController
@@ -55,7 +54,7 @@ public class JwtAuthenticationRestController {
         final User userDetails = (User) jwtUserDetailsService.loadUserByUsername(authenticationRequest.getUsername());
 
         final String token = jwtTokenUtil.generateToken(userDetails);
-        final String role = Base64.getEncoder().encodeToString(userDetails.getRole().getRoleId().getBytes());
+        final String role = Base64Utils.encodeToString(userDetails.getRole().getRoleId().getBytes());
         return ResponseEntity.ok(new JwtTokenResponse(token, role, new UserDto(userDetails)));
     }
 
@@ -69,7 +68,7 @@ public class JwtAuthenticationRestController {
 
         if (jwtTokenUtil.canTokenBeRefreshed(token)) {
             String refreshedToken = jwtTokenUtil.refreshToken(token, username);
-            final String role = Base64.getEncoder().encodeToString(userDetails.getRole().getRoleId().getBytes());
+            final String role = Base64Utils.encodeToString(userDetails.getRole().getRoleId().getBytes());
             return ResponseEntity.ok(new JwtTokenResponse(refreshedToken, role, new UserDto(userDetails)));
         } else {
             throw new JwtAuthenticationException("Invalid token", null);

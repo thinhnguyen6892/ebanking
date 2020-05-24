@@ -11,11 +11,11 @@ import edu.hcmus.project.ebanking.backoffice.service.restclient.dto.RSATransacti
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -94,7 +94,7 @@ public class RestClientService {
             }*/
             try {
                 String contentAsString = objectMapper.writeValueAsString(requestContent);
-                byte[] signByte = Base64.decodeBase64(resp.getSign().getBytes("UTF-8"));
+                byte[] signByte = Base64Utils.decode(resp.getSign().getBytes("UTF-8"));
                 signatureService.verifyWithPublicKey(bank.getSignType(), contentAsString, signByte, bank.getKey());
             } catch (Exception e) {
                 return false;

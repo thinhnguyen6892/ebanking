@@ -2,6 +2,7 @@ package edu.hcmus.project.ebanking.ws.resource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.hcmus.project.ebanking.data.model.contranst.SignType;
 import edu.hcmus.project.ebanking.ws.config.exception.BadRequestException;
 import edu.hcmus.project.ebanking.ws.config.security.ClientDetails;
 import edu.hcmus.project.ebanking.data.model.Bank;
@@ -26,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.security.SignatureException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -75,6 +77,19 @@ public class ResourceRestController {
         return dto;
     }
 
+    @GetMapping("/transactions/request/sample")
+    public SignatureDto<TransactionRequestDto> queryTransactionsInformation(@RequestBody TransactionRequestDto content) throws JsonProcessingException, SignatureException {
+        SignatureDto<TransactionRequestDto> dto = new SignatureDto<>();
+        ClientDetails clientDetails = (ClientDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        content.setClientKey(clientDetails.getSecret());
+        String contentStr = mapper.writeValueAsString(content);
+        dto.setHash(bCryptPasswordEncoder.encode(contentStr));
+        dto.setContent(content);
+        dto.setSign(signatureService.signWithPrivateKey(SignType.PGP, contentStr));
+        return dto;
+    }
+
     @ApiOperation(value = "Perform transaction processing", response = CustomerDto.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Transaction successfully completed"),
@@ -86,11 +101,10 @@ public class ResourceRestController {
     public SignatureDto<TransactionDto> requestTransaction(@Valid @RequestBody SignatureDto<TransactionRequestDto> dto, HttpServletRequest request, ZoneId clientZoneId) {
         ClientDetails clientDetails = getLoggedClient();
         hashVerify(dto, request, clientZoneId);
-
         try {
             BaseRequestDto contentDto = dto.getContent();
             String contentAsString = mapper.writeValueAsString(contentDto);
-            byte[] signByte = Base64.decodeBase64(dto.getSign().getBytes("UTF-8"));
+            byte[] signByte = Base64Utils.decode(dto.getSign().getBytes("UTF-8"));
             signatureService.verifyWithPublicKey(clientDetails.getSignType(), contentAsString, signByte, clientDetails.getKey());
             TransactionDto content = null;
             switch (dto.getContent().getTransType()) {
@@ -104,7 +118,7 @@ public class ResourceRestController {
             result.setContent(content);
             String hash = bCryptPasswordEncoder.encode(mapper.writeValueAsString(hashContent));
             result.setHash(hash);
-            result.setSign(signatureService.signWithPrivateKey(hash));
+            result.setSign(signatureService.signWithPrivateKey(clientDetails.getSignType(), hash));
             return result;
         } catch (Exception e) {
             throw new BadRequestException("Invalid sign");
@@ -141,7 +155,6 @@ public class ResourceRestController {
 
         return new HttpEntity<byte[]>(details.getKey(), headers);
     }
-
 
     private ClientDetails getLoggedClient() {
         return (ClientDetails) SecurityContextHolder.getContext().getAuthentication()
