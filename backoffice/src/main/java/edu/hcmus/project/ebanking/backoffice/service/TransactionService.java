@@ -86,7 +86,7 @@ public class TransactionService {
     }
 
     public Page<TransactionDto> findUserAccountTransaction(@Nullable User owner, String accountId, TransactionType type, Pageable pageable) {
-        Optional<Account> accountOpt = owner == null ? accountRepository.findById(accountId) : accountRepository.findByOwnerAndAccountId(owner, accountId);
+        Optional<Account> accountOpt = owner == null ? accountRepository.findByAccountIdAndStatusIsTrue(accountId) : accountRepository.findByOwnerAndAccountIdAndStatusIsTrue(owner, accountId);
         if(!accountOpt.isPresent()) {
             throw new BadRequestException("Account not found in the system");
         }
@@ -110,7 +110,7 @@ public class TransactionService {
 
     public TransactionDto requestTransaction(User owner, CreateTransactionRequestDto dto) {
         Double fee = 7000d;
-        Optional<Account> sourceOpt = accountRepository.findByOwnerAndAccountId(owner, dto.getSource());
+        Optional<Account> sourceOpt = accountRepository.findByOwnerAndAccountIdAndStatusIsTrue(owner, dto.getSource());
         if(!sourceOpt.isPresent()) {
             throw new BadRequestException("Source account is not exist!");
         }
@@ -198,7 +198,7 @@ public class TransactionService {
     }
 
     public TransactionDto performTransaction(User owner, Transaction transaction) {
-        Optional<Account> sourceOpt = accountRepository.findByOwnerAndAccountId(owner, transaction.getSource());
+        Optional<Account> sourceOpt = accountRepository.findByOwnerAndAccountIdAndStatusIsTrue(owner, transaction.getSource());
         if(!sourceOpt.isPresent()) {
             throw new BadRequestException("Source account is not exist!");
         }
