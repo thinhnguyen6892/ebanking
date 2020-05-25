@@ -1,6 +1,7 @@
 package edu.hcmus.project.ebanking.backoffice.service.restclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.hcmus.project.ebanking.backoffice.resource.exception.ResourceNotFoundException;
 import edu.hcmus.project.ebanking.data.model.Bank;
 import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.backoffice.resource.exception.ConnectException;
@@ -11,6 +12,8 @@ import edu.hcmus.project.ebanking.backoffice.service.restclient.dto.RSATransacti
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,11 +27,14 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
 public class RestClientService {
+
+    private Logger logger = LoggerFactory.getLogger(SignatureService.class);
 
     @Value("${app.rest.client.request.time-out.in.seconds}")
     private long requestExpires;
@@ -61,6 +67,11 @@ public class RestClientService {
             RSAAccountInfoDto responseAccount = resp.getResponseContent();
             //Check hash???
             return true;
+        }, errRes -> {
+            if(errRes.code() == 400){
+                throw new ResourceNotFoundException("Account doesn't exists!");
+            }
+            throw new ConnectException("Cannot connect.");
         });
         AccountDto dto = new AccountDto();
         dto.setAccountId(response.getAccount());
@@ -100,23 +111,28 @@ public class RestClientService {
                 return false;
             }
             return true;
+        }, errHand -> {
+            throw new ConnectException("Cannot connect.");
         });
         return response;
     }
 
-    private <T extends ResponseDto<E>, E> E handleResponse(Call<T> call, Predicate<T> validator) {
+    private <T extends ResponseDto<E>, E> E handleResponse(Call<T> call, Predicate<T> validator, Consumer<Response> errorHandler) {
         try {
             Response<T> response = call.execute();
             if (!response.isSuccessful()) {
-                throw new ConnectException(response.errorBody().string());
-            }
-            if(!validator.test(response.body())){
+                logger.error(response.errorBody().string());
+                errorHandler.accept(response);
+            } else if(!validator.test(response.body())){
                 throw new ConnectException("Invalid hash or sign");
+            } else {
+                return response.body().getResponseContent();
             }
-            return response.body().getResponseContent();
         } catch (IOException e) {
+            logger.error("Unknown exception", e);
             throw new ConnectException(e);
         }
+        throw new ConnectException("Request is unsuccessful");
     }
 
     private <T> T buildRestService(Bank bank, Map<String, String> headerMap, Class<T> clzz) {

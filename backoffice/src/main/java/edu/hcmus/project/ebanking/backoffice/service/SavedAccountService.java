@@ -1,5 +1,6 @@
 package edu.hcmus.project.ebanking.backoffice.service;
 
+import edu.hcmus.project.ebanking.backoffice.resource.account.dto.AccountDto;
 import edu.hcmus.project.ebanking.data.model.Account;
 import edu.hcmus.project.ebanking.data.model.SavedAccount;
 import edu.hcmus.project.ebanking.data.model.User;
@@ -25,6 +26,9 @@ public class SavedAccountService {
 
     @Autowired
      private AccountRepository accountRepository;
+
+    @Autowired
+    private AccountService accountService;
 
 
     public List<ReceiverDto> search(User owner, String name) {
@@ -56,25 +60,35 @@ public class SavedAccountService {
     }
 
     public CreateReceiverDto createReceiver(User owner, CreateReceiverDto dto) {
+        String firstName = null, lastName = null, userName = null;
         if(StringUtils.isEmpty(dto.getBankId())) {
             Optional<Account> accountOpt = accountRepository.findByAccountIdAndTypeIsNot(dto.getAccountId(), AccountType.SYSTEM);
-            if(!accountOpt.isPresent()) {
+            if (!accountOpt.isPresent()) {
                 throw new BadRequestException("Account is not exist!");
             }
             Account account = accountOpt.get();
-            Optional<SavedAccount> checker = repository.findByAccountId(account.getAccountId());
-            if(checker.isPresent()) {
-                throw new BadRequestException("This account already saved");
-            }
             User receiver = account.getOwner();
-            SavedAccount savedAccount = new SavedAccount();
-            savedAccount.setOwner(owner);
-            savedAccount.setAccountId(account.getAccountId());
-            savedAccount.setFirstName(receiver.getFirstName());
-            savedAccount.setLastName(receiver.getLastName());
-            savedAccount.setNameSuggestion(StringUtils.isEmpty(dto.getNameSuggestion()) ? receiver.getUsername() : dto.getNameSuggestion());
-            repository.save(savedAccount);
+            userName = receiver.getUsername();
+            firstName = receiver.getFirstName();
+            lastName = receiver.getLastName();
+
+        } else {
+            AccountDto accountDto = accountService.findBankAccount(dto.getAccountId(), dto.getBankId());
+            userName = accountDto.getOwnerName();
         }
+
+        Optional<SavedAccount> checker = repository.findByAccountId(dto.getAccountId());
+        if(checker.isPresent()) {
+            throw new BadRequestException("This account already saved");
+        }
+
+        SavedAccount savedAccount = new SavedAccount();
+        savedAccount.setOwner(owner);
+        savedAccount.setAccountId(dto.getAccountId());
+        savedAccount.setFirstName(firstName);
+        savedAccount.setLastName(lastName);
+        savedAccount.setNameSuggestion(StringUtils.isEmpty(dto.getNameSuggestion()) ? userName : dto.getNameSuggestion());
+        repository.save(savedAccount);
         return dto;
     }
 

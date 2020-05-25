@@ -27,9 +27,6 @@ public class SavedReceiverRestController {
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/create")
     public ResponseEntity<CreateReceiverDto> createReceiver(@Valid @RequestBody CreateReceiverDto dto) {
-        if(!StringUtils.isEmpty(dto.getBankId())) {
-            throw new UnsupportedOperationException("We still working on it");
-        }
         service.createReceiver(JwtTokenUtil.getLoggedUser(), dto);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
