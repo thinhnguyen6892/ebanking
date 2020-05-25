@@ -81,7 +81,7 @@ public class RestClientService {
         String headerValueString = header.values().stream().map(Object::toString).collect(Collectors.joining()).toString();
         rsaRequestDto.setHash(passwordEncoder.encode(headerValueString));
         try {
-            rsaRequestDto.setSign(signatureService.signWithPrivateKey(objectMapper.writeValueAsString(requestContent)));
+            rsaRequestDto.setSign(signatureService.signWithPrivateKey(bank.getSignType(), objectMapper.writeValueAsString(requestContent)));
         } catch (Exception e) {
             throw new ConnectException(e);
         }
