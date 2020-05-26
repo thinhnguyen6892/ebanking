@@ -73,6 +73,7 @@ public class SavedAccountService {
             savedAccount.setFirstName(receiver.getFirstName());
             savedAccount.setLastName(receiver.getLastName());
             savedAccount.setNameSuggestion(StringUtils.isEmpty(dto.getNameSuggestion()) ? receiver.getUsername() : dto.getNameSuggestion());
+            savedAccount.setBankId(dto.getBankId());
             repository.save(savedAccount);
         }
         return dto;
