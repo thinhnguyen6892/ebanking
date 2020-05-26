@@ -4,6 +4,8 @@ import edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.io.Serializable;
 
 public class DepositAccount implements Serializable {
@@ -15,6 +17,7 @@ public class DepositAccount implements Serializable {
     private String username;
 
     @NotNull
+    @Positive
     private Double amount;
 
     @NotNull

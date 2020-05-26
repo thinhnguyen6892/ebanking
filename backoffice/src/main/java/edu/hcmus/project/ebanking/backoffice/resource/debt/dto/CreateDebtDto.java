@@ -2,6 +2,7 @@ package edu.hcmus.project.ebanking.backoffice.resource.debt.dto;
 
 import edu.hcmus.project.ebanking.data.model.contranst.DebtStatus;
 
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,6 +11,7 @@ public class CreateDebtDto implements Serializable {
     private DebtStatus status;
     private String debtor;
     private String content;
+    @Positive
     private Double amount;
 
     public Date getCreateDate() {

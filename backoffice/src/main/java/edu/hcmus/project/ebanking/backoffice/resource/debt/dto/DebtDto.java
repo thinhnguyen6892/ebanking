@@ -7,6 +7,7 @@ import edu.hcmus.project.ebanking.data.model.contranst.DebtStatus;
 import edu.hcmus.project.ebanking.backoffice.resource.user.dto.UserDto;
 
 import javax.jws.soap.SOAPBinding;
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -20,6 +21,7 @@ public class DebtDto implements Serializable {
     private String debtor;
     private UserDto userDebtor;
     private String content;
+    @Positive
     private Double amount;
 
     public DebtDto() {

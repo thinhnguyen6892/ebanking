@@ -5,12 +5,14 @@ import edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType;
 import edu.hcmus.project.ebanking.data.model.contranst.TransactionType;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 
 public class CreateTransactionRequestDto implements Serializable {
     private String source;
     private String target;
     private String content;
+    @Positive
     private Double amount;
     private String bankId;
     private TransactionType type;

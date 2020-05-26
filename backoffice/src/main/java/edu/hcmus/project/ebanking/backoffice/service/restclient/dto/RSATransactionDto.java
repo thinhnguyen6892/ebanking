@@ -1,7 +1,10 @@
 package edu.hcmus.project.ebanking.backoffice.service.restclient.dto;
 
+import javax.validation.constraints.Positive;
+
 public class RSATransactionDto {
     private String account;
+    @Positive
     private Integer amount;
     private String content;
 

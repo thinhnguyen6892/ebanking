@@ -5,6 +5,7 @@ import edu.hcmus.project.ebanking.data.model.Transaction;
 import edu.hcmus.project.ebanking.data.model.contranst.TransactionFeeType;
 import edu.hcmus.project.ebanking.data.model.contranst.TransactionType;
 
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
@@ -19,6 +20,7 @@ public class TransactionDto implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private ZonedDateTime createdDate;
     private String content;
+    @Positive
     private Double amount;
     private TransactionType type;
     private TransactionFeeType feeType;
