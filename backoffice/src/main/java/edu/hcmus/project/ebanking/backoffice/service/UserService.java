@@ -80,6 +80,9 @@ public class UserService {
                 dto.setUserType(user.getRole().getRoleId());
             }
             dto.setEmail(user.getEmail());
+            dto.setPhone(user.getPhone());
+            dto.setFirstName(user.getFirstName());
+            dto.setLastName(user.getLastName());
             return dto;
         }).collect(Collectors.toList());
     }
